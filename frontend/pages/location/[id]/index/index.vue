@@ -1,4 +1,5 @@
 <script setup lang="ts">
+  import XBuildButton from "~/components/X/BuildButton.vue"; // Fork: What can I build?
   import { useI18n } from "vue-i18n";
   import { toast } from "@/components/ui/sonner";
   import type { AnyDetail, Details } from "~~/components/global/DetailsSection/types";
@@ -283,6 +284,7 @@
             </div>
             <div class="ml-auto mt-2 flex flex-wrap items-center justify-between gap-2">
               <LabelMaker :id="location.id" type="location" />
+              <XBuildButton :location-id="location.id" />
               <Button class="w-9 md:w-auto" @click="openCreateItem">
                 <MdiPlus name="mdi-plus" />
                 <span class="hidden md:inline">

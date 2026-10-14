@@ -24,6 +24,7 @@
   import ItemViewSelectable from "~/components/Item/View/Selectable.vue";
   import TagSingleSelector from "~/components/Tag/SingleSelector.vue";
   import TagChip from "~/components/Tag/Chip.vue";
+  import XBuildButton from "~/components/X/BuildButton.vue"; // Fork: What can I build?
   import type { TagOut } from "~~/lib/api/types/data-contracts";
   import { useTagStore } from "~/stores/tags";
 
@@ -298,6 +299,7 @@
           </div>
           <div class="ml-auto mt-2 flex flex-wrap items-center justify-between gap-3">
             <PageQRCode />
+            <XBuildButton :tag-id="tagId" />
             <Button @click="openUpdate">
               <MdiPencil />
               {{ $t("global.edit") }}

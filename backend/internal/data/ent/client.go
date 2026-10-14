@@ -34,9 +34,13 @@ import (
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/templatefield"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/user"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/usergroup"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xentityactivity"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xidledigest"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/ximportcandidate"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xinboundaddress"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xinboundmessage"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xproject"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xprojectpart"
 )
 
 // Client is the client that holds all ent builders.
@@ -80,12 +84,20 @@ type Client struct {
 	User *UserClient
 	// UserGroup is the client for interacting with the UserGroup builders.
 	UserGroup *UserGroupClient
+	// XEntityActivity is the client for interacting with the XEntityActivity builders.
+	XEntityActivity *XEntityActivityClient
+	// XIdleDigest is the client for interacting with the XIdleDigest builders.
+	XIdleDigest *XIdleDigestClient
 	// XImportCandidate is the client for interacting with the XImportCandidate builders.
 	XImportCandidate *XImportCandidateClient
 	// XInboundAddress is the client for interacting with the XInboundAddress builders.
 	XInboundAddress *XInboundAddressClient
 	// XInboundMessage is the client for interacting with the XInboundMessage builders.
 	XInboundMessage *XInboundMessageClient
+	// XProject is the client for interacting with the XProject builders.
+	XProject *XProjectClient
+	// XProjectPart is the client for interacting with the XProjectPart builders.
+	XProjectPart *XProjectPartClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -115,9 +127,13 @@ func (c *Client) init() {
 	c.TemplateField = NewTemplateFieldClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.UserGroup = NewUserGroupClient(c.config)
+	c.XEntityActivity = NewXEntityActivityClient(c.config)
+	c.XIdleDigest = NewXIdleDigestClient(c.config)
 	c.XImportCandidate = NewXImportCandidateClient(c.config)
 	c.XInboundAddress = NewXInboundAddressClient(c.config)
 	c.XInboundMessage = NewXInboundMessageClient(c.config)
+	c.XProject = NewXProjectClient(c.config)
+	c.XProjectPart = NewXProjectPartClient(c.config)
 }
 
 type (
@@ -228,9 +244,13 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		TemplateField:        NewTemplateFieldClient(cfg),
 		User:                 NewUserClient(cfg),
 		UserGroup:            NewUserGroupClient(cfg),
+		XEntityActivity:      NewXEntityActivityClient(cfg),
+		XIdleDigest:          NewXIdleDigestClient(cfg),
 		XImportCandidate:     NewXImportCandidateClient(cfg),
 		XInboundAddress:      NewXInboundAddressClient(cfg),
 		XInboundMessage:      NewXInboundMessageClient(cfg),
+		XProject:             NewXProjectClient(cfg),
+		XProjectPart:         NewXProjectPartClient(cfg),
 	}, nil
 }
 
@@ -268,9 +288,13 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		TemplateField:        NewTemplateFieldClient(cfg),
 		User:                 NewUserClient(cfg),
 		UserGroup:            NewUserGroupClient(cfg),
+		XEntityActivity:      NewXEntityActivityClient(cfg),
+		XIdleDigest:          NewXIdleDigestClient(cfg),
 		XImportCandidate:     NewXImportCandidateClient(cfg),
 		XInboundAddress:      NewXInboundAddressClient(cfg),
 		XInboundMessage:      NewXInboundMessageClient(cfg),
+		XProject:             NewXProjectClient(cfg),
+		XProjectPart:         NewXProjectPartClient(cfg),
 	}, nil
 }
 
@@ -303,7 +327,8 @@ func (c *Client) Use(hooks ...Hook) {
 		c.APIKey, c.Attachment, c.AuthRoles, c.AuthTokens, c.Entity, c.EntityField,
 		c.EntityTemplate, c.EntityType, c.Export, c.Group, c.GroupInvitationToken,
 		c.MaintenanceEntry, c.Notifier, c.PasswordResetTokens, c.Tag, c.TemplateField,
-		c.User, c.UserGroup, c.XImportCandidate, c.XInboundAddress, c.XInboundMessage,
+		c.User, c.UserGroup, c.XEntityActivity, c.XIdleDigest, c.XImportCandidate,
+		c.XInboundAddress, c.XInboundMessage, c.XProject, c.XProjectPart,
 	} {
 		n.Use(hooks...)
 	}
@@ -316,7 +341,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.APIKey, c.Attachment, c.AuthRoles, c.AuthTokens, c.Entity, c.EntityField,
 		c.EntityTemplate, c.EntityType, c.Export, c.Group, c.GroupInvitationToken,
 		c.MaintenanceEntry, c.Notifier, c.PasswordResetTokens, c.Tag, c.TemplateField,
-		c.User, c.UserGroup, c.XImportCandidate, c.XInboundAddress, c.XInboundMessage,
+		c.User, c.UserGroup, c.XEntityActivity, c.XIdleDigest, c.XImportCandidate,
+		c.XInboundAddress, c.XInboundMessage, c.XProject, c.XProjectPart,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -361,12 +387,20 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.User.mutate(ctx, m)
 	case *UserGroupMutation:
 		return c.UserGroup.mutate(ctx, m)
+	case *XEntityActivityMutation:
+		return c.XEntityActivity.mutate(ctx, m)
+	case *XIdleDigestMutation:
+		return c.XIdleDigest.mutate(ctx, m)
 	case *XImportCandidateMutation:
 		return c.XImportCandidate.mutate(ctx, m)
 	case *XInboundAddressMutation:
 		return c.XInboundAddress.mutate(ctx, m)
 	case *XInboundMessageMutation:
 		return c.XInboundMessage.mutate(ctx, m)
+	case *XProjectMutation:
+		return c.XProject.mutate(ctx, m)
+	case *XProjectPartMutation:
+		return c.XProjectPart.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -3533,6 +3567,272 @@ func (c *UserGroupClient) mutate(ctx context.Context, m *UserGroupMutation) (Val
 	}
 }
 
+// XEntityActivityClient is a client for the XEntityActivity schema.
+type XEntityActivityClient struct {
+	config
+}
+
+// NewXEntityActivityClient returns a client for the XEntityActivity from the given config.
+func NewXEntityActivityClient(c config) *XEntityActivityClient {
+	return &XEntityActivityClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `xentityactivity.Hooks(f(g(h())))`.
+func (c *XEntityActivityClient) Use(hooks ...Hook) {
+	c.hooks.XEntityActivity = append(c.hooks.XEntityActivity, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `xentityactivity.Intercept(f(g(h())))`.
+func (c *XEntityActivityClient) Intercept(interceptors ...Interceptor) {
+	c.inters.XEntityActivity = append(c.inters.XEntityActivity, interceptors...)
+}
+
+// Create returns a builder for creating a XEntityActivity entity.
+func (c *XEntityActivityClient) Create() *XEntityActivityCreate {
+	mutation := newXEntityActivityMutation(c.config, OpCreate)
+	return &XEntityActivityCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of XEntityActivity entities.
+func (c *XEntityActivityClient) CreateBulk(builders ...*XEntityActivityCreate) *XEntityActivityCreateBulk {
+	return &XEntityActivityCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *XEntityActivityClient) MapCreateBulk(slice any, setFunc func(*XEntityActivityCreate, int)) *XEntityActivityCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &XEntityActivityCreateBulk{err: fmt.Errorf("calling to XEntityActivityClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*XEntityActivityCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &XEntityActivityCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for XEntityActivity.
+func (c *XEntityActivityClient) Update() *XEntityActivityUpdate {
+	mutation := newXEntityActivityMutation(c.config, OpUpdate)
+	return &XEntityActivityUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *XEntityActivityClient) UpdateOne(_m *XEntityActivity) *XEntityActivityUpdateOne {
+	mutation := newXEntityActivityMutation(c.config, OpUpdateOne, withXEntityActivity(_m))
+	return &XEntityActivityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *XEntityActivityClient) UpdateOneID(id uuid.UUID) *XEntityActivityUpdateOne {
+	mutation := newXEntityActivityMutation(c.config, OpUpdateOne, withXEntityActivityID(id))
+	return &XEntityActivityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for XEntityActivity.
+func (c *XEntityActivityClient) Delete() *XEntityActivityDelete {
+	mutation := newXEntityActivityMutation(c.config, OpDelete)
+	return &XEntityActivityDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *XEntityActivityClient) DeleteOne(_m *XEntityActivity) *XEntityActivityDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *XEntityActivityClient) DeleteOneID(id uuid.UUID) *XEntityActivityDeleteOne {
+	builder := c.Delete().Where(xentityactivity.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &XEntityActivityDeleteOne{builder}
+}
+
+// Query returns a query builder for XEntityActivity.
+func (c *XEntityActivityClient) Query() *XEntityActivityQuery {
+	return &XEntityActivityQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeXEntityActivity},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a XEntityActivity entity by its id.
+func (c *XEntityActivityClient) Get(ctx context.Context, id uuid.UUID) (*XEntityActivity, error) {
+	return c.Query().Where(xentityactivity.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *XEntityActivityClient) GetX(ctx context.Context, id uuid.UUID) *XEntityActivity {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *XEntityActivityClient) Hooks() []Hook {
+	return c.hooks.XEntityActivity
+}
+
+// Interceptors returns the client interceptors.
+func (c *XEntityActivityClient) Interceptors() []Interceptor {
+	return c.inters.XEntityActivity
+}
+
+func (c *XEntityActivityClient) mutate(ctx context.Context, m *XEntityActivityMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&XEntityActivityCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&XEntityActivityUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&XEntityActivityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&XEntityActivityDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown XEntityActivity mutation op: %q", m.Op())
+	}
+}
+
+// XIdleDigestClient is a client for the XIdleDigest schema.
+type XIdleDigestClient struct {
+	config
+}
+
+// NewXIdleDigestClient returns a client for the XIdleDigest from the given config.
+func NewXIdleDigestClient(c config) *XIdleDigestClient {
+	return &XIdleDigestClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `xidledigest.Hooks(f(g(h())))`.
+func (c *XIdleDigestClient) Use(hooks ...Hook) {
+	c.hooks.XIdleDigest = append(c.hooks.XIdleDigest, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `xidledigest.Intercept(f(g(h())))`.
+func (c *XIdleDigestClient) Intercept(interceptors ...Interceptor) {
+	c.inters.XIdleDigest = append(c.inters.XIdleDigest, interceptors...)
+}
+
+// Create returns a builder for creating a XIdleDigest entity.
+func (c *XIdleDigestClient) Create() *XIdleDigestCreate {
+	mutation := newXIdleDigestMutation(c.config, OpCreate)
+	return &XIdleDigestCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of XIdleDigest entities.
+func (c *XIdleDigestClient) CreateBulk(builders ...*XIdleDigestCreate) *XIdleDigestCreateBulk {
+	return &XIdleDigestCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *XIdleDigestClient) MapCreateBulk(slice any, setFunc func(*XIdleDigestCreate, int)) *XIdleDigestCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &XIdleDigestCreateBulk{err: fmt.Errorf("calling to XIdleDigestClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*XIdleDigestCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &XIdleDigestCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for XIdleDigest.
+func (c *XIdleDigestClient) Update() *XIdleDigestUpdate {
+	mutation := newXIdleDigestMutation(c.config, OpUpdate)
+	return &XIdleDigestUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *XIdleDigestClient) UpdateOne(_m *XIdleDigest) *XIdleDigestUpdateOne {
+	mutation := newXIdleDigestMutation(c.config, OpUpdateOne, withXIdleDigest(_m))
+	return &XIdleDigestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *XIdleDigestClient) UpdateOneID(id uuid.UUID) *XIdleDigestUpdateOne {
+	mutation := newXIdleDigestMutation(c.config, OpUpdateOne, withXIdleDigestID(id))
+	return &XIdleDigestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for XIdleDigest.
+func (c *XIdleDigestClient) Delete() *XIdleDigestDelete {
+	mutation := newXIdleDigestMutation(c.config, OpDelete)
+	return &XIdleDigestDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *XIdleDigestClient) DeleteOne(_m *XIdleDigest) *XIdleDigestDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *XIdleDigestClient) DeleteOneID(id uuid.UUID) *XIdleDigestDeleteOne {
+	builder := c.Delete().Where(xidledigest.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &XIdleDigestDeleteOne{builder}
+}
+
+// Query returns a query builder for XIdleDigest.
+func (c *XIdleDigestClient) Query() *XIdleDigestQuery {
+	return &XIdleDigestQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeXIdleDigest},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a XIdleDigest entity by its id.
+func (c *XIdleDigestClient) Get(ctx context.Context, id uuid.UUID) (*XIdleDigest, error) {
+	return c.Query().Where(xidledigest.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *XIdleDigestClient) GetX(ctx context.Context, id uuid.UUID) *XIdleDigest {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *XIdleDigestClient) Hooks() []Hook {
+	return c.hooks.XIdleDigest
+}
+
+// Interceptors returns the client interceptors.
+func (c *XIdleDigestClient) Interceptors() []Interceptor {
+	return c.inters.XIdleDigest
+}
+
+func (c *XIdleDigestClient) mutate(ctx context.Context, m *XIdleDigestMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&XIdleDigestCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&XIdleDigestUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&XIdleDigestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&XIdleDigestDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown XIdleDigest mutation op: %q", m.Op())
+	}
+}
+
 // XImportCandidateClient is a client for the XImportCandidate schema.
 type XImportCandidateClient struct {
 	config
@@ -3964,18 +4264,318 @@ func (c *XInboundMessageClient) mutate(ctx context.Context, m *XInboundMessageMu
 	}
 }
 
+// XProjectClient is a client for the XProject schema.
+type XProjectClient struct {
+	config
+}
+
+// NewXProjectClient returns a client for the XProject from the given config.
+func NewXProjectClient(c config) *XProjectClient {
+	return &XProjectClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `xproject.Hooks(f(g(h())))`.
+func (c *XProjectClient) Use(hooks ...Hook) {
+	c.hooks.XProject = append(c.hooks.XProject, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `xproject.Intercept(f(g(h())))`.
+func (c *XProjectClient) Intercept(interceptors ...Interceptor) {
+	c.inters.XProject = append(c.inters.XProject, interceptors...)
+}
+
+// Create returns a builder for creating a XProject entity.
+func (c *XProjectClient) Create() *XProjectCreate {
+	mutation := newXProjectMutation(c.config, OpCreate)
+	return &XProjectCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of XProject entities.
+func (c *XProjectClient) CreateBulk(builders ...*XProjectCreate) *XProjectCreateBulk {
+	return &XProjectCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *XProjectClient) MapCreateBulk(slice any, setFunc func(*XProjectCreate, int)) *XProjectCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &XProjectCreateBulk{err: fmt.Errorf("calling to XProjectClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*XProjectCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &XProjectCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for XProject.
+func (c *XProjectClient) Update() *XProjectUpdate {
+	mutation := newXProjectMutation(c.config, OpUpdate)
+	return &XProjectUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *XProjectClient) UpdateOne(_m *XProject) *XProjectUpdateOne {
+	mutation := newXProjectMutation(c.config, OpUpdateOne, withXProject(_m))
+	return &XProjectUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *XProjectClient) UpdateOneID(id uuid.UUID) *XProjectUpdateOne {
+	mutation := newXProjectMutation(c.config, OpUpdateOne, withXProjectID(id))
+	return &XProjectUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for XProject.
+func (c *XProjectClient) Delete() *XProjectDelete {
+	mutation := newXProjectMutation(c.config, OpDelete)
+	return &XProjectDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *XProjectClient) DeleteOne(_m *XProject) *XProjectDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *XProjectClient) DeleteOneID(id uuid.UUID) *XProjectDeleteOne {
+	builder := c.Delete().Where(xproject.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &XProjectDeleteOne{builder}
+}
+
+// Query returns a query builder for XProject.
+func (c *XProjectClient) Query() *XProjectQuery {
+	return &XProjectQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeXProject},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a XProject entity by its id.
+func (c *XProjectClient) Get(ctx context.Context, id uuid.UUID) (*XProject, error) {
+	return c.Query().Where(xproject.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *XProjectClient) GetX(ctx context.Context, id uuid.UUID) *XProject {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryParts queries the parts edge of a XProject.
+func (c *XProjectClient) QueryParts(_m *XProject) *XProjectPartQuery {
+	query := (&XProjectPartClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(xproject.Table, xproject.FieldID, id),
+			sqlgraph.To(xprojectpart.Table, xprojectpart.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, xproject.PartsTable, xproject.PartsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *XProjectClient) Hooks() []Hook {
+	return c.hooks.XProject
+}
+
+// Interceptors returns the client interceptors.
+func (c *XProjectClient) Interceptors() []Interceptor {
+	return c.inters.XProject
+}
+
+func (c *XProjectClient) mutate(ctx context.Context, m *XProjectMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&XProjectCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&XProjectUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&XProjectUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&XProjectDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown XProject mutation op: %q", m.Op())
+	}
+}
+
+// XProjectPartClient is a client for the XProjectPart schema.
+type XProjectPartClient struct {
+	config
+}
+
+// NewXProjectPartClient returns a client for the XProjectPart from the given config.
+func NewXProjectPartClient(c config) *XProjectPartClient {
+	return &XProjectPartClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `xprojectpart.Hooks(f(g(h())))`.
+func (c *XProjectPartClient) Use(hooks ...Hook) {
+	c.hooks.XProjectPart = append(c.hooks.XProjectPart, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `xprojectpart.Intercept(f(g(h())))`.
+func (c *XProjectPartClient) Intercept(interceptors ...Interceptor) {
+	c.inters.XProjectPart = append(c.inters.XProjectPart, interceptors...)
+}
+
+// Create returns a builder for creating a XProjectPart entity.
+func (c *XProjectPartClient) Create() *XProjectPartCreate {
+	mutation := newXProjectPartMutation(c.config, OpCreate)
+	return &XProjectPartCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of XProjectPart entities.
+func (c *XProjectPartClient) CreateBulk(builders ...*XProjectPartCreate) *XProjectPartCreateBulk {
+	return &XProjectPartCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *XProjectPartClient) MapCreateBulk(slice any, setFunc func(*XProjectPartCreate, int)) *XProjectPartCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &XProjectPartCreateBulk{err: fmt.Errorf("calling to XProjectPartClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*XProjectPartCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &XProjectPartCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for XProjectPart.
+func (c *XProjectPartClient) Update() *XProjectPartUpdate {
+	mutation := newXProjectPartMutation(c.config, OpUpdate)
+	return &XProjectPartUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *XProjectPartClient) UpdateOne(_m *XProjectPart) *XProjectPartUpdateOne {
+	mutation := newXProjectPartMutation(c.config, OpUpdateOne, withXProjectPart(_m))
+	return &XProjectPartUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *XProjectPartClient) UpdateOneID(id uuid.UUID) *XProjectPartUpdateOne {
+	mutation := newXProjectPartMutation(c.config, OpUpdateOne, withXProjectPartID(id))
+	return &XProjectPartUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for XProjectPart.
+func (c *XProjectPartClient) Delete() *XProjectPartDelete {
+	mutation := newXProjectPartMutation(c.config, OpDelete)
+	return &XProjectPartDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *XProjectPartClient) DeleteOne(_m *XProjectPart) *XProjectPartDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *XProjectPartClient) DeleteOneID(id uuid.UUID) *XProjectPartDeleteOne {
+	builder := c.Delete().Where(xprojectpart.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &XProjectPartDeleteOne{builder}
+}
+
+// Query returns a query builder for XProjectPart.
+func (c *XProjectPartClient) Query() *XProjectPartQuery {
+	return &XProjectPartQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeXProjectPart},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a XProjectPart entity by its id.
+func (c *XProjectPartClient) Get(ctx context.Context, id uuid.UUID) (*XProjectPart, error) {
+	return c.Query().Where(xprojectpart.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *XProjectPartClient) GetX(ctx context.Context, id uuid.UUID) *XProjectPart {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryProject queries the project edge of a XProjectPart.
+func (c *XProjectPartClient) QueryProject(_m *XProjectPart) *XProjectQuery {
+	query := (&XProjectClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(xprojectpart.Table, xprojectpart.FieldID, id),
+			sqlgraph.To(xproject.Table, xproject.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, xprojectpart.ProjectTable, xprojectpart.ProjectColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *XProjectPartClient) Hooks() []Hook {
+	return c.hooks.XProjectPart
+}
+
+// Interceptors returns the client interceptors.
+func (c *XProjectPartClient) Interceptors() []Interceptor {
+	return c.inters.XProjectPart
+}
+
+func (c *XProjectPartClient) mutate(ctx context.Context, m *XProjectPartMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&XProjectPartCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&XProjectPartUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&XProjectPartUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&XProjectPartDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown XProjectPart mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
 		APIKey, Attachment, AuthRoles, AuthTokens, Entity, EntityField, EntityTemplate,
 		EntityType, Export, Group, GroupInvitationToken, MaintenanceEntry, Notifier,
-		PasswordResetTokens, Tag, TemplateField, User, UserGroup, XImportCandidate,
-		XInboundAddress, XInboundMessage []ent.Hook
+		PasswordResetTokens, Tag, TemplateField, User, UserGroup, XEntityActivity,
+		XIdleDigest, XImportCandidate, XInboundAddress, XInboundMessage, XProject,
+		XProjectPart []ent.Hook
 	}
 	inters struct {
 		APIKey, Attachment, AuthRoles, AuthTokens, Entity, EntityField, EntityTemplate,
 		EntityType, Export, Group, GroupInvitationToken, MaintenanceEntry, Notifier,
-		PasswordResetTokens, Tag, TemplateField, User, UserGroup, XImportCandidate,
-		XInboundAddress, XInboundMessage []ent.Interceptor
+		PasswordResetTokens, Tag, TemplateField, User, UserGroup, XEntityActivity,
+		XIdleDigest, XImportCandidate, XInboundAddress, XInboundMessage, XProject,
+		XProjectPart []ent.Interceptor
 	}
 )

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+  import XMarkUsedButton from "~/components/X/MarkUsedButton.vue"; // Fork: idle tracking
   import { useI18n } from "vue-i18n";
   import { toast } from "@/components/ui/sonner";
   import type { AnyDetail, Detail, Details } from "~~/components/global/DetailsSection/types";
@@ -706,6 +707,7 @@
                 type="asset"
               />
               <LabelMaker v-else :id="item.id" type="item" />
+              <XMarkUsedButton :id="item.id" />
               <Button class="w-9 md:w-auto" :aria-label="$t('global.create_subitem')" @click="createSubitem">
                 <MdiPlus />
                 <span class="hidden md:inline">{{ $t("global.create_subitem") }}</span>

@@ -23,9 +23,13 @@ import (
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/tag"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/templatefield"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/user"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xentityactivity"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xidledigest"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/ximportcandidate"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xinboundaddress"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xinboundmessage"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xproject"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xprojectpart"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -830,6 +834,60 @@ func init() {
 	user.DefaultID = userDescID.Default.(func() uuid.UUID)
 	usergroupFields := schema.UserGroup{}.Fields()
 	_ = usergroupFields
+	xentityactivityMixin := schema.XEntityActivity{}.Mixin()
+	xentityactivityMixinFields0 := xentityactivityMixin[0].Fields()
+	_ = xentityactivityMixinFields0
+	xentityactivityFields := schema.XEntityActivity{}.Fields()
+	_ = xentityactivityFields
+	// xentityactivityDescCreatedAt is the schema descriptor for created_at field.
+	xentityactivityDescCreatedAt := xentityactivityMixinFields0[1].Descriptor()
+	// xentityactivity.DefaultCreatedAt holds the default value on creation for the created_at field.
+	xentityactivity.DefaultCreatedAt = xentityactivityDescCreatedAt.Default.(func() time.Time)
+	// xentityactivityDescUpdatedAt is the schema descriptor for updated_at field.
+	xentityactivityDescUpdatedAt := xentityactivityMixinFields0[2].Descriptor()
+	// xentityactivity.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	xentityactivity.DefaultUpdatedAt = xentityactivityDescUpdatedAt.Default.(func() time.Time)
+	// xentityactivity.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	xentityactivity.UpdateDefaultUpdatedAt = xentityactivityDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// xentityactivityDescUseCount is the schema descriptor for use_count field.
+	xentityactivityDescUseCount := xentityactivityFields[3].Descriptor()
+	// xentityactivity.DefaultUseCount holds the default value on creation for the use_count field.
+	xentityactivity.DefaultUseCount = xentityactivityDescUseCount.Default.(int)
+	// xentityactivityDescForSale is the schema descriptor for for_sale field.
+	xentityactivityDescForSale := xentityactivityFields[5].Descriptor()
+	// xentityactivity.DefaultForSale holds the default value on creation for the for_sale field.
+	xentityactivity.DefaultForSale = xentityactivityDescForSale.Default.(bool)
+	// xentityactivityDescSaleDraft is the schema descriptor for sale_draft field.
+	xentityactivityDescSaleDraft := xentityactivityFields[6].Descriptor()
+	// xentityactivity.DefaultSaleDraft holds the default value on creation for the sale_draft field.
+	xentityactivity.DefaultSaleDraft = xentityactivityDescSaleDraft.Default.(string)
+	// xentityactivityDescID is the schema descriptor for id field.
+	xentityactivityDescID := xentityactivityMixinFields0[0].Descriptor()
+	// xentityactivity.DefaultID holds the default value on creation for the id field.
+	xentityactivity.DefaultID = xentityactivityDescID.Default.(func() uuid.UUID)
+	xidledigestMixin := schema.XIdleDigest{}.Mixin()
+	xidledigestMixinFields0 := xidledigestMixin[0].Fields()
+	_ = xidledigestMixinFields0
+	xidledigestFields := schema.XIdleDigest{}.Fields()
+	_ = xidledigestFields
+	// xidledigestDescCreatedAt is the schema descriptor for created_at field.
+	xidledigestDescCreatedAt := xidledigestMixinFields0[1].Descriptor()
+	// xidledigest.DefaultCreatedAt holds the default value on creation for the created_at field.
+	xidledigest.DefaultCreatedAt = xidledigestDescCreatedAt.Default.(func() time.Time)
+	// xidledigestDescUpdatedAt is the schema descriptor for updated_at field.
+	xidledigestDescUpdatedAt := xidledigestMixinFields0[2].Descriptor()
+	// xidledigest.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	xidledigest.DefaultUpdatedAt = xidledigestDescUpdatedAt.Default.(func() time.Time)
+	// xidledigest.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	xidledigest.UpdateDefaultUpdatedAt = xidledigestDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// xidledigestDescItemCount is the schema descriptor for item_count field.
+	xidledigestDescItemCount := xidledigestFields[2].Descriptor()
+	// xidledigest.DefaultItemCount holds the default value on creation for the item_count field.
+	xidledigest.DefaultItemCount = xidledigestDescItemCount.Default.(int)
+	// xidledigestDescID is the schema descriptor for id field.
+	xidledigestDescID := xidledigestMixinFields0[0].Descriptor()
+	// xidledigest.DefaultID holds the default value on creation for the id field.
+	xidledigest.DefaultID = xidledigestDescID.Default.(func() uuid.UUID)
 	ximportcandidateMixin := schema.XImportCandidate{}.Mixin()
 	ximportcandidateMixinFields0 := ximportcandidateMixin[0].Fields()
 	_ = ximportcandidateMixinFields0
@@ -1055,4 +1113,82 @@ func init() {
 	xinboundmessageDescID := xinboundmessageMixinFields0[0].Descriptor()
 	// xinboundmessage.DefaultID holds the default value on creation for the id field.
 	xinboundmessage.DefaultID = xinboundmessageDescID.Default.(func() uuid.UUID)
+	xprojectMixin := schema.XProject{}.Mixin()
+	xprojectMixinFields0 := xprojectMixin[0].Fields()
+	_ = xprojectMixinFields0
+	xprojectFields := schema.XProject{}.Fields()
+	_ = xprojectFields
+	// xprojectDescCreatedAt is the schema descriptor for created_at field.
+	xprojectDescCreatedAt := xprojectMixinFields0[1].Descriptor()
+	// xproject.DefaultCreatedAt holds the default value on creation for the created_at field.
+	xproject.DefaultCreatedAt = xprojectDescCreatedAt.Default.(func() time.Time)
+	// xprojectDescUpdatedAt is the schema descriptor for updated_at field.
+	xprojectDescUpdatedAt := xprojectMixinFields0[2].Descriptor()
+	// xproject.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	xproject.DefaultUpdatedAt = xprojectDescUpdatedAt.Default.(func() time.Time)
+	// xproject.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	xproject.UpdateDefaultUpdatedAt = xprojectDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// xprojectDescName is the schema descriptor for name field.
+	xprojectDescName := xprojectFields[1].Descriptor()
+	// xproject.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	xproject.NameValidator = func() func(string) error {
+		validators := xprojectDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// xprojectDescDescription is the schema descriptor for description field.
+	xprojectDescDescription := xprojectFields[2].Descriptor()
+	// xproject.DefaultDescription holds the default value on creation for the description field.
+	xproject.DefaultDescription = xprojectDescDescription.Default.(string)
+	// xprojectDescSteps is the schema descriptor for steps field.
+	xprojectDescSteps := xprojectFields[4].Descriptor()
+	// xproject.DefaultSteps holds the default value on creation for the steps field.
+	xproject.DefaultSteps = xprojectDescSteps.Default.(string)
+	// xprojectDescMissingParts is the schema descriptor for missing_parts field.
+	xprojectDescMissingParts := xprojectFields[5].Descriptor()
+	// xproject.DefaultMissingParts holds the default value on creation for the missing_parts field.
+	xproject.DefaultMissingParts = xprojectDescMissingParts.Default.(string)
+	// xprojectDescID is the schema descriptor for id field.
+	xprojectDescID := xprojectMixinFields0[0].Descriptor()
+	// xproject.DefaultID holds the default value on creation for the id field.
+	xproject.DefaultID = xprojectDescID.Default.(func() uuid.UUID)
+	xprojectpartMixin := schema.XProjectPart{}.Mixin()
+	xprojectpartMixinFields0 := xprojectpartMixin[0].Fields()
+	_ = xprojectpartMixinFields0
+	xprojectpartFields := schema.XProjectPart{}.Fields()
+	_ = xprojectpartFields
+	// xprojectpartDescCreatedAt is the schema descriptor for created_at field.
+	xprojectpartDescCreatedAt := xprojectpartMixinFields0[1].Descriptor()
+	// xprojectpart.DefaultCreatedAt holds the default value on creation for the created_at field.
+	xprojectpart.DefaultCreatedAt = xprojectpartDescCreatedAt.Default.(func() time.Time)
+	// xprojectpartDescUpdatedAt is the schema descriptor for updated_at field.
+	xprojectpartDescUpdatedAt := xprojectpartMixinFields0[2].Descriptor()
+	// xprojectpart.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	xprojectpart.DefaultUpdatedAt = xprojectpartDescUpdatedAt.Default.(func() time.Time)
+	// xprojectpart.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	xprojectpart.UpdateDefaultUpdatedAt = xprojectpartDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// xprojectpartDescQuantity is the schema descriptor for quantity field.
+	xprojectpartDescQuantity := xprojectpartFields[2].Descriptor()
+	// xprojectpart.DefaultQuantity holds the default value on creation for the quantity field.
+	xprojectpart.DefaultQuantity = xprojectpartDescQuantity.Default.(float64)
+	// xprojectpartDescRole is the schema descriptor for role field.
+	xprojectpartDescRole := xprojectpartFields[3].Descriptor()
+	// xprojectpart.DefaultRole holds the default value on creation for the role field.
+	xprojectpart.DefaultRole = xprojectpartDescRole.Default.(string)
+	// xprojectpart.RoleValidator is a validator for the "role" field. It is called by the builders before save.
+	xprojectpart.RoleValidator = xprojectpartDescRole.Validators[0].(func(string) error)
+	// xprojectpartDescID is the schema descriptor for id field.
+	xprojectpartDescID := xprojectpartMixinFields0[0].Descriptor()
+	// xprojectpart.DefaultID holds the default value on creation for the id field.
+	xprojectpart.DefaultID = xprojectpartDescID.Default.(func() uuid.UUID)
 }

@@ -72,6 +72,14 @@ func (_m *User) GetID() uuid.UUID {
 	return _m.ID
 }
 
+func (_m *XEntityActivity) GetID() uuid.UUID {
+	return _m.ID
+}
+
+func (_m *XIdleDigest) GetID() uuid.UUID {
+	return _m.ID
+}
+
 func (_m *XImportCandidate) GetID() uuid.UUID {
 	return _m.ID
 }
@@ -81,5 +89,13 @@ func (_m *XInboundAddress) GetID() uuid.UUID {
 }
 
 func (_m *XInboundMessage) GetID() uuid.UUID {
+	return _m.ID
+}
+
+func (_m *XProject) GetID() uuid.UUID {
+	return _m.ID
+}
+
+func (_m *XProjectPart) GetID() uuid.UUID {
 	return _m.ID
 }

@@ -254,6 +254,8 @@
   import MdiFileDocumentMultiple from "~icons/mdi/file-document-multiple";
   import MdiChevronRight from "~icons/mdi/chevron-right";
   import MdiInboxArrowDown from "~icons/mdi/inbox-arrow-down"; // Fork: order import
+  import MdiSleep from "~icons/mdi/sleep"; // Fork: idle items
+  import MdiHammerWrench from "~icons/mdi/hammer-wrench"; // Fork: build
 
   import {
     Sidebar,
@@ -448,9 +450,24 @@
     {
       icon: MdiInboxArrowDown,
       id: 90,
-      active: computed(() => route.path.startsWith("/x/")),
+      active: computed(() => route.path.startsWith("/x/inbox") || route.path.startsWith("/x/import")),
       name: computed(() => t("menu.order_inbox")),
       to: "/x/inbox",
+    },
+    // Fork: use & build
+    {
+      icon: MdiSleep,
+      id: 91,
+      active: computed(() => route.path === "/x/idle"),
+      name: computed(() => t("menu.idle_items")),
+      to: "/x/idle",
+    },
+    {
+      icon: MdiHammerWrench,
+      id: 92,
+      active: computed(() => route.path === "/x/build"),
+      name: computed(() => t("menu.build")),
+      to: "/x/build",
     },
     {
       icon: MdiAccount,

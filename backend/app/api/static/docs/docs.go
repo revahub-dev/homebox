@@ -211,6 +211,165 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/build/projects": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Use \u0026 Build"
+                ],
+                "summary": "List saved projects (with reserved parts)",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/repo.XProjectOut"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Use \u0026 Build"
+                ],
+                "summary": "Save an idea as a project and reserve its owned parts",
+                "parameters": [
+                    {
+                        "description": "Project",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/repo.XProjectIn"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/repo.XProjectOut"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/build/projects/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "tags": [
+                    "Use \u0026 Build"
+                ],
+                "summary": "Delete a project and release its reserved parts",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/v1/build/status": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Use \u0026 Build"
+                ],
+                "summary": "Whether \"What can I build?\" is available (an LLM is configured)",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.BuildStatus"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/build/suggest": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Sends the owned items in scope (names, quantities, descriptions) to the configured OpenAI-compatible LLM and returns 3-5 validated project ideas. Owned parts always reference real item IDs; invented references are dropped. 503 when no LLM is configured.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Use \u0026 Build"
+                ],
+                "summary": "What can I build?",
+                "parameters": [
+                    {
+                        "description": "Scope",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.BuildSuggestInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/usebuild.BuildResult"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/validate.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/currencies": {
             "get": {
                 "produces": [
@@ -1882,6 +2041,180 @@ const docTemplate = `{
                                 "$ref": "#/definitions/repo.TotalsByOrganizer"
                             }
                         }
+                    }
+                }
+            }
+        },
+        "/v1/idle": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Use \u0026 Build"
+                ],
+                "summary": "List idle items (untouched for HBOX_IDLE_DAYS) and items marked for sale",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "max idle items (default 100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.IdleList"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/idle/{id}/archive": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "tags": [
+                    "Use \u0026 Build"
+                ],
+                "summary": "Archive an idle item",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Entity ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/v1/idle/{id}/keep": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "tags": [
+                    "Use \u0026 Build"
+                ],
+                "summary": "Keep an idle item (snooze nudges for HBOX_IDLE_SNOOZE_DAYS, default 90)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Entity ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/v1/idle/{id}/sell": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Uses the LLM when configured, otherwise a template. Nothing is posted anywhere.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Use \u0026 Build"
+                ],
+                "summary": "Mark an item for sale and draft a Mercari-style listing",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Entity ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.SaleDraftOut"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/idle/{id}/unsell": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "tags": [
+                    "Use \u0026 Build"
+                ],
+                "summary": "Remove the for-sale mark from an item",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Entity ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/v1/idle/{id}/use": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "tags": [
+                    "Use \u0026 Build"
+                ],
+                "summary": "Mark an item as used (resets its idle timer)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Entity ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -6978,6 +7311,191 @@ const docTemplate = `{
                 }
             }
         },
+        "repo.XInvItem": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "forSale": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lastTouchedAt": {
+                    "description": "LastTouchedAt is the latest of created, edited and used.",
+                    "type": "string"
+                },
+                "lastUsedAt": {
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "locationPath": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "purchaseDate": {
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "purchasePrice": {
+                    "type": "number"
+                },
+                "quantity": {
+                    "type": "number"
+                },
+                "reservedQuantity": {
+                    "description": "ReservedQuantity is the total reserved by saved projects.",
+                    "type": "number"
+                },
+                "saleDraft": {
+                    "type": "string"
+                },
+                "snoozedUntil": {
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "useCount": {
+                    "type": "integer"
+                }
+            }
+        },
+        "repo.XMissingPart": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "note": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "number"
+                }
+            }
+        },
+        "repo.XProjectIn": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "buildStatus": {
+                    "type": "string",
+                    "enum": [
+                        "buildable_now",
+                        "missing_parts"
+                    ]
+                },
+                "description": {
+                    "type": "string"
+                },
+                "missingParts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/repo.XMissingPart"
+                    }
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "ownedParts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/repo.XProjectPartIn"
+                    }
+                },
+                "steps": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "repo.XProjectOut": {
+            "type": "object",
+            "properties": {
+                "buildStatus": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "missingParts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/repo.XMissingPart"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/repo.XProjectPartOut"
+                    }
+                },
+                "steps": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "repo.XProjectPartIn": {
+            "type": "object",
+            "required": [
+                "entityId"
+            ],
+            "properties": {
+                "entityId": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "number"
+                },
+                "role": {
+                    "type": "string",
+                    "maxLength": 255
+                }
+            }
+        },
+        "repo.XProjectPartOut": {
+            "type": "object",
+            "properties": {
+                "entityId": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "number"
+                },
+                "role": {
+                    "type": "string"
+                }
+            }
+        },
         "services.Latest": {
             "type": "object",
             "properties": {
@@ -7020,6 +7538,83 @@ const docTemplate = `{
                 "TypeBoolean",
                 "TypeTime"
             ]
+        },
+        "usebuild.BuildResult": {
+            "type": "object",
+            "properties": {
+                "ideas": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/usebuild.Idea"
+                    }
+                },
+                "itemsSent": {
+                    "type": "integer"
+                },
+                "itemsTotal": {
+                    "type": "integer"
+                },
+                "truncated": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "usebuild.Idea": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "droppedRefs": {
+                    "description": "DroppedRefs counts owned-part references the model invented.",
+                    "type": "integer"
+                },
+                "missingParts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/repo.XMissingPart"
+                    }
+                },
+                "ownedParts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/usebuild.OwnedPart"
+                    }
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "buildable_now",
+                        "missing_parts"
+                    ]
+                },
+                "steps": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "usebuild.OwnedPart": {
+            "type": "object",
+            "properties": {
+                "entityId": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "number"
+                },
+                "role": {
+                    "type": "string"
+                }
+            }
         },
         "usergroup.Role": {
             "type": "string",
@@ -7094,6 +7689,27 @@ const docTemplate = `{
                 },
                 "version": {
                     "type": "string"
+                }
+            }
+        },
+        "v1.BuildStatus": {
+            "type": "object",
+            "properties": {
+                "aiEnabled": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "v1.BuildSuggestInput": {
+            "type": "object",
+            "properties": {
+                "locationId": {
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "tagId": {
+                    "type": "string",
+                    "x-nullable": true
                 }
             }
         },
@@ -7307,6 +7923,32 @@ const docTemplate = `{
                 }
             }
         },
+        "v1.IdleList": {
+            "type": "object",
+            "properties": {
+                "aiEnabled": {
+                    "type": "boolean"
+                },
+                "days": {
+                    "type": "integer"
+                },
+                "forSale": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/repo.XInvItem"
+                    }
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/repo.XInvItem"
+                    }
+                },
+                "snoozeDays": {
+                    "type": "integer"
+                }
+            }
+        },
         "v1.ImportFileResult": {
             "type": "object",
             "properties": {
@@ -7442,6 +8084,20 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/repo.ExportOut"
                     }
+                }
+            }
+        },
+        "v1.SaleDraftOut": {
+            "type": "object",
+            "properties": {
+                "draft": {
+                    "type": "string"
+                },
+                "generated": {
+                    "type": "boolean"
+                },
+                "suggestedPrice": {
+                    "type": "integer"
                 }
             }
         },

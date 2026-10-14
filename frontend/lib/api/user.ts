@@ -14,6 +14,7 @@ import { ProductAPI } from "./classes/product";
 import { TemplatesApi } from "./classes/templates";
 import { BackupsAPI } from "./classes/backups";
 import { XImportAPI } from "./classes/x-import";
+import { XUseBuildAPI } from "./classes/x-usebuild";
 import type { Requests } from "~~/lib/requests";
 
 export class UserClient extends BaseAPI {
@@ -33,6 +34,8 @@ export class UserClient extends BaseAPI {
   backups: BackupsAPI;
   // Fork: order import
   xImport: XImportAPI;
+  // Fork: use & build
+  xUse: XUseBuildAPI;
 
   /** Backward-compat shim that delegates to the entities (items) API. */
   locations: {
@@ -62,6 +65,7 @@ export class UserClient extends BaseAPI {
     this.products = new ProductAPI(requests);
     this.backups = new BackupsAPI(requests);
     this.xImport = new XImportAPI(requests);
+    this.xUse = new XUseBuildAPI(requests);
 
     // Backward-compat shim: api.locations.* delegates to api.items.*
     this.locations = {
