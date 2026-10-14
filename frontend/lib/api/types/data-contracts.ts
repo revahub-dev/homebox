@@ -56,6 +56,24 @@ export enum EntityfieldType {
   TypeTime = "time",
 }
 
+export enum DupcheckTier {
+  /** an identifier (ASIN, JAN, model number) matched */
+  TierExact = "exact",
+  /** normalized names are identical */
+  TierLikely = "likely",
+  /** token-overlap (or, later, embedding) similarity */
+  TierSimilar = "similar",
+}
+
+export enum DupcheckReason {
+  ReasonASIN = "asin",
+  ReasonJAN = "jan",
+  ReasonModelNumber = "model_number",
+  ReasonName = "normalized_name",
+  ReasonTokens = "token_overlap",
+  ReasonSemantic = "semantic",
+}
+
 export enum AuthrolesRole {
   DefaultRole = "user",
   RoleAdmin = "admin",
@@ -1370,6 +1388,48 @@ export interface ChangePassword {
 
 export interface CreateRequest {
   name: string;
+}
+
+export interface DuplicateCheckQuery {
+  /** @maxLength 64 */
+  asin: string;
+  /** @maxLength 64 */
+  jan: string;
+  /**
+   * Maximum number of matches (default 10, max 50).
+   * @min 0
+   * @max 50
+   */
+  limit: number;
+  /** @maxLength 255 */
+  modelNumber: string;
+  /** @maxLength 500 */
+  name: string;
+}
+
+export interface DuplicateCheckResult {
+  matches: DuplicateMatch[];
+}
+
+export interface DuplicateMatch {
+  /** exact | likely | similar */
+  confidence: "exact" | "likely" | "similar";
+  id: string;
+  /** Ancestors from root to direct parent. */
+  location: EntityPath[];
+  /** Location rendered as "Garage > Drawer 3". */
+  locationPath: string;
+  /** asin | jan | model_number | normalized_name | token_overlap | semantic */
+  matchedOn:
+    | "asin"
+    | "jan"
+    | "model_number"
+    | "normalized_name"
+    | "token_overlap"
+    | "semantic";
+  name: string;
+  /** 0..1; comparable across tiers. */
+  score: number;
 }
 
 export interface EntityTemplateCreateItemRequest {

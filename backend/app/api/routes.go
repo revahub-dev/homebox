@@ -253,6 +253,9 @@ func (a *app) mountRoutes(r *chi.Mux, chain *errchain.ErrChain, repos *repo.AllR
 			a.mwRoles(RoleModeOr, authroles.RoleUser.String(), authroles.RoleAttachments.String()),
 		}
 
+		// Fork: duplicate check before purchase (see internal/core/dupcheck)
+		r.Get("/duplicates/check", chain.ToHandlerFunc(v1Ctrl.HandleDuplicateCheckGet(), userMW...))
+		r.Post("/duplicates/check", chain.ToHandlerFunc(v1Ctrl.HandleDuplicateCheckPost(), userMW...))
 		r.Get("/products/search-from-barcode", chain.ToHandlerFunc(v1Ctrl.HandleProductSearchFromBarcode(a.conf.Barcode), userMW...))
 
 		r.Get("/qrcode", chain.ToHandlerFunc(v1Ctrl.HandleGenerateQRCode(), assetMW...))

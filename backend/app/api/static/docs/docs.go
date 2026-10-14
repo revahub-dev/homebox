@@ -230,6 +230,100 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/duplicates/check": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Ranks the group's existing items against a prospective purchase. Order: exact ASIN, JAN or model number; normalized-name match; token-overlap similarity. At least one of name, asin, jan or modelNumber is required.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Duplicates"
+                ],
+                "summary": "Check for duplicates (query string)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product name / title",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Amazon ASIN",
+                        "name": "asin",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "JAN / EAN barcode",
+                        "name": "jan",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Model number",
+                        "name": "modelNumber",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Max matches (default 10, max 50)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.DuplicateCheckResult"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Same as the GET variant, with the query in a JSON body.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Duplicates"
+                ],
+                "summary": "Check for duplicates",
+                "parameters": [
+                    {
+                        "description": "Prospective purchase",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.DuplicateCheckQuery"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.DuplicateCheckResult"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/entities": {
             "get": {
                 "security": [
@@ -3280,6 +3374,48 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "dupcheck.Reason": {
+            "type": "string",
+            "enum": [
+                "asin",
+                "jan",
+                "model_number",
+                "normalized_name",
+                "token_overlap",
+                "semantic"
+            ],
+            "x-enum-varnames": [
+                "ReasonASIN",
+                "ReasonJAN",
+                "ReasonModelNumber",
+                "ReasonName",
+                "ReasonTokens",
+                "ReasonSemantic"
+            ]
+        },
+        "dupcheck.Tier": {
+            "type": "string",
+            "enum": [
+                "exact",
+                "likely",
+                "similar"
+            ],
+            "x-enum-comments": {
+                "TierExact": "an identifier (ASIN, JAN, model number) matched",
+                "TierLikely": "normalized names are identical",
+                "TierSimilar": "token-overlap (or, later, embedding) similarity"
+            },
+            "x-enum-descriptions": [
+                "an identifier (ASIN, JAN, model number) matched",
+                "normalized names are identical",
+                "token-overlap (or, later, embedding) similarity"
+            ],
+            "x-enum-varnames": [
+                "TierExact",
+                "TierLikely",
+                "TierSimilar"
+            ]
         },
         "ent.APIKey": {
             "type": "object",
@@ -6481,6 +6617,99 @@ const docTemplate = `{
             "properties": {
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "v1.DuplicateCheckQuery": {
+            "type": "object",
+            "properties": {
+                "asin": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "jan": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "limit": {
+                    "description": "Maximum number of matches (default 10, max 50).",
+                    "type": "integer",
+                    "maximum": 50,
+                    "minimum": 0
+                },
+                "modelNumber": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 500
+                }
+            }
+        },
+        "v1.DuplicateCheckResult": {
+            "type": "object",
+            "properties": {
+                "matches": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v1.DuplicateMatch"
+                    }
+                }
+            }
+        },
+        "v1.DuplicateMatch": {
+            "type": "object",
+            "properties": {
+                "confidence": {
+                    "description": "exact | likely | similar",
+                    "enum": [
+                        "exact",
+                        "likely",
+                        "similar"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dupcheck.Tier"
+                        }
+                    ]
+                },
+                "id": {
+                    "type": "string"
+                },
+                "location": {
+                    "description": "Ancestors from root to direct parent.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/repo.EntityPath"
+                    }
+                },
+                "locationPath": {
+                    "description": "Location rendered as \"Garage \u003e Drawer 3\".",
+                    "type": "string"
+                },
+                "matchedOn": {
+                    "description": "asin | jan | model_number | normalized_name | token_overlap | semantic",
+                    "enum": [
+                        "asin",
+                        "jan",
+                        "model_number",
+                        "normalized_name",
+                        "token_overlap",
+                        "semantic"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dupcheck.Reason"
+                        }
+                    ]
+                },
+                "name": {
+                    "type": "string"
+                },
+                "score": {
+                    "description": "0..1; comparable across tiers.",
+                    "type": "number"
                 }
             }
         },

@@ -43,6 +43,40 @@ definitions:
       symbol:
         type: string
     type: object
+  dupcheck.Reason:
+    enum:
+    - asin
+    - jan
+    - model_number
+    - normalized_name
+    - token_overlap
+    - semantic
+    type: string
+    x-enum-varnames:
+    - ReasonASIN
+    - ReasonJAN
+    - ReasonModelNumber
+    - ReasonName
+    - ReasonTokens
+    - ReasonSemantic
+  dupcheck.Tier:
+    enum:
+    - exact
+    - likely
+    - similar
+    type: string
+    x-enum-comments:
+      TierExact: an identifier (ASIN, JAN, model number) matched
+      TierLikely: normalized names are identical
+      TierSimilar: token-overlap (or, later, embedding) similarity
+    x-enum-descriptions:
+    - an identifier (ASIN, JAN, model number) matched
+    - normalized names are identical
+    - token-overlap (or, later, embedding) similarity
+    x-enum-varnames:
+    - TierExact
+    - TierLikely
+    - TierSimilar
   ent.APIKey:
     properties:
       created_at:
@@ -2249,6 +2283,71 @@ definitions:
     required:
     - name
     type: object
+  v1.DuplicateCheckQuery:
+    properties:
+      asin:
+        maxLength: 64
+        type: string
+      jan:
+        maxLength: 64
+        type: string
+      limit:
+        description: Maximum number of matches (default 10, max 50).
+        maximum: 50
+        minimum: 0
+        type: integer
+      modelNumber:
+        maxLength: 255
+        type: string
+      name:
+        maxLength: 500
+        type: string
+    type: object
+  v1.DuplicateCheckResult:
+    properties:
+      matches:
+        items:
+          $ref: '#/definitions/v1.DuplicateMatch'
+        type: array
+    type: object
+  v1.DuplicateMatch:
+    properties:
+      confidence:
+        allOf:
+        - $ref: '#/definitions/dupcheck.Tier'
+        description: exact | likely | similar
+        enum:
+        - exact
+        - likely
+        - similar
+      id:
+        type: string
+      location:
+        description: Ancestors from root to direct parent.
+        items:
+          $ref: '#/definitions/repo.EntityPath'
+        type: array
+      locationPath:
+        description: Location rendered as "Garage > Drawer 3".
+        type: string
+      matchedOn:
+        allOf:
+        - $ref: '#/definitions/dupcheck.Reason'
+        description: asin | jan | model_number | normalized_name | token_overlap |
+          semantic
+        enum:
+        - asin
+        - jan
+        - model_number
+        - normalized_name
+        - token_overlap
+        - semantic
+      name:
+        type: string
+      score:
+        description: 0..1; comparable across tiers.
+        type: number
+    type: object
   v1.EntityTemplateCreateItemRequest:
     properties:
       description:
@@ -2538,6 +2637,67 @@ paths:
       summary: Currency
       tags:
       - Base
+  /v1/duplicates/check:
+    get:
+      description: 'Ranks the group''s existing items against a prospective purchase.
+        Order: exact ASIN, JAN or model number; normalized-name match; token-overlap
+        similarity. At least one of name, asin, jan or modelNumber is required.'
+      parameters:
+      - description: Product name / title
+        in: query
+        name: name
+        type: string
+      - description: Amazon ASIN
+        in: query
+        name: asin
+        type: string
+      - description: JAN / EAN barcode
+        in: query
+        name: jan
+        type: string
+      - description: Model number
+        in: query
+        name: modelNumber
+        type: string
+      - description: Max matches (default 10, max 50)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.DuplicateCheckResult'
+      security:
+      - Bearer: []
+      summary: Check for duplicates (query string)
+      tags:
+      - Duplicates
+    post:
+      consumes:
+      - application/json
+      description: Same as the GET variant, with the query in a JSON body.
+      parameters:
+      - description: Prospective purchase
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/v1.DuplicateCheckQuery'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.DuplicateCheckResult'
+      security:
+      - Bearer: []
+      summary: Check for duplicates
+      tags:
+      - Duplicates
   /v1/entities:
     get:
       parameters:
