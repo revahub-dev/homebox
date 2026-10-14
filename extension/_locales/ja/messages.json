@@ -1,0 +1,22 @@
+{
+  "extName": { "message": "Homebox 重複チェック" },
+  "extDescription": { "message": "買い物中に、Homebox の在庫ですでに持っている商品かどうかを表示します。" },
+  "badgeExact": { "message": "所有済み $COUNT$ 件（完全一致）", "placeholders": { "count": { "content": "$1" } } },
+  "badgeLikely": { "message": "所有している可能性 $COUNT$ 件", "placeholders": { "count": { "content": "$1" } } },
+  "badgeSimilar": { "message": "類似品: $COUNT$ 件", "placeholders": { "count": { "content": "$1" } } },
+  "badgeOpen": { "message": "Homebox で開く" },
+  "badgeDismiss": { "message": "閉じる" },
+  "optionsTitle": { "message": "Homebox 重複チェックの設定" },
+  "optionsServerUrl": { "message": "Homebox サーバー URL" },
+  "optionsApiKey": { "message": "API キー" },
+  "optionsApiKeyHelp": { "message": "Homebox のプロフィールで API キーを作成してください。キーはこのブラウザにのみ保存されます。" },
+  "optionsSave": { "message": "保存" },
+  "optionsTest": { "message": "接続テスト" },
+  "optionsSaved": { "message": "保存しました。" },
+  "optionsPermissionDenied": { "message": "サーバーへのアクセス許可が得られませんでした。" },
+  "optionsInvalidUrl": { "message": "有効な http(s) URL を入力してください。" },
+  "optionsTestOk": { "message": "$NAME$ として接続しました。", "placeholders": { "name": { "content": "$1" } } },
+  "optionsTestUnauthorized": { "message": "API キーがサーバーに拒否されました。" },
+  "optionsTestFailed": { "message": "サーバーに接続できませんでした。" },
+  "optionsNotConfigured": { "message": "先にサーバー URL と API キーを保存してください。" }
+}
