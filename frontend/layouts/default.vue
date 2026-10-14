@@ -253,6 +253,7 @@
   import MdiLogout from "~icons/mdi/logout";
   import MdiFileDocumentMultiple from "~icons/mdi/file-document-multiple";
   import MdiChevronRight from "~icons/mdi/chevron-right";
+  import MdiInboxArrowDown from "~icons/mdi/inbox-arrow-down"; // Fork: order import
 
   import {
     Sidebar,
@@ -442,6 +443,14 @@
       active: computed(() => route.path === "/maintenance"),
       name: computed(() => t("menu.maintenance")),
       to: "/maintenance",
+    },
+    // Fork: order import review inbox
+    {
+      icon: MdiInboxArrowDown,
+      id: 90,
+      active: computed(() => route.path.startsWith("/x/")),
+      name: computed(() => t("menu.order_inbox")),
+      to: "/x/inbox",
     },
     {
       icon: MdiAccount,

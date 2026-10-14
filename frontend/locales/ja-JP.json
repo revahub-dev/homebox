@@ -518,6 +518,7 @@
         "home": "ホーム",
         "locations": "ロケーション",
         "maintenance": "メンテナンス情報",
+        "order_inbox": "注文インボックス",
         "profile": "ユーザー設定",
         "scanner": "スキャナー",
         "search": "検索"
@@ -693,6 +694,86 @@
             "failed_ensure_import_refs": "import_ref の確認に失敗しました。",
             "failed_set_primary_photos": "サムネイルの設定に失敗しました。",
             "failed_zero_datetimes": "日時のリセットに失敗しました。"
+        }
+    },
+    "x_import": {
+        "inbox_title": "注文インボックス",
+        "settings_title": "注文取り込み設定",
+        "refresh": "更新",
+        "empty": "何もありません。",
+        "notice": "お知らせ",
+        "low_confidence": "信頼度低 — 内容を確認してください",
+        "order": "注文",
+        "model": "型番",
+        "product_page": "商品ページ",
+        "unit_price": "単価",
+        "merge_into": "このアイテムに統合",
+        "merge_other": "または別のアイテムに統合",
+        "merge": "統合",
+        "accept": "登録",
+        "ignore": "無視",
+        "dismiss": "閉じる",
+        "open_item": "アイテムを開く",
+        "ignore_confirm": "この候補を無視しますか？取り込まれません。",
+        "status": {
+            "pending": "未処理",
+            "accepted": "登録済み",
+            "merged": "統合済み",
+            "ignored": "無視"
+        },
+        "channel": {
+            "forward": "転送",
+            "eml": "アップロード",
+            "photo": "写真"
+        },
+        "dup": {
+            "exact": "すでに所有しています",
+            "likely": "所有している可能性が高いです",
+            "similar": "類似アイテム"
+        },
+        "result": {
+            "imported": "取り込み完了",
+            "unparsed": "認識できませんでした（インボックスへ）",
+            "duplicate": "取り込み済み"
+        },
+        "forwarding_title": "メール転送",
+        "forwarding_help": "注文確認メール（Amazon.co.jp・楽天・ヨドバシ）をこのアドレスに転送するか、メールリレーから生のMIMEをWebhookにPOSTしてください。",
+        "address": "転送先アドレス",
+        "no_domain": "受信ドメインが未設定です（HBOX_ORDER_IMPORT_INBOUND_DOMAIN）。メールリレーでWebhook URLを使ってください。",
+        "webhook_url": "Webhook URL",
+        "webhook_help": "このURLは秘密にしてください。URLを知っていれば誰でも候補を追加できます。漏れた場合はトークンを再発行してください。",
+        "copy": "コピー",
+        "last_received": "最終受信",
+        "rotate": "トークンを再発行",
+        "rotate_confirm": "トークンを再発行しますか？古いアドレスとWebhook URLはすぐに使えなくなります。",
+        "allow_list": "許可する送信者",
+        "allow_list_help": "1行に1アドレス。空欄の場合、アドレスを知っている全員から受け付けます。",
+        "upload_eml_title": ".emlファイルをアップロード",
+        "upload_eml_help": "一度に最大{max}件まで。",
+        "drop_here": ".emlファイルをここにドロップ",
+        "choose_files": "ファイルを選択",
+        "upload_photo_title": "レシート写真",
+        "upload_photo_help": "画像認識モデルで読み取ります。結果は信頼度低として表示されます。",
+        "choose_photo": "写真を選択",
+        "vision_disabled": "写真の取り込みには画像認識LLMの設定が必要です（HBOX_ORDER_IMPORT_LLM_*）。",
+        "toast": {
+            "load_failed": "読み込みに失敗しました",
+            "already_handled": "この候補はすでに処理されています",
+            "accept_failed": "登録に失敗しました",
+            "accepted": "アイテムを作成しました",
+            "pick_merge_target": "統合先のアイテムを選んでください",
+            "merge_failed": "統合に失敗しました",
+            "merged": "既存のアイテムに統合しました",
+            "ignore_failed": "無視に失敗しました",
+            "copied": "コピーしました",
+            "copy_failed": "コピーに失敗しました",
+            "rotate_failed": "トークンの再発行に失敗しました",
+            "rotated": "トークンを再発行しました",
+            "save_failed": "保存に失敗しました",
+            "saved": "保存しました",
+            "too_many_files": "ファイルが多すぎます（最大{max}件）",
+            "upload_failed": "アップロードに失敗しました",
+            "uploaded": "{total}件中{imported}件を取り込みました"
         }
     }
 }

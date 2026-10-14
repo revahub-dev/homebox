@@ -1886,6 +1886,353 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/import/candidates": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Order Import"
+                ],
+                "summary": "List the review inbox",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "pending | accepted | merged | ignored (default: all)",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/repo.XImportCandidate"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/import/candidates/{id}/accept": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Creates an entity with purchase date, store and price, and ASIN/JAN custom fields. Optional overrides edit the item before it is created.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Order Import"
+                ],
+                "summary": "Accept a review-inbox item",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Candidate ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Overrides",
+                        "name": "payload",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/orderimport.AcceptInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/repo.EntityOut"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/import/candidates/{id}/ignore": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "tags": [
+                    "Order Import"
+                ],
+                "summary": "Ignore a review-inbox entry",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Candidate ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/v1/import/candidates/{id}/merge": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Adds the quantity, fills in empty purchase fields, and adds ASIN/JAN custom fields.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Order Import"
+                ],
+                "summary": "Merge a review-inbox item into an existing entity",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Candidate ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Target entity",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.ImportMergeInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/repo.EntityOut"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/import/eml": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Up to 50 files per request in the \"files\" field, each at most 10 MB. Every file gets its own result; invalid files report an error without failing the batch.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Order Import"
+                ],
+                "summary": "Upload order emails (.eml)",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": ".eml files",
+                        "name": "files",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v1.ImportFileResult"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/import/inbound/{token}": {
+            "post": {
+                "description": "Public endpoint for an inbound-email service. The body is the raw MIME message (or a multipart form with an \"email\"/\"body-mime\" field). The token in the path authenticates the request. Unknown or rotated tokens get 404, bodies over 10 MB get 413, and senders outside the allow-list get 403. Nothing is imported without review.",
+                "consumes": [
+                    "text/plain"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Order Import"
+                ],
+                "summary": "Inbound email webhook",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Forwarding token",
+                        "name": "token",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/orderimport.Result"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/import/photo": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Reads the image with the configured vision LLM. Results are marked low-confidence. Returns 503 when no LLM is configured.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Order Import"
+                ],
+                "summary": "Upload a receipt or order screenshot",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "JPEG, PNG, WebP or GIF image",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/orderimport.Result"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/import/settings": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Order Import"
+                ],
+                "summary": "Get order-import forwarding settings",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ImportSettings"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Order Import"
+                ],
+                "summary": "Update the forwarding sender allow-list",
+                "parameters": [
+                    {
+                        "description": "Allow-list",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.ImportSettingsUpdate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ImportSettings"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/import/settings/rotate": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Issues a new token; mail sent to the old address or webhook URL is rejected from now on.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Order Import"
+                ],
+                "summary": "Rotate the forwarding token",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.ImportSettings"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/labelmaker/asset/{id}": {
             "get": {
                 "security": [
@@ -4842,6 +5189,62 @@ const docTemplate = `{
                 "StatusFailed"
             ]
         },
+        "orderimport.AcceptInput": {
+            "type": "object",
+            "properties": {
+                "entityTypeId": {
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "parentId": {
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "quantity": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "unitPrice": {
+                    "type": "number",
+                    "minimum": 0
+                }
+            }
+        },
+        "orderimport.Result": {
+            "type": "object",
+            "properties": {
+                "candidates": {
+                    "type": "integer"
+                },
+                "extractor": {
+                    "type": "string"
+                },
+                "messageId": {
+                    "type": "string"
+                },
+                "note": {
+                    "type": "string"
+                },
+                "orderNumber": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "imported",
+                        "unparsed",
+                        "duplicate"
+                    ]
+                },
+                "store": {
+                    "type": "string"
+                }
+            }
+        },
         "repo.APIKeyCreate": {
             "type": "object",
             "required": [
@@ -6479,6 +6882,102 @@ const docTemplate = `{
                 }
             }
         },
+        "repo.XImportCandidate": {
+            "type": "object",
+            "properties": {
+                "asin": {
+                    "type": "string"
+                },
+                "channel": {
+                    "type": "string",
+                    "enum": [
+                        "forward",
+                        "eml",
+                        "photo"
+                    ]
+                },
+                "confidence": {
+                    "type": "number"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "dupMatches": {
+                    "description": "JSON array of duplicate-check matches captured at import time.",
+                    "type": "string"
+                },
+                "entityId": {
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "extractor": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "jan": {
+                    "type": "string"
+                },
+                "kind": {
+                    "type": "string",
+                    "enum": [
+                        "item",
+                        "notice"
+                    ]
+                },
+                "lowConfidence": {
+                    "type": "boolean"
+                },
+                "messageId": {
+                    "description": "Source message",
+                    "type": "string"
+                },
+                "modelNumber": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "note": {
+                    "type": "string"
+                },
+                "orderDate": {
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "orderNumber": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "number"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "pending",
+                        "accepted",
+                        "merged",
+                        "ignored"
+                    ]
+                },
+                "store": {
+                    "type": "string"
+                },
+                "subject": {
+                    "type": "string"
+                },
+                "unitPrice": {
+                    "type": "number"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "services.Latest": {
             "type": "object",
             "properties": {
@@ -6805,6 +7304,83 @@ const docTemplate = `{
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
+                }
+            }
+        },
+        "v1.ImportFileResult": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "fileName": {
+                    "type": "string"
+                },
+                "result": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/orderimport.Result"
+                        }
+                    ],
+                    "x-nullable": true
+                }
+            }
+        },
+        "v1.ImportMergeInput": {
+            "type": "object",
+            "required": [
+                "entityId"
+            ],
+            "properties": {
+                "entityId": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.ImportSettings": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "description": "orders-\u003ctoken\u003e@\u003cdomain\u003e; empty when HBOX_ORDER_IMPORT_INBOUND_DOMAIN is unset.",
+                    "type": "string"
+                },
+                "allowedSenders": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "lastReceivedAt": {
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "llmEnabled": {
+                    "type": "boolean"
+                },
+                "maxBytes": {
+                    "type": "integer"
+                },
+                "maxFiles": {
+                    "type": "integer"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "webhookPath": {
+                    "description": "Path of the inbound webhook, relative to the server origin.",
+                    "type": "string"
+                }
+            }
+        },
+        "v1.ImportSettingsUpdate": {
+            "type": "object",
+            "properties": {
+                "allowedSenders": {
+                    "type": "array",
+                    "maxItems": 100,
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },

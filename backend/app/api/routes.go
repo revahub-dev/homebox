@@ -253,6 +253,17 @@ func (a *app) mountRoutes(r *chi.Mux, chain *errchain.ErrChain, repos *repo.AllR
 			a.mwRoles(RoleModeOr, authroles.RoleUser.String(), authroles.RoleAttachments.String()),
 		}
 
+		// Fork: order import (see internal/core/services/x/orderimport)
+		r.Post("/import/inbound/{token}", chain.ToHandlerFunc(v1Ctrl.HandleImportInbound()))
+		r.Get("/import/settings", chain.ToHandlerFunc(v1Ctrl.HandleImportSettingsGet(), userMW...))
+		r.Put("/import/settings", chain.ToHandlerFunc(v1Ctrl.HandleImportSettingsUpdate(), userMW...))
+		r.Post("/import/settings/rotate", chain.ToHandlerFunc(v1Ctrl.HandleImportTokenRotate(), userMW...))
+		r.Post("/import/eml", chain.ToHandlerFunc(v1Ctrl.HandleImportEmlUpload(), userMW...))
+		r.Post("/import/photo", chain.ToHandlerFunc(v1Ctrl.HandleImportPhotoUpload(), userMW...))
+		r.Get("/import/candidates", chain.ToHandlerFunc(v1Ctrl.HandleImportCandidates(), userMW...))
+		r.Post("/import/candidates/{id}/accept", chain.ToHandlerFunc(v1Ctrl.HandleImportAccept(), userMW...))
+		r.Post("/import/candidates/{id}/merge", chain.ToHandlerFunc(v1Ctrl.HandleImportMerge(), userMW...))
+		r.Post("/import/candidates/{id}/ignore", chain.ToHandlerFunc(v1Ctrl.HandleImportIgnore(), userMW...))
 		// Fork: duplicate check before purchase (see internal/core/dupcheck)
 		r.Get("/duplicates/check", chain.ToHandlerFunc(v1Ctrl.HandleDuplicateCheckGet(), userMW...))
 		r.Post("/duplicates/check", chain.ToHandlerFunc(v1Ctrl.HandleDuplicateCheckPost(), userMW...))

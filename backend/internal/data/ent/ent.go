@@ -30,6 +30,9 @@ import (
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/templatefield"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/user"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/usergroup"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/ximportcandidate"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xinboundaddress"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xinboundmessage"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -108,6 +111,9 @@ func checkColumn(t, c string) error {
 			templatefield.Table:        templatefield.ValidColumn,
 			user.Table:                 user.ValidColumn,
 			usergroup.Table:            usergroup.ValidColumn,
+			ximportcandidate.Table:     ximportcandidate.ValidColumn,
+			xinboundaddress.Table:      xinboundaddress.ValidColumn,
+			xinboundmessage.Table:      xinboundmessage.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

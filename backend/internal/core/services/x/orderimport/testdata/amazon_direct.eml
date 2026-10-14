@@ -1,0 +1,49 @@
+From: "Amazon.co.jp" <auto-confirm@amazon.co.jp>
+To: jack@example.com
+Subject: =?utf-8?b?QW1hem9uLmNvLmpw44Gn44Gu44GU5rOo5paHIDI1MC0xMjM0NTY3LTc2NTQzMjE=?=
+Date: Sat, 10 Oct 2026 10:00:00 +0900
+Message-ID: <0100amz-order-7654321@email.amazonses.com>
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="b1"
+
+--b1
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: base64
+
+QW1hem9uLmNvLmpwIOOCkuOBlOWIqeeUqOOBhOOBn+OBoOOBjeOAgeOBguOCiuOBjOOBqOOBhuOB
+lOOBluOBhOOBvuOBmeOAggrms6jmlofnlarlj7fvvJogMjUwLTEyMzQ1NjctNzY1NDMyMQrms6jm
+lofml6XvvJogMjAyNuW5tDEw5pyIMTDml6UKCuOCveODi+ODvCDjg6/jgqTjg6Tjg6zjgrnjg47j
+gqTjgrrjgq3jg6Pjg7Pjgrvjg6rjg7PjgrDjg5jjg4Pjg4njg5vjg7MgV0gtMTAwMFhNNSDjg5bj
+g6njg4Pjgq8KaHR0cHM6Ly93d3cuYW1hem9uLmNvLmpwL2RwL0IwOVkyTVlMNUMK5pWw6YePOiAx
+Cu+/pTQ0LDAwMAoKQW5rZXIgUG93ZXJDb3JlIDEwMDAwICjjg6Ljg5DjgqTjg6vjg5Djg4Pjg4bj
+g6rjg7wgMTAwMDBtQWgpCmh0dHBzOi8vd3d3LmFtYXpvbi5jby5qcC9kcC9CMDE5R05VVDBDCuaV
+sOmHjzogMgrvv6UyLDk5MAoK44GU6KuL5rGC6aGN77yaIO+/pTQ5LDk4MAo=
+
+--b1
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<html><head><style>.x{color:red}</style><script>alert(1)</script></head><bo=
+dy>
+<table><tr><td><h2>=E3=81=94=E6=B3=A8=E6=96=87=E3=81=AE=E7=A2=BA=E8=AA=8D</=
+h2></td></tr>
+<tr><td>=E6=B3=A8=E6=96=87=E7=95=AA=E5=8F=B7=EF=BC=9A 250-1234567-7654321</=
+td></tr>
+<tr><td>=E6=B3=A8=E6=96=87=E6=97=A5=EF=BC=9A 2026=E5=B9=B410=E6=9C=8810=E6=
+=97=A5</td></tr>
+<tr><td><a href=3D"https://www.amazon.co.jp/dp/B09Y2MYL5C/ref=3Dpe_123">=E3=
+=82=BD=E3=83=8B=E3=83=BC =E3=83=AF=E3=82=A4=E3=83=A4=E3=83=AC=E3=82=B9=E3=
+=83=8E=E3=82=A4=E3=82=BA=E3=82=AD=E3=83=A3=E3=83=B3=E3=82=BB=E3=83=AA=E3=83=
+=B3=E3=82=B0=E3=83=98=E3=83=83=E3=83=89=E3=83=9B=E3=83=B3 WH-1000XM5 =E3=83=
+=96=E3=83=A9=E3=83=83=E3=82=AF</a></td></tr>
+<tr><td>=E6=95=B0=E9=87=8F: 1</td></tr><tr><td>=EF=BF=A544,000</td></tr>
+<tr><td><a href=3D"https://www.amazon.co.jp/gp/product/B019GNUT0C?psc=3D1">=
+Anker PowerCore 10000 (=E3=83=A2=E3=83=90=E3=82=A4=E3=83=AB=E3=83=90=E3=83=
+=83=E3=83=86=E3=83=AA=E3=83=BC 10000mAh)</a></td></tr>
+<tr><td>=E6=95=B0=E9=87=8F: 2</td></tr><tr><td>=EF=BF=A5=EF=BC=92,=EF=BC=99=
+=EF=BC=99=EF=BC=90</td></tr>
+<tr><td>=E3=81=94=E8=AB=8B=E6=B1=82=E9=A1=8D=EF=BC=9A =EF=BF=A549,980</td><=
+/tr>
+<tr><td><img src=3D"https://tracking.example/pixel.gif"></td></tr>
+</table></body></html>
+--b1--

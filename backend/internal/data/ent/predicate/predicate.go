@@ -59,3 +59,12 @@ type User func(*sql.Selector)
 
 // UserGroup is the predicate function for usergroup builders.
 type UserGroup func(*sql.Selector)
+
+// XImportCandidate is the predicate function for ximportcandidate builders.
+type XImportCandidate func(*sql.Selector)
+
+// XInboundAddress is the predicate function for xinboundaddress builders.
+type XInboundAddress func(*sql.Selector)
+
+// XInboundMessage is the predicate function for xinboundmessage builders.
+type XInboundMessage func(*sql.Selector)

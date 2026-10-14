@@ -715,6 +715,27 @@ export interface EntUserGroupEdges {
   user: EntUser;
 }
 
+export interface OrderimportAcceptInput {
+  entityTypeId?: string | null;
+  /** @maxLength 255 */
+  name: string;
+  parentId?: string | null;
+  /** @min 0 */
+  quantity: number;
+  /** @min 0 */
+  unitPrice: number;
+}
+
+export interface OrderimportResult {
+  candidates: number;
+  extractor: string;
+  messageId: string;
+  note: string;
+  orderNumber: string;
+  status: "imported" | "unparsed" | "duplicate";
+  store: string;
+}
+
 export interface APIKeyCreate {
   expiresAt?: string | null;
   /**
@@ -1345,6 +1366,35 @@ export interface ValueOverTimeEntry {
   value: number;
 }
 
+export interface XImportCandidate {
+  asin: string;
+  channel: "forward" | "eml" | "photo";
+  confidence: number;
+  createdAt: Date | string;
+  currency: string;
+  /** JSON array of duplicate-check matches captured at import time. */
+  dupMatches: string;
+  entityId?: string | null;
+  extractor: string;
+  id: string;
+  jan: string;
+  kind: "item" | "notice";
+  lowConfidence: boolean;
+  /** Source message */
+  messageId: string;
+  modelNumber: string;
+  name: string;
+  note: string;
+  orderDate?: string | null;
+  orderNumber: string;
+  quantity: number;
+  status: "pending" | "accepted" | "merged" | "ignored";
+  store: string;
+  subject: string;
+  unitPrice: number;
+  url: string;
+}
+
 export interface Latest {
   date: Date | string;
   version: string;
@@ -1475,6 +1525,34 @@ export interface GroupInvitationCreate {
    * @max 100
    */
   uses: number;
+}
+
+export interface ImportFileResult {
+  error: string;
+  fileName: string;
+  result?: OrderimportResult | null;
+}
+
+export interface ImportMergeInput {
+  entityId: string;
+}
+
+export interface ImportSettings {
+  /** orders-<token>@<domain>; empty when HBOX_ORDER_IMPORT_INBOUND_DOMAIN is unset. */
+  address: string;
+  allowedSenders: string[];
+  lastReceivedAt?: string | null;
+  llmEnabled: boolean;
+  maxBytes: number;
+  maxFiles: number;
+  token: string;
+  /** Path of the inbound webhook, relative to the server origin. */
+  webhookPath: string;
+}
+
+export interface ImportSettingsUpdate {
+  /** @maxItems 100 */
+  allowedSenders: string[];
 }
 
 export interface LoginForm {

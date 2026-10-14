@@ -31,6 +31,9 @@ import (
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/templatefield"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/user"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/usergroup"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/ximportcandidate"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xinboundaddress"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xinboundmessage"
 )
 
 const (
@@ -60,6 +63,9 @@ const (
 	TypeTemplateField        = "TemplateField"
 	TypeUser                 = "User"
 	TypeUserGroup            = "UserGroup"
+	TypeXImportCandidate     = "XImportCandidate"
+	TypeXInboundAddress      = "XInboundAddress"
+	TypeXInboundMessage      = "XInboundMessage"
 )
 
 // APIKeyMutation represents an operation that mutates the APIKey nodes in the graph.
@@ -17513,4 +17519,3724 @@ func (m *UserGroupMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown UserGroup edge %s", name)
+}
+
+// XImportCandidateMutation represents an operation that mutates the XImportCandidate nodes in the graph.
+type XImportCandidateMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *uuid.UUID
+	created_at     *time.Time
+	updated_at     *time.Time
+	group_id       *uuid.UUID
+	kind           *ximportcandidate.Kind
+	status         *ximportcandidate.Status
+	name           *string
+	quantity       *float64
+	addquantity    *float64
+	unit_price     *float64
+	addunit_price  *float64
+	currency       *string
+	store          *string
+	order_number   *string
+	order_date     *time.Time
+	asin           *string
+	jan            *string
+	model_number   *string
+	url            *string
+	note           *string
+	confidence     *float64
+	addconfidence  *float64
+	low_confidence *bool
+	extractor      *string
+	dup_matches    *string
+	entity_id      *uuid.UUID
+	clearedFields  map[string]struct{}
+	message        *uuid.UUID
+	clearedmessage bool
+	done           bool
+	oldValue       func(context.Context) (*XImportCandidate, error)
+	predicates     []predicate.XImportCandidate
+}
+
+var _ ent.Mutation = (*XImportCandidateMutation)(nil)
+
+// ximportcandidateOption allows management of the mutation configuration using functional options.
+type ximportcandidateOption func(*XImportCandidateMutation)
+
+// newXImportCandidateMutation creates new mutation for the XImportCandidate entity.
+func newXImportCandidateMutation(c config, op Op, opts ...ximportcandidateOption) *XImportCandidateMutation {
+	m := &XImportCandidateMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeXImportCandidate,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withXImportCandidateID sets the ID field of the mutation.
+func withXImportCandidateID(id uuid.UUID) ximportcandidateOption {
+	return func(m *XImportCandidateMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *XImportCandidate
+		)
+		m.oldValue = func(ctx context.Context) (*XImportCandidate, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().XImportCandidate.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withXImportCandidate sets the old XImportCandidate of the mutation.
+func withXImportCandidate(node *XImportCandidate) ximportcandidateOption {
+	return func(m *XImportCandidateMutation) {
+		m.oldValue = func(context.Context) (*XImportCandidate, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m XImportCandidateMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m XImportCandidateMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of XImportCandidate entities.
+func (m *XImportCandidateMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *XImportCandidateMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *XImportCandidateMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().XImportCandidate.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *XImportCandidateMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *XImportCandidateMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the XImportCandidate entity.
+// If the XImportCandidate object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XImportCandidateMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *XImportCandidateMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *XImportCandidateMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *XImportCandidateMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the XImportCandidate entity.
+// If the XImportCandidate object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XImportCandidateMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *XImportCandidateMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetGroupID sets the "group_id" field.
+func (m *XImportCandidateMutation) SetGroupID(u uuid.UUID) {
+	m.group_id = &u
+}
+
+// GroupID returns the value of the "group_id" field in the mutation.
+func (m *XImportCandidateMutation) GroupID() (r uuid.UUID, exists bool) {
+	v := m.group_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGroupID returns the old "group_id" field's value of the XImportCandidate entity.
+// If the XImportCandidate object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XImportCandidateMutation) OldGroupID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGroupID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGroupID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGroupID: %w", err)
+	}
+	return oldValue.GroupID, nil
+}
+
+// ResetGroupID resets all changes to the "group_id" field.
+func (m *XImportCandidateMutation) ResetGroupID() {
+	m.group_id = nil
+}
+
+// SetInboundMessageID sets the "inbound_message_id" field.
+func (m *XImportCandidateMutation) SetInboundMessageID(u uuid.UUID) {
+	m.message = &u
+}
+
+// InboundMessageID returns the value of the "inbound_message_id" field in the mutation.
+func (m *XImportCandidateMutation) InboundMessageID() (r uuid.UUID, exists bool) {
+	v := m.message
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInboundMessageID returns the old "inbound_message_id" field's value of the XImportCandidate entity.
+// If the XImportCandidate object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XImportCandidateMutation) OldInboundMessageID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldInboundMessageID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldInboundMessageID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInboundMessageID: %w", err)
+	}
+	return oldValue.InboundMessageID, nil
+}
+
+// ResetInboundMessageID resets all changes to the "inbound_message_id" field.
+func (m *XImportCandidateMutation) ResetInboundMessageID() {
+	m.message = nil
+}
+
+// SetKind sets the "kind" field.
+func (m *XImportCandidateMutation) SetKind(x ximportcandidate.Kind) {
+	m.kind = &x
+}
+
+// Kind returns the value of the "kind" field in the mutation.
+func (m *XImportCandidateMutation) Kind() (r ximportcandidate.Kind, exists bool) {
+	v := m.kind
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldKind returns the old "kind" field's value of the XImportCandidate entity.
+// If the XImportCandidate object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XImportCandidateMutation) OldKind(ctx context.Context) (v ximportcandidate.Kind, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldKind is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldKind requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldKind: %w", err)
+	}
+	return oldValue.Kind, nil
+}
+
+// ResetKind resets all changes to the "kind" field.
+func (m *XImportCandidateMutation) ResetKind() {
+	m.kind = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *XImportCandidateMutation) SetStatus(x ximportcandidate.Status) {
+	m.status = &x
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *XImportCandidateMutation) Status() (r ximportcandidate.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the XImportCandidate entity.
+// If the XImportCandidate object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XImportCandidateMutation) OldStatus(ctx context.Context) (v ximportcandidate.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *XImportCandidateMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetName sets the "name" field.
+func (m *XImportCandidateMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *XImportCandidateMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the XImportCandidate entity.
+// If the XImportCandidate object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XImportCandidateMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *XImportCandidateMutation) ResetName() {
+	m.name = nil
+}
+
+// SetQuantity sets the "quantity" field.
+func (m *XImportCandidateMutation) SetQuantity(f float64) {
+	m.quantity = &f
+	m.addquantity = nil
+}
+
+// Quantity returns the value of the "quantity" field in the mutation.
+func (m *XImportCandidateMutation) Quantity() (r float64, exists bool) {
+	v := m.quantity
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldQuantity returns the old "quantity" field's value of the XImportCandidate entity.
+// If the XImportCandidate object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XImportCandidateMutation) OldQuantity(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldQuantity is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldQuantity requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldQuantity: %w", err)
+	}
+	return oldValue.Quantity, nil
+}
+
+// AddQuantity adds f to the "quantity" field.
+func (m *XImportCandidateMutation) AddQuantity(f float64) {
+	if m.addquantity != nil {
+		*m.addquantity += f
+	} else {
+		m.addquantity = &f
+	}
+}
+
+// AddedQuantity returns the value that was added to the "quantity" field in this mutation.
+func (m *XImportCandidateMutation) AddedQuantity() (r float64, exists bool) {
+	v := m.addquantity
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetQuantity resets all changes to the "quantity" field.
+func (m *XImportCandidateMutation) ResetQuantity() {
+	m.quantity = nil
+	m.addquantity = nil
+}
+
+// SetUnitPrice sets the "unit_price" field.
+func (m *XImportCandidateMutation) SetUnitPrice(f float64) {
+	m.unit_price = &f
+	m.addunit_price = nil
+}
+
+// UnitPrice returns the value of the "unit_price" field in the mutation.
+func (m *XImportCandidateMutation) UnitPrice() (r float64, exists bool) {
+	v := m.unit_price
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUnitPrice returns the old "unit_price" field's value of the XImportCandidate entity.
+// If the XImportCandidate object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XImportCandidateMutation) OldUnitPrice(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUnitPrice is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUnitPrice requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUnitPrice: %w", err)
+	}
+	return oldValue.UnitPrice, nil
+}
+
+// AddUnitPrice adds f to the "unit_price" field.
+func (m *XImportCandidateMutation) AddUnitPrice(f float64) {
+	if m.addunit_price != nil {
+		*m.addunit_price += f
+	} else {
+		m.addunit_price = &f
+	}
+}
+
+// AddedUnitPrice returns the value that was added to the "unit_price" field in this mutation.
+func (m *XImportCandidateMutation) AddedUnitPrice() (r float64, exists bool) {
+	v := m.addunit_price
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetUnitPrice resets all changes to the "unit_price" field.
+func (m *XImportCandidateMutation) ResetUnitPrice() {
+	m.unit_price = nil
+	m.addunit_price = nil
+}
+
+// SetCurrency sets the "currency" field.
+func (m *XImportCandidateMutation) SetCurrency(s string) {
+	m.currency = &s
+}
+
+// Currency returns the value of the "currency" field in the mutation.
+func (m *XImportCandidateMutation) Currency() (r string, exists bool) {
+	v := m.currency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCurrency returns the old "currency" field's value of the XImportCandidate entity.
+// If the XImportCandidate object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XImportCandidateMutation) OldCurrency(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCurrency is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCurrency requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCurrency: %w", err)
+	}
+	return oldValue.Currency, nil
+}
+
+// ResetCurrency resets all changes to the "currency" field.
+func (m *XImportCandidateMutation) ResetCurrency() {
+	m.currency = nil
+}
+
+// SetStore sets the "store" field.
+func (m *XImportCandidateMutation) SetStore(s string) {
+	m.store = &s
+}
+
+// Store returns the value of the "store" field in the mutation.
+func (m *XImportCandidateMutation) Store() (r string, exists bool) {
+	v := m.store
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStore returns the old "store" field's value of the XImportCandidate entity.
+// If the XImportCandidate object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XImportCandidateMutation) OldStore(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStore is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStore requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStore: %w", err)
+	}
+	return oldValue.Store, nil
+}
+
+// ResetStore resets all changes to the "store" field.
+func (m *XImportCandidateMutation) ResetStore() {
+	m.store = nil
+}
+
+// SetOrderNumber sets the "order_number" field.
+func (m *XImportCandidateMutation) SetOrderNumber(s string) {
+	m.order_number = &s
+}
+
+// OrderNumber returns the value of the "order_number" field in the mutation.
+func (m *XImportCandidateMutation) OrderNumber() (r string, exists bool) {
+	v := m.order_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrderNumber returns the old "order_number" field's value of the XImportCandidate entity.
+// If the XImportCandidate object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XImportCandidateMutation) OldOrderNumber(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrderNumber is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrderNumber requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrderNumber: %w", err)
+	}
+	return oldValue.OrderNumber, nil
+}
+
+// ResetOrderNumber resets all changes to the "order_number" field.
+func (m *XImportCandidateMutation) ResetOrderNumber() {
+	m.order_number = nil
+}
+
+// SetOrderDate sets the "order_date" field.
+func (m *XImportCandidateMutation) SetOrderDate(t time.Time) {
+	m.order_date = &t
+}
+
+// OrderDate returns the value of the "order_date" field in the mutation.
+func (m *XImportCandidateMutation) OrderDate() (r time.Time, exists bool) {
+	v := m.order_date
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrderDate returns the old "order_date" field's value of the XImportCandidate entity.
+// If the XImportCandidate object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XImportCandidateMutation) OldOrderDate(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrderDate is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrderDate requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrderDate: %w", err)
+	}
+	return oldValue.OrderDate, nil
+}
+
+// ClearOrderDate clears the value of the "order_date" field.
+func (m *XImportCandidateMutation) ClearOrderDate() {
+	m.order_date = nil
+	m.clearedFields[ximportcandidate.FieldOrderDate] = struct{}{}
+}
+
+// OrderDateCleared returns if the "order_date" field was cleared in this mutation.
+func (m *XImportCandidateMutation) OrderDateCleared() bool {
+	_, ok := m.clearedFields[ximportcandidate.FieldOrderDate]
+	return ok
+}
+
+// ResetOrderDate resets all changes to the "order_date" field.
+func (m *XImportCandidateMutation) ResetOrderDate() {
+	m.order_date = nil
+	delete(m.clearedFields, ximportcandidate.FieldOrderDate)
+}
+
+// SetAsin sets the "asin" field.
+func (m *XImportCandidateMutation) SetAsin(s string) {
+	m.asin = &s
+}
+
+// Asin returns the value of the "asin" field in the mutation.
+func (m *XImportCandidateMutation) Asin() (r string, exists bool) {
+	v := m.asin
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAsin returns the old "asin" field's value of the XImportCandidate entity.
+// If the XImportCandidate object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XImportCandidateMutation) OldAsin(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAsin is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAsin requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAsin: %w", err)
+	}
+	return oldValue.Asin, nil
+}
+
+// ResetAsin resets all changes to the "asin" field.
+func (m *XImportCandidateMutation) ResetAsin() {
+	m.asin = nil
+}
+
+// SetJan sets the "jan" field.
+func (m *XImportCandidateMutation) SetJan(s string) {
+	m.jan = &s
+}
+
+// Jan returns the value of the "jan" field in the mutation.
+func (m *XImportCandidateMutation) Jan() (r string, exists bool) {
+	v := m.jan
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldJan returns the old "jan" field's value of the XImportCandidate entity.
+// If the XImportCandidate object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XImportCandidateMutation) OldJan(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldJan is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldJan requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldJan: %w", err)
+	}
+	return oldValue.Jan, nil
+}
+
+// ResetJan resets all changes to the "jan" field.
+func (m *XImportCandidateMutation) ResetJan() {
+	m.jan = nil
+}
+
+// SetModelNumber sets the "model_number" field.
+func (m *XImportCandidateMutation) SetModelNumber(s string) {
+	m.model_number = &s
+}
+
+// ModelNumber returns the value of the "model_number" field in the mutation.
+func (m *XImportCandidateMutation) ModelNumber() (r string, exists bool) {
+	v := m.model_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldModelNumber returns the old "model_number" field's value of the XImportCandidate entity.
+// If the XImportCandidate object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XImportCandidateMutation) OldModelNumber(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldModelNumber is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldModelNumber requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldModelNumber: %w", err)
+	}
+	return oldValue.ModelNumber, nil
+}
+
+// ResetModelNumber resets all changes to the "model_number" field.
+func (m *XImportCandidateMutation) ResetModelNumber() {
+	m.model_number = nil
+}
+
+// SetURL sets the "url" field.
+func (m *XImportCandidateMutation) SetURL(s string) {
+	m.url = &s
+}
+
+// URL returns the value of the "url" field in the mutation.
+func (m *XImportCandidateMutation) URL() (r string, exists bool) {
+	v := m.url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldURL returns the old "url" field's value of the XImportCandidate entity.
+// If the XImportCandidate object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XImportCandidateMutation) OldURL(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldURL: %w", err)
+	}
+	return oldValue.URL, nil
+}
+
+// ResetURL resets all changes to the "url" field.
+func (m *XImportCandidateMutation) ResetURL() {
+	m.url = nil
+}
+
+// SetNote sets the "note" field.
+func (m *XImportCandidateMutation) SetNote(s string) {
+	m.note = &s
+}
+
+// Note returns the value of the "note" field in the mutation.
+func (m *XImportCandidateMutation) Note() (r string, exists bool) {
+	v := m.note
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNote returns the old "note" field's value of the XImportCandidate entity.
+// If the XImportCandidate object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XImportCandidateMutation) OldNote(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNote is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNote requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNote: %w", err)
+	}
+	return oldValue.Note, nil
+}
+
+// ResetNote resets all changes to the "note" field.
+func (m *XImportCandidateMutation) ResetNote() {
+	m.note = nil
+}
+
+// SetConfidence sets the "confidence" field.
+func (m *XImportCandidateMutation) SetConfidence(f float64) {
+	m.confidence = &f
+	m.addconfidence = nil
+}
+
+// Confidence returns the value of the "confidence" field in the mutation.
+func (m *XImportCandidateMutation) Confidence() (r float64, exists bool) {
+	v := m.confidence
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldConfidence returns the old "confidence" field's value of the XImportCandidate entity.
+// If the XImportCandidate object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XImportCandidateMutation) OldConfidence(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldConfidence is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldConfidence requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldConfidence: %w", err)
+	}
+	return oldValue.Confidence, nil
+}
+
+// AddConfidence adds f to the "confidence" field.
+func (m *XImportCandidateMutation) AddConfidence(f float64) {
+	if m.addconfidence != nil {
+		*m.addconfidence += f
+	} else {
+		m.addconfidence = &f
+	}
+}
+
+// AddedConfidence returns the value that was added to the "confidence" field in this mutation.
+func (m *XImportCandidateMutation) AddedConfidence() (r float64, exists bool) {
+	v := m.addconfidence
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetConfidence resets all changes to the "confidence" field.
+func (m *XImportCandidateMutation) ResetConfidence() {
+	m.confidence = nil
+	m.addconfidence = nil
+}
+
+// SetLowConfidence sets the "low_confidence" field.
+func (m *XImportCandidateMutation) SetLowConfidence(b bool) {
+	m.low_confidence = &b
+}
+
+// LowConfidence returns the value of the "low_confidence" field in the mutation.
+func (m *XImportCandidateMutation) LowConfidence() (r bool, exists bool) {
+	v := m.low_confidence
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLowConfidence returns the old "low_confidence" field's value of the XImportCandidate entity.
+// If the XImportCandidate object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XImportCandidateMutation) OldLowConfidence(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLowConfidence is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLowConfidence requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLowConfidence: %w", err)
+	}
+	return oldValue.LowConfidence, nil
+}
+
+// ResetLowConfidence resets all changes to the "low_confidence" field.
+func (m *XImportCandidateMutation) ResetLowConfidence() {
+	m.low_confidence = nil
+}
+
+// SetExtractor sets the "extractor" field.
+func (m *XImportCandidateMutation) SetExtractor(s string) {
+	m.extractor = &s
+}
+
+// Extractor returns the value of the "extractor" field in the mutation.
+func (m *XImportCandidateMutation) Extractor() (r string, exists bool) {
+	v := m.extractor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExtractor returns the old "extractor" field's value of the XImportCandidate entity.
+// If the XImportCandidate object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XImportCandidateMutation) OldExtractor(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExtractor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExtractor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExtractor: %w", err)
+	}
+	return oldValue.Extractor, nil
+}
+
+// ResetExtractor resets all changes to the "extractor" field.
+func (m *XImportCandidateMutation) ResetExtractor() {
+	m.extractor = nil
+}
+
+// SetDupMatches sets the "dup_matches" field.
+func (m *XImportCandidateMutation) SetDupMatches(s string) {
+	m.dup_matches = &s
+}
+
+// DupMatches returns the value of the "dup_matches" field in the mutation.
+func (m *XImportCandidateMutation) DupMatches() (r string, exists bool) {
+	v := m.dup_matches
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDupMatches returns the old "dup_matches" field's value of the XImportCandidate entity.
+// If the XImportCandidate object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XImportCandidateMutation) OldDupMatches(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDupMatches is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDupMatches requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDupMatches: %w", err)
+	}
+	return oldValue.DupMatches, nil
+}
+
+// ResetDupMatches resets all changes to the "dup_matches" field.
+func (m *XImportCandidateMutation) ResetDupMatches() {
+	m.dup_matches = nil
+}
+
+// SetEntityID sets the "entity_id" field.
+func (m *XImportCandidateMutation) SetEntityID(u uuid.UUID) {
+	m.entity_id = &u
+}
+
+// EntityID returns the value of the "entity_id" field in the mutation.
+func (m *XImportCandidateMutation) EntityID() (r uuid.UUID, exists bool) {
+	v := m.entity_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEntityID returns the old "entity_id" field's value of the XImportCandidate entity.
+// If the XImportCandidate object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XImportCandidateMutation) OldEntityID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEntityID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEntityID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEntityID: %w", err)
+	}
+	return oldValue.EntityID, nil
+}
+
+// ClearEntityID clears the value of the "entity_id" field.
+func (m *XImportCandidateMutation) ClearEntityID() {
+	m.entity_id = nil
+	m.clearedFields[ximportcandidate.FieldEntityID] = struct{}{}
+}
+
+// EntityIDCleared returns if the "entity_id" field was cleared in this mutation.
+func (m *XImportCandidateMutation) EntityIDCleared() bool {
+	_, ok := m.clearedFields[ximportcandidate.FieldEntityID]
+	return ok
+}
+
+// ResetEntityID resets all changes to the "entity_id" field.
+func (m *XImportCandidateMutation) ResetEntityID() {
+	m.entity_id = nil
+	delete(m.clearedFields, ximportcandidate.FieldEntityID)
+}
+
+// SetMessageID sets the "message" edge to the XInboundMessage entity by id.
+func (m *XImportCandidateMutation) SetMessageID(id uuid.UUID) {
+	m.message = &id
+}
+
+// ClearMessage clears the "message" edge to the XInboundMessage entity.
+func (m *XImportCandidateMutation) ClearMessage() {
+	m.clearedmessage = true
+	m.clearedFields[ximportcandidate.FieldInboundMessageID] = struct{}{}
+}
+
+// MessageCleared reports if the "message" edge to the XInboundMessage entity was cleared.
+func (m *XImportCandidateMutation) MessageCleared() bool {
+	return m.clearedmessage
+}
+
+// MessageID returns the "message" edge ID in the mutation.
+func (m *XImportCandidateMutation) MessageID() (id uuid.UUID, exists bool) {
+	if m.message != nil {
+		return *m.message, true
+	}
+	return
+}
+
+// MessageIDs returns the "message" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// MessageID instead. It exists only for internal usage by the builders.
+func (m *XImportCandidateMutation) MessageIDs() (ids []uuid.UUID) {
+	if id := m.message; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetMessage resets all changes to the "message" edge.
+func (m *XImportCandidateMutation) ResetMessage() {
+	m.message = nil
+	m.clearedmessage = false
+}
+
+// Where appends a list predicates to the XImportCandidateMutation builder.
+func (m *XImportCandidateMutation) Where(ps ...predicate.XImportCandidate) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the XImportCandidateMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *XImportCandidateMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.XImportCandidate, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *XImportCandidateMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *XImportCandidateMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (XImportCandidate).
+func (m *XImportCandidateMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *XImportCandidateMutation) Fields() []string {
+	fields := make([]string, 0, 23)
+	if m.created_at != nil {
+		fields = append(fields, ximportcandidate.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, ximportcandidate.FieldUpdatedAt)
+	}
+	if m.group_id != nil {
+		fields = append(fields, ximportcandidate.FieldGroupID)
+	}
+	if m.message != nil {
+		fields = append(fields, ximportcandidate.FieldInboundMessageID)
+	}
+	if m.kind != nil {
+		fields = append(fields, ximportcandidate.FieldKind)
+	}
+	if m.status != nil {
+		fields = append(fields, ximportcandidate.FieldStatus)
+	}
+	if m.name != nil {
+		fields = append(fields, ximportcandidate.FieldName)
+	}
+	if m.quantity != nil {
+		fields = append(fields, ximportcandidate.FieldQuantity)
+	}
+	if m.unit_price != nil {
+		fields = append(fields, ximportcandidate.FieldUnitPrice)
+	}
+	if m.currency != nil {
+		fields = append(fields, ximportcandidate.FieldCurrency)
+	}
+	if m.store != nil {
+		fields = append(fields, ximportcandidate.FieldStore)
+	}
+	if m.order_number != nil {
+		fields = append(fields, ximportcandidate.FieldOrderNumber)
+	}
+	if m.order_date != nil {
+		fields = append(fields, ximportcandidate.FieldOrderDate)
+	}
+	if m.asin != nil {
+		fields = append(fields, ximportcandidate.FieldAsin)
+	}
+	if m.jan != nil {
+		fields = append(fields, ximportcandidate.FieldJan)
+	}
+	if m.model_number != nil {
+		fields = append(fields, ximportcandidate.FieldModelNumber)
+	}
+	if m.url != nil {
+		fields = append(fields, ximportcandidate.FieldURL)
+	}
+	if m.note != nil {
+		fields = append(fields, ximportcandidate.FieldNote)
+	}
+	if m.confidence != nil {
+		fields = append(fields, ximportcandidate.FieldConfidence)
+	}
+	if m.low_confidence != nil {
+		fields = append(fields, ximportcandidate.FieldLowConfidence)
+	}
+	if m.extractor != nil {
+		fields = append(fields, ximportcandidate.FieldExtractor)
+	}
+	if m.dup_matches != nil {
+		fields = append(fields, ximportcandidate.FieldDupMatches)
+	}
+	if m.entity_id != nil {
+		fields = append(fields, ximportcandidate.FieldEntityID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *XImportCandidateMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case ximportcandidate.FieldCreatedAt:
+		return m.CreatedAt()
+	case ximportcandidate.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case ximportcandidate.FieldGroupID:
+		return m.GroupID()
+	case ximportcandidate.FieldInboundMessageID:
+		return m.InboundMessageID()
+	case ximportcandidate.FieldKind:
+		return m.Kind()
+	case ximportcandidate.FieldStatus:
+		return m.Status()
+	case ximportcandidate.FieldName:
+		return m.Name()
+	case ximportcandidate.FieldQuantity:
+		return m.Quantity()
+	case ximportcandidate.FieldUnitPrice:
+		return m.UnitPrice()
+	case ximportcandidate.FieldCurrency:
+		return m.Currency()
+	case ximportcandidate.FieldStore:
+		return m.Store()
+	case ximportcandidate.FieldOrderNumber:
+		return m.OrderNumber()
+	case ximportcandidate.FieldOrderDate:
+		return m.OrderDate()
+	case ximportcandidate.FieldAsin:
+		return m.Asin()
+	case ximportcandidate.FieldJan:
+		return m.Jan()
+	case ximportcandidate.FieldModelNumber:
+		return m.ModelNumber()
+	case ximportcandidate.FieldURL:
+		return m.URL()
+	case ximportcandidate.FieldNote:
+		return m.Note()
+	case ximportcandidate.FieldConfidence:
+		return m.Confidence()
+	case ximportcandidate.FieldLowConfidence:
+		return m.LowConfidence()
+	case ximportcandidate.FieldExtractor:
+		return m.Extractor()
+	case ximportcandidate.FieldDupMatches:
+		return m.DupMatches()
+	case ximportcandidate.FieldEntityID:
+		return m.EntityID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *XImportCandidateMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case ximportcandidate.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case ximportcandidate.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case ximportcandidate.FieldGroupID:
+		return m.OldGroupID(ctx)
+	case ximportcandidate.FieldInboundMessageID:
+		return m.OldInboundMessageID(ctx)
+	case ximportcandidate.FieldKind:
+		return m.OldKind(ctx)
+	case ximportcandidate.FieldStatus:
+		return m.OldStatus(ctx)
+	case ximportcandidate.FieldName:
+		return m.OldName(ctx)
+	case ximportcandidate.FieldQuantity:
+		return m.OldQuantity(ctx)
+	case ximportcandidate.FieldUnitPrice:
+		return m.OldUnitPrice(ctx)
+	case ximportcandidate.FieldCurrency:
+		return m.OldCurrency(ctx)
+	case ximportcandidate.FieldStore:
+		return m.OldStore(ctx)
+	case ximportcandidate.FieldOrderNumber:
+		return m.OldOrderNumber(ctx)
+	case ximportcandidate.FieldOrderDate:
+		return m.OldOrderDate(ctx)
+	case ximportcandidate.FieldAsin:
+		return m.OldAsin(ctx)
+	case ximportcandidate.FieldJan:
+		return m.OldJan(ctx)
+	case ximportcandidate.FieldModelNumber:
+		return m.OldModelNumber(ctx)
+	case ximportcandidate.FieldURL:
+		return m.OldURL(ctx)
+	case ximportcandidate.FieldNote:
+		return m.OldNote(ctx)
+	case ximportcandidate.FieldConfidence:
+		return m.OldConfidence(ctx)
+	case ximportcandidate.FieldLowConfidence:
+		return m.OldLowConfidence(ctx)
+	case ximportcandidate.FieldExtractor:
+		return m.OldExtractor(ctx)
+	case ximportcandidate.FieldDupMatches:
+		return m.OldDupMatches(ctx)
+	case ximportcandidate.FieldEntityID:
+		return m.OldEntityID(ctx)
+	}
+	return nil, fmt.Errorf("unknown XImportCandidate field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *XImportCandidateMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case ximportcandidate.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case ximportcandidate.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case ximportcandidate.FieldGroupID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGroupID(v)
+		return nil
+	case ximportcandidate.FieldInboundMessageID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInboundMessageID(v)
+		return nil
+	case ximportcandidate.FieldKind:
+		v, ok := value.(ximportcandidate.Kind)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetKind(v)
+		return nil
+	case ximportcandidate.FieldStatus:
+		v, ok := value.(ximportcandidate.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case ximportcandidate.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case ximportcandidate.FieldQuantity:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetQuantity(v)
+		return nil
+	case ximportcandidate.FieldUnitPrice:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUnitPrice(v)
+		return nil
+	case ximportcandidate.FieldCurrency:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCurrency(v)
+		return nil
+	case ximportcandidate.FieldStore:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStore(v)
+		return nil
+	case ximportcandidate.FieldOrderNumber:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrderNumber(v)
+		return nil
+	case ximportcandidate.FieldOrderDate:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrderDate(v)
+		return nil
+	case ximportcandidate.FieldAsin:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAsin(v)
+		return nil
+	case ximportcandidate.FieldJan:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetJan(v)
+		return nil
+	case ximportcandidate.FieldModelNumber:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetModelNumber(v)
+		return nil
+	case ximportcandidate.FieldURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetURL(v)
+		return nil
+	case ximportcandidate.FieldNote:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNote(v)
+		return nil
+	case ximportcandidate.FieldConfidence:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetConfidence(v)
+		return nil
+	case ximportcandidate.FieldLowConfidence:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLowConfidence(v)
+		return nil
+	case ximportcandidate.FieldExtractor:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExtractor(v)
+		return nil
+	case ximportcandidate.FieldDupMatches:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDupMatches(v)
+		return nil
+	case ximportcandidate.FieldEntityID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEntityID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown XImportCandidate field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *XImportCandidateMutation) AddedFields() []string {
+	var fields []string
+	if m.addquantity != nil {
+		fields = append(fields, ximportcandidate.FieldQuantity)
+	}
+	if m.addunit_price != nil {
+		fields = append(fields, ximportcandidate.FieldUnitPrice)
+	}
+	if m.addconfidence != nil {
+		fields = append(fields, ximportcandidate.FieldConfidence)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *XImportCandidateMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case ximportcandidate.FieldQuantity:
+		return m.AddedQuantity()
+	case ximportcandidate.FieldUnitPrice:
+		return m.AddedUnitPrice()
+	case ximportcandidate.FieldConfidence:
+		return m.AddedConfidence()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *XImportCandidateMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case ximportcandidate.FieldQuantity:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddQuantity(v)
+		return nil
+	case ximportcandidate.FieldUnitPrice:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUnitPrice(v)
+		return nil
+	case ximportcandidate.FieldConfidence:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddConfidence(v)
+		return nil
+	}
+	return fmt.Errorf("unknown XImportCandidate numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *XImportCandidateMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(ximportcandidate.FieldOrderDate) {
+		fields = append(fields, ximportcandidate.FieldOrderDate)
+	}
+	if m.FieldCleared(ximportcandidate.FieldEntityID) {
+		fields = append(fields, ximportcandidate.FieldEntityID)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *XImportCandidateMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *XImportCandidateMutation) ClearField(name string) error {
+	switch name {
+	case ximportcandidate.FieldOrderDate:
+		m.ClearOrderDate()
+		return nil
+	case ximportcandidate.FieldEntityID:
+		m.ClearEntityID()
+		return nil
+	}
+	return fmt.Errorf("unknown XImportCandidate nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *XImportCandidateMutation) ResetField(name string) error {
+	switch name {
+	case ximportcandidate.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case ximportcandidate.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case ximportcandidate.FieldGroupID:
+		m.ResetGroupID()
+		return nil
+	case ximportcandidate.FieldInboundMessageID:
+		m.ResetInboundMessageID()
+		return nil
+	case ximportcandidate.FieldKind:
+		m.ResetKind()
+		return nil
+	case ximportcandidate.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case ximportcandidate.FieldName:
+		m.ResetName()
+		return nil
+	case ximportcandidate.FieldQuantity:
+		m.ResetQuantity()
+		return nil
+	case ximportcandidate.FieldUnitPrice:
+		m.ResetUnitPrice()
+		return nil
+	case ximportcandidate.FieldCurrency:
+		m.ResetCurrency()
+		return nil
+	case ximportcandidate.FieldStore:
+		m.ResetStore()
+		return nil
+	case ximportcandidate.FieldOrderNumber:
+		m.ResetOrderNumber()
+		return nil
+	case ximportcandidate.FieldOrderDate:
+		m.ResetOrderDate()
+		return nil
+	case ximportcandidate.FieldAsin:
+		m.ResetAsin()
+		return nil
+	case ximportcandidate.FieldJan:
+		m.ResetJan()
+		return nil
+	case ximportcandidate.FieldModelNumber:
+		m.ResetModelNumber()
+		return nil
+	case ximportcandidate.FieldURL:
+		m.ResetURL()
+		return nil
+	case ximportcandidate.FieldNote:
+		m.ResetNote()
+		return nil
+	case ximportcandidate.FieldConfidence:
+		m.ResetConfidence()
+		return nil
+	case ximportcandidate.FieldLowConfidence:
+		m.ResetLowConfidence()
+		return nil
+	case ximportcandidate.FieldExtractor:
+		m.ResetExtractor()
+		return nil
+	case ximportcandidate.FieldDupMatches:
+		m.ResetDupMatches()
+		return nil
+	case ximportcandidate.FieldEntityID:
+		m.ResetEntityID()
+		return nil
+	}
+	return fmt.Errorf("unknown XImportCandidate field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *XImportCandidateMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.message != nil {
+		edges = append(edges, ximportcandidate.EdgeMessage)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *XImportCandidateMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case ximportcandidate.EdgeMessage:
+		if id := m.message; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *XImportCandidateMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *XImportCandidateMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *XImportCandidateMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedmessage {
+		edges = append(edges, ximportcandidate.EdgeMessage)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *XImportCandidateMutation) EdgeCleared(name string) bool {
+	switch name {
+	case ximportcandidate.EdgeMessage:
+		return m.clearedmessage
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *XImportCandidateMutation) ClearEdge(name string) error {
+	switch name {
+	case ximportcandidate.EdgeMessage:
+		m.ClearMessage()
+		return nil
+	}
+	return fmt.Errorf("unknown XImportCandidate unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *XImportCandidateMutation) ResetEdge(name string) error {
+	switch name {
+	case ximportcandidate.EdgeMessage:
+		m.ResetMessage()
+		return nil
+	}
+	return fmt.Errorf("unknown XImportCandidate edge %s", name)
+}
+
+// XInboundAddressMutation represents an operation that mutates the XInboundAddress nodes in the graph.
+type XInboundAddressMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *uuid.UUID
+	created_at       *time.Time
+	updated_at       *time.Time
+	group_id         *uuid.UUID
+	token            *string
+	allowed_senders  *string
+	last_received_at *time.Time
+	clearedFields    map[string]struct{}
+	done             bool
+	oldValue         func(context.Context) (*XInboundAddress, error)
+	predicates       []predicate.XInboundAddress
+}
+
+var _ ent.Mutation = (*XInboundAddressMutation)(nil)
+
+// xinboundaddressOption allows management of the mutation configuration using functional options.
+type xinboundaddressOption func(*XInboundAddressMutation)
+
+// newXInboundAddressMutation creates new mutation for the XInboundAddress entity.
+func newXInboundAddressMutation(c config, op Op, opts ...xinboundaddressOption) *XInboundAddressMutation {
+	m := &XInboundAddressMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeXInboundAddress,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withXInboundAddressID sets the ID field of the mutation.
+func withXInboundAddressID(id uuid.UUID) xinboundaddressOption {
+	return func(m *XInboundAddressMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *XInboundAddress
+		)
+		m.oldValue = func(ctx context.Context) (*XInboundAddress, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().XInboundAddress.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withXInboundAddress sets the old XInboundAddress of the mutation.
+func withXInboundAddress(node *XInboundAddress) xinboundaddressOption {
+	return func(m *XInboundAddressMutation) {
+		m.oldValue = func(context.Context) (*XInboundAddress, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m XInboundAddressMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m XInboundAddressMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of XInboundAddress entities.
+func (m *XInboundAddressMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *XInboundAddressMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *XInboundAddressMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().XInboundAddress.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *XInboundAddressMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *XInboundAddressMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the XInboundAddress entity.
+// If the XInboundAddress object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XInboundAddressMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *XInboundAddressMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *XInboundAddressMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *XInboundAddressMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the XInboundAddress entity.
+// If the XInboundAddress object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XInboundAddressMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *XInboundAddressMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetGroupID sets the "group_id" field.
+func (m *XInboundAddressMutation) SetGroupID(u uuid.UUID) {
+	m.group_id = &u
+}
+
+// GroupID returns the value of the "group_id" field in the mutation.
+func (m *XInboundAddressMutation) GroupID() (r uuid.UUID, exists bool) {
+	v := m.group_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGroupID returns the old "group_id" field's value of the XInboundAddress entity.
+// If the XInboundAddress object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XInboundAddressMutation) OldGroupID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGroupID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGroupID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGroupID: %w", err)
+	}
+	return oldValue.GroupID, nil
+}
+
+// ResetGroupID resets all changes to the "group_id" field.
+func (m *XInboundAddressMutation) ResetGroupID() {
+	m.group_id = nil
+}
+
+// SetToken sets the "token" field.
+func (m *XInboundAddressMutation) SetToken(s string) {
+	m.token = &s
+}
+
+// Token returns the value of the "token" field in the mutation.
+func (m *XInboundAddressMutation) Token() (r string, exists bool) {
+	v := m.token
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldToken returns the old "token" field's value of the XInboundAddress entity.
+// If the XInboundAddress object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XInboundAddressMutation) OldToken(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldToken is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldToken requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldToken: %w", err)
+	}
+	return oldValue.Token, nil
+}
+
+// ResetToken resets all changes to the "token" field.
+func (m *XInboundAddressMutation) ResetToken() {
+	m.token = nil
+}
+
+// SetAllowedSenders sets the "allowed_senders" field.
+func (m *XInboundAddressMutation) SetAllowedSenders(s string) {
+	m.allowed_senders = &s
+}
+
+// AllowedSenders returns the value of the "allowed_senders" field in the mutation.
+func (m *XInboundAddressMutation) AllowedSenders() (r string, exists bool) {
+	v := m.allowed_senders
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAllowedSenders returns the old "allowed_senders" field's value of the XInboundAddress entity.
+// If the XInboundAddress object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XInboundAddressMutation) OldAllowedSenders(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAllowedSenders is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAllowedSenders requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAllowedSenders: %w", err)
+	}
+	return oldValue.AllowedSenders, nil
+}
+
+// ResetAllowedSenders resets all changes to the "allowed_senders" field.
+func (m *XInboundAddressMutation) ResetAllowedSenders() {
+	m.allowed_senders = nil
+}
+
+// SetLastReceivedAt sets the "last_received_at" field.
+func (m *XInboundAddressMutation) SetLastReceivedAt(t time.Time) {
+	m.last_received_at = &t
+}
+
+// LastReceivedAt returns the value of the "last_received_at" field in the mutation.
+func (m *XInboundAddressMutation) LastReceivedAt() (r time.Time, exists bool) {
+	v := m.last_received_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastReceivedAt returns the old "last_received_at" field's value of the XInboundAddress entity.
+// If the XInboundAddress object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XInboundAddressMutation) OldLastReceivedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastReceivedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastReceivedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastReceivedAt: %w", err)
+	}
+	return oldValue.LastReceivedAt, nil
+}
+
+// ClearLastReceivedAt clears the value of the "last_received_at" field.
+func (m *XInboundAddressMutation) ClearLastReceivedAt() {
+	m.last_received_at = nil
+	m.clearedFields[xinboundaddress.FieldLastReceivedAt] = struct{}{}
+}
+
+// LastReceivedAtCleared returns if the "last_received_at" field was cleared in this mutation.
+func (m *XInboundAddressMutation) LastReceivedAtCleared() bool {
+	_, ok := m.clearedFields[xinboundaddress.FieldLastReceivedAt]
+	return ok
+}
+
+// ResetLastReceivedAt resets all changes to the "last_received_at" field.
+func (m *XInboundAddressMutation) ResetLastReceivedAt() {
+	m.last_received_at = nil
+	delete(m.clearedFields, xinboundaddress.FieldLastReceivedAt)
+}
+
+// Where appends a list predicates to the XInboundAddressMutation builder.
+func (m *XInboundAddressMutation) Where(ps ...predicate.XInboundAddress) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the XInboundAddressMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *XInboundAddressMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.XInboundAddress, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *XInboundAddressMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *XInboundAddressMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (XInboundAddress).
+func (m *XInboundAddressMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *XInboundAddressMutation) Fields() []string {
+	fields := make([]string, 0, 6)
+	if m.created_at != nil {
+		fields = append(fields, xinboundaddress.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, xinboundaddress.FieldUpdatedAt)
+	}
+	if m.group_id != nil {
+		fields = append(fields, xinboundaddress.FieldGroupID)
+	}
+	if m.token != nil {
+		fields = append(fields, xinboundaddress.FieldToken)
+	}
+	if m.allowed_senders != nil {
+		fields = append(fields, xinboundaddress.FieldAllowedSenders)
+	}
+	if m.last_received_at != nil {
+		fields = append(fields, xinboundaddress.FieldLastReceivedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *XInboundAddressMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case xinboundaddress.FieldCreatedAt:
+		return m.CreatedAt()
+	case xinboundaddress.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case xinboundaddress.FieldGroupID:
+		return m.GroupID()
+	case xinboundaddress.FieldToken:
+		return m.Token()
+	case xinboundaddress.FieldAllowedSenders:
+		return m.AllowedSenders()
+	case xinboundaddress.FieldLastReceivedAt:
+		return m.LastReceivedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *XInboundAddressMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case xinboundaddress.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case xinboundaddress.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case xinboundaddress.FieldGroupID:
+		return m.OldGroupID(ctx)
+	case xinboundaddress.FieldToken:
+		return m.OldToken(ctx)
+	case xinboundaddress.FieldAllowedSenders:
+		return m.OldAllowedSenders(ctx)
+	case xinboundaddress.FieldLastReceivedAt:
+		return m.OldLastReceivedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown XInboundAddress field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *XInboundAddressMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case xinboundaddress.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case xinboundaddress.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case xinboundaddress.FieldGroupID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGroupID(v)
+		return nil
+	case xinboundaddress.FieldToken:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetToken(v)
+		return nil
+	case xinboundaddress.FieldAllowedSenders:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAllowedSenders(v)
+		return nil
+	case xinboundaddress.FieldLastReceivedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastReceivedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown XInboundAddress field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *XInboundAddressMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *XInboundAddressMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *XInboundAddressMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown XInboundAddress numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *XInboundAddressMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(xinboundaddress.FieldLastReceivedAt) {
+		fields = append(fields, xinboundaddress.FieldLastReceivedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *XInboundAddressMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *XInboundAddressMutation) ClearField(name string) error {
+	switch name {
+	case xinboundaddress.FieldLastReceivedAt:
+		m.ClearLastReceivedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown XInboundAddress nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *XInboundAddressMutation) ResetField(name string) error {
+	switch name {
+	case xinboundaddress.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case xinboundaddress.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case xinboundaddress.FieldGroupID:
+		m.ResetGroupID()
+		return nil
+	case xinboundaddress.FieldToken:
+		m.ResetToken()
+		return nil
+	case xinboundaddress.FieldAllowedSenders:
+		m.ResetAllowedSenders()
+		return nil
+	case xinboundaddress.FieldLastReceivedAt:
+		m.ResetLastReceivedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown XInboundAddress field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *XInboundAddressMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *XInboundAddressMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *XInboundAddressMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *XInboundAddressMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *XInboundAddressMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *XInboundAddressMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *XInboundAddressMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown XInboundAddress unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *XInboundAddressMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown XInboundAddress edge %s", name)
+}
+
+// XInboundMessageMutation represents an operation that mutates the XInboundMessage nodes in the graph.
+type XInboundMessageMutation struct {
+	config
+	op                Op
+	typ               string
+	id                *uuid.UUID
+	created_at        *time.Time
+	updated_at        *time.Time
+	group_id          *uuid.UUID
+	channel           *xinboundmessage.Channel
+	status            *xinboundmessage.Status
+	message_id        *string
+	content_hash      *string
+	store             *string
+	order_number      *string
+	order_date        *time.Time
+	order_total       *float64
+	addorder_total    *float64
+	sender            *string
+	subject           *string
+	mime_type         *string
+	extractor         *string
+	error             *string
+	raw               *[]byte
+	clearedFields     map[string]struct{}
+	candidates        map[uuid.UUID]struct{}
+	removedcandidates map[uuid.UUID]struct{}
+	clearedcandidates bool
+	done              bool
+	oldValue          func(context.Context) (*XInboundMessage, error)
+	predicates        []predicate.XInboundMessage
+}
+
+var _ ent.Mutation = (*XInboundMessageMutation)(nil)
+
+// xinboundmessageOption allows management of the mutation configuration using functional options.
+type xinboundmessageOption func(*XInboundMessageMutation)
+
+// newXInboundMessageMutation creates new mutation for the XInboundMessage entity.
+func newXInboundMessageMutation(c config, op Op, opts ...xinboundmessageOption) *XInboundMessageMutation {
+	m := &XInboundMessageMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeXInboundMessage,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withXInboundMessageID sets the ID field of the mutation.
+func withXInboundMessageID(id uuid.UUID) xinboundmessageOption {
+	return func(m *XInboundMessageMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *XInboundMessage
+		)
+		m.oldValue = func(ctx context.Context) (*XInboundMessage, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().XInboundMessage.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withXInboundMessage sets the old XInboundMessage of the mutation.
+func withXInboundMessage(node *XInboundMessage) xinboundmessageOption {
+	return func(m *XInboundMessageMutation) {
+		m.oldValue = func(context.Context) (*XInboundMessage, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m XInboundMessageMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m XInboundMessageMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of XInboundMessage entities.
+func (m *XInboundMessageMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *XInboundMessageMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *XInboundMessageMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().XInboundMessage.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *XInboundMessageMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *XInboundMessageMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the XInboundMessage entity.
+// If the XInboundMessage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XInboundMessageMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *XInboundMessageMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *XInboundMessageMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *XInboundMessageMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the XInboundMessage entity.
+// If the XInboundMessage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XInboundMessageMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *XInboundMessageMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetGroupID sets the "group_id" field.
+func (m *XInboundMessageMutation) SetGroupID(u uuid.UUID) {
+	m.group_id = &u
+}
+
+// GroupID returns the value of the "group_id" field in the mutation.
+func (m *XInboundMessageMutation) GroupID() (r uuid.UUID, exists bool) {
+	v := m.group_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGroupID returns the old "group_id" field's value of the XInboundMessage entity.
+// If the XInboundMessage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XInboundMessageMutation) OldGroupID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGroupID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGroupID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGroupID: %w", err)
+	}
+	return oldValue.GroupID, nil
+}
+
+// ResetGroupID resets all changes to the "group_id" field.
+func (m *XInboundMessageMutation) ResetGroupID() {
+	m.group_id = nil
+}
+
+// SetChannel sets the "channel" field.
+func (m *XInboundMessageMutation) SetChannel(x xinboundmessage.Channel) {
+	m.channel = &x
+}
+
+// Channel returns the value of the "channel" field in the mutation.
+func (m *XInboundMessageMutation) Channel() (r xinboundmessage.Channel, exists bool) {
+	v := m.channel
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChannel returns the old "channel" field's value of the XInboundMessage entity.
+// If the XInboundMessage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XInboundMessageMutation) OldChannel(ctx context.Context) (v xinboundmessage.Channel, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChannel is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChannel requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChannel: %w", err)
+	}
+	return oldValue.Channel, nil
+}
+
+// ResetChannel resets all changes to the "channel" field.
+func (m *XInboundMessageMutation) ResetChannel() {
+	m.channel = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *XInboundMessageMutation) SetStatus(x xinboundmessage.Status) {
+	m.status = &x
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *XInboundMessageMutation) Status() (r xinboundmessage.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the XInboundMessage entity.
+// If the XInboundMessage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XInboundMessageMutation) OldStatus(ctx context.Context) (v xinboundmessage.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *XInboundMessageMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetMessageID sets the "message_id" field.
+func (m *XInboundMessageMutation) SetMessageID(s string) {
+	m.message_id = &s
+}
+
+// MessageID returns the value of the "message_id" field in the mutation.
+func (m *XInboundMessageMutation) MessageID() (r string, exists bool) {
+	v := m.message_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMessageID returns the old "message_id" field's value of the XInboundMessage entity.
+// If the XInboundMessage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XInboundMessageMutation) OldMessageID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMessageID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMessageID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMessageID: %w", err)
+	}
+	return oldValue.MessageID, nil
+}
+
+// ResetMessageID resets all changes to the "message_id" field.
+func (m *XInboundMessageMutation) ResetMessageID() {
+	m.message_id = nil
+}
+
+// SetContentHash sets the "content_hash" field.
+func (m *XInboundMessageMutation) SetContentHash(s string) {
+	m.content_hash = &s
+}
+
+// ContentHash returns the value of the "content_hash" field in the mutation.
+func (m *XInboundMessageMutation) ContentHash() (r string, exists bool) {
+	v := m.content_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContentHash returns the old "content_hash" field's value of the XInboundMessage entity.
+// If the XInboundMessage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XInboundMessageMutation) OldContentHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldContentHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldContentHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContentHash: %w", err)
+	}
+	return oldValue.ContentHash, nil
+}
+
+// ResetContentHash resets all changes to the "content_hash" field.
+func (m *XInboundMessageMutation) ResetContentHash() {
+	m.content_hash = nil
+}
+
+// SetStore sets the "store" field.
+func (m *XInboundMessageMutation) SetStore(s string) {
+	m.store = &s
+}
+
+// Store returns the value of the "store" field in the mutation.
+func (m *XInboundMessageMutation) Store() (r string, exists bool) {
+	v := m.store
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStore returns the old "store" field's value of the XInboundMessage entity.
+// If the XInboundMessage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XInboundMessageMutation) OldStore(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStore is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStore requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStore: %w", err)
+	}
+	return oldValue.Store, nil
+}
+
+// ResetStore resets all changes to the "store" field.
+func (m *XInboundMessageMutation) ResetStore() {
+	m.store = nil
+}
+
+// SetOrderNumber sets the "order_number" field.
+func (m *XInboundMessageMutation) SetOrderNumber(s string) {
+	m.order_number = &s
+}
+
+// OrderNumber returns the value of the "order_number" field in the mutation.
+func (m *XInboundMessageMutation) OrderNumber() (r string, exists bool) {
+	v := m.order_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrderNumber returns the old "order_number" field's value of the XInboundMessage entity.
+// If the XInboundMessage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XInboundMessageMutation) OldOrderNumber(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrderNumber is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrderNumber requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrderNumber: %w", err)
+	}
+	return oldValue.OrderNumber, nil
+}
+
+// ResetOrderNumber resets all changes to the "order_number" field.
+func (m *XInboundMessageMutation) ResetOrderNumber() {
+	m.order_number = nil
+}
+
+// SetOrderDate sets the "order_date" field.
+func (m *XInboundMessageMutation) SetOrderDate(t time.Time) {
+	m.order_date = &t
+}
+
+// OrderDate returns the value of the "order_date" field in the mutation.
+func (m *XInboundMessageMutation) OrderDate() (r time.Time, exists bool) {
+	v := m.order_date
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrderDate returns the old "order_date" field's value of the XInboundMessage entity.
+// If the XInboundMessage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XInboundMessageMutation) OldOrderDate(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrderDate is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrderDate requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrderDate: %w", err)
+	}
+	return oldValue.OrderDate, nil
+}
+
+// ClearOrderDate clears the value of the "order_date" field.
+func (m *XInboundMessageMutation) ClearOrderDate() {
+	m.order_date = nil
+	m.clearedFields[xinboundmessage.FieldOrderDate] = struct{}{}
+}
+
+// OrderDateCleared returns if the "order_date" field was cleared in this mutation.
+func (m *XInboundMessageMutation) OrderDateCleared() bool {
+	_, ok := m.clearedFields[xinboundmessage.FieldOrderDate]
+	return ok
+}
+
+// ResetOrderDate resets all changes to the "order_date" field.
+func (m *XInboundMessageMutation) ResetOrderDate() {
+	m.order_date = nil
+	delete(m.clearedFields, xinboundmessage.FieldOrderDate)
+}
+
+// SetOrderTotal sets the "order_total" field.
+func (m *XInboundMessageMutation) SetOrderTotal(f float64) {
+	m.order_total = &f
+	m.addorder_total = nil
+}
+
+// OrderTotal returns the value of the "order_total" field in the mutation.
+func (m *XInboundMessageMutation) OrderTotal() (r float64, exists bool) {
+	v := m.order_total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrderTotal returns the old "order_total" field's value of the XInboundMessage entity.
+// If the XInboundMessage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XInboundMessageMutation) OldOrderTotal(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrderTotal is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrderTotal requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrderTotal: %w", err)
+	}
+	return oldValue.OrderTotal, nil
+}
+
+// AddOrderTotal adds f to the "order_total" field.
+func (m *XInboundMessageMutation) AddOrderTotal(f float64) {
+	if m.addorder_total != nil {
+		*m.addorder_total += f
+	} else {
+		m.addorder_total = &f
+	}
+}
+
+// AddedOrderTotal returns the value that was added to the "order_total" field in this mutation.
+func (m *XInboundMessageMutation) AddedOrderTotal() (r float64, exists bool) {
+	v := m.addorder_total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetOrderTotal resets all changes to the "order_total" field.
+func (m *XInboundMessageMutation) ResetOrderTotal() {
+	m.order_total = nil
+	m.addorder_total = nil
+}
+
+// SetSender sets the "sender" field.
+func (m *XInboundMessageMutation) SetSender(s string) {
+	m.sender = &s
+}
+
+// Sender returns the value of the "sender" field in the mutation.
+func (m *XInboundMessageMutation) Sender() (r string, exists bool) {
+	v := m.sender
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSender returns the old "sender" field's value of the XInboundMessage entity.
+// If the XInboundMessage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XInboundMessageMutation) OldSender(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSender is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSender requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSender: %w", err)
+	}
+	return oldValue.Sender, nil
+}
+
+// ResetSender resets all changes to the "sender" field.
+func (m *XInboundMessageMutation) ResetSender() {
+	m.sender = nil
+}
+
+// SetSubject sets the "subject" field.
+func (m *XInboundMessageMutation) SetSubject(s string) {
+	m.subject = &s
+}
+
+// Subject returns the value of the "subject" field in the mutation.
+func (m *XInboundMessageMutation) Subject() (r string, exists bool) {
+	v := m.subject
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSubject returns the old "subject" field's value of the XInboundMessage entity.
+// If the XInboundMessage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XInboundMessageMutation) OldSubject(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSubject is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSubject requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSubject: %w", err)
+	}
+	return oldValue.Subject, nil
+}
+
+// ResetSubject resets all changes to the "subject" field.
+func (m *XInboundMessageMutation) ResetSubject() {
+	m.subject = nil
+}
+
+// SetMimeType sets the "mime_type" field.
+func (m *XInboundMessageMutation) SetMimeType(s string) {
+	m.mime_type = &s
+}
+
+// MimeType returns the value of the "mime_type" field in the mutation.
+func (m *XInboundMessageMutation) MimeType() (r string, exists bool) {
+	v := m.mime_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMimeType returns the old "mime_type" field's value of the XInboundMessage entity.
+// If the XInboundMessage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XInboundMessageMutation) OldMimeType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMimeType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMimeType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMimeType: %w", err)
+	}
+	return oldValue.MimeType, nil
+}
+
+// ResetMimeType resets all changes to the "mime_type" field.
+func (m *XInboundMessageMutation) ResetMimeType() {
+	m.mime_type = nil
+}
+
+// SetExtractor sets the "extractor" field.
+func (m *XInboundMessageMutation) SetExtractor(s string) {
+	m.extractor = &s
+}
+
+// Extractor returns the value of the "extractor" field in the mutation.
+func (m *XInboundMessageMutation) Extractor() (r string, exists bool) {
+	v := m.extractor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExtractor returns the old "extractor" field's value of the XInboundMessage entity.
+// If the XInboundMessage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XInboundMessageMutation) OldExtractor(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExtractor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExtractor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExtractor: %w", err)
+	}
+	return oldValue.Extractor, nil
+}
+
+// ResetExtractor resets all changes to the "extractor" field.
+func (m *XInboundMessageMutation) ResetExtractor() {
+	m.extractor = nil
+}
+
+// SetError sets the "error" field.
+func (m *XInboundMessageMutation) SetError(s string) {
+	m.error = &s
+}
+
+// Error returns the value of the "error" field in the mutation.
+func (m *XInboundMessageMutation) Error() (r string, exists bool) {
+	v := m.error
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldError returns the old "error" field's value of the XInboundMessage entity.
+// If the XInboundMessage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XInboundMessageMutation) OldError(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldError is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldError requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldError: %w", err)
+	}
+	return oldValue.Error, nil
+}
+
+// ResetError resets all changes to the "error" field.
+func (m *XInboundMessageMutation) ResetError() {
+	m.error = nil
+}
+
+// SetRaw sets the "raw" field.
+func (m *XInboundMessageMutation) SetRaw(b []byte) {
+	m.raw = &b
+}
+
+// Raw returns the value of the "raw" field in the mutation.
+func (m *XInboundMessageMutation) Raw() (r []byte, exists bool) {
+	v := m.raw
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRaw returns the old "raw" field's value of the XInboundMessage entity.
+// If the XInboundMessage object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XInboundMessageMutation) OldRaw(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRaw is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRaw requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRaw: %w", err)
+	}
+	return oldValue.Raw, nil
+}
+
+// ClearRaw clears the value of the "raw" field.
+func (m *XInboundMessageMutation) ClearRaw() {
+	m.raw = nil
+	m.clearedFields[xinboundmessage.FieldRaw] = struct{}{}
+}
+
+// RawCleared returns if the "raw" field was cleared in this mutation.
+func (m *XInboundMessageMutation) RawCleared() bool {
+	_, ok := m.clearedFields[xinboundmessage.FieldRaw]
+	return ok
+}
+
+// ResetRaw resets all changes to the "raw" field.
+func (m *XInboundMessageMutation) ResetRaw() {
+	m.raw = nil
+	delete(m.clearedFields, xinboundmessage.FieldRaw)
+}
+
+// AddCandidateIDs adds the "candidates" edge to the XImportCandidate entity by ids.
+func (m *XInboundMessageMutation) AddCandidateIDs(ids ...uuid.UUID) {
+	if m.candidates == nil {
+		m.candidates = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.candidates[ids[i]] = struct{}{}
+	}
+}
+
+// ClearCandidates clears the "candidates" edge to the XImportCandidate entity.
+func (m *XInboundMessageMutation) ClearCandidates() {
+	m.clearedcandidates = true
+}
+
+// CandidatesCleared reports if the "candidates" edge to the XImportCandidate entity was cleared.
+func (m *XInboundMessageMutation) CandidatesCleared() bool {
+	return m.clearedcandidates
+}
+
+// RemoveCandidateIDs removes the "candidates" edge to the XImportCandidate entity by IDs.
+func (m *XInboundMessageMutation) RemoveCandidateIDs(ids ...uuid.UUID) {
+	if m.removedcandidates == nil {
+		m.removedcandidates = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.candidates, ids[i])
+		m.removedcandidates[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedCandidates returns the removed IDs of the "candidates" edge to the XImportCandidate entity.
+func (m *XInboundMessageMutation) RemovedCandidatesIDs() (ids []uuid.UUID) {
+	for id := range m.removedcandidates {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// CandidatesIDs returns the "candidates" edge IDs in the mutation.
+func (m *XInboundMessageMutation) CandidatesIDs() (ids []uuid.UUID) {
+	for id := range m.candidates {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetCandidates resets all changes to the "candidates" edge.
+func (m *XInboundMessageMutation) ResetCandidates() {
+	m.candidates = nil
+	m.clearedcandidates = false
+	m.removedcandidates = nil
+}
+
+// Where appends a list predicates to the XInboundMessageMutation builder.
+func (m *XInboundMessageMutation) Where(ps ...predicate.XInboundMessage) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the XInboundMessageMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *XInboundMessageMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.XInboundMessage, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *XInboundMessageMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *XInboundMessageMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (XInboundMessage).
+func (m *XInboundMessageMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *XInboundMessageMutation) Fields() []string {
+	fields := make([]string, 0, 17)
+	if m.created_at != nil {
+		fields = append(fields, xinboundmessage.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, xinboundmessage.FieldUpdatedAt)
+	}
+	if m.group_id != nil {
+		fields = append(fields, xinboundmessage.FieldGroupID)
+	}
+	if m.channel != nil {
+		fields = append(fields, xinboundmessage.FieldChannel)
+	}
+	if m.status != nil {
+		fields = append(fields, xinboundmessage.FieldStatus)
+	}
+	if m.message_id != nil {
+		fields = append(fields, xinboundmessage.FieldMessageID)
+	}
+	if m.content_hash != nil {
+		fields = append(fields, xinboundmessage.FieldContentHash)
+	}
+	if m.store != nil {
+		fields = append(fields, xinboundmessage.FieldStore)
+	}
+	if m.order_number != nil {
+		fields = append(fields, xinboundmessage.FieldOrderNumber)
+	}
+	if m.order_date != nil {
+		fields = append(fields, xinboundmessage.FieldOrderDate)
+	}
+	if m.order_total != nil {
+		fields = append(fields, xinboundmessage.FieldOrderTotal)
+	}
+	if m.sender != nil {
+		fields = append(fields, xinboundmessage.FieldSender)
+	}
+	if m.subject != nil {
+		fields = append(fields, xinboundmessage.FieldSubject)
+	}
+	if m.mime_type != nil {
+		fields = append(fields, xinboundmessage.FieldMimeType)
+	}
+	if m.extractor != nil {
+		fields = append(fields, xinboundmessage.FieldExtractor)
+	}
+	if m.error != nil {
+		fields = append(fields, xinboundmessage.FieldError)
+	}
+	if m.raw != nil {
+		fields = append(fields, xinboundmessage.FieldRaw)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *XInboundMessageMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case xinboundmessage.FieldCreatedAt:
+		return m.CreatedAt()
+	case xinboundmessage.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case xinboundmessage.FieldGroupID:
+		return m.GroupID()
+	case xinboundmessage.FieldChannel:
+		return m.Channel()
+	case xinboundmessage.FieldStatus:
+		return m.Status()
+	case xinboundmessage.FieldMessageID:
+		return m.MessageID()
+	case xinboundmessage.FieldContentHash:
+		return m.ContentHash()
+	case xinboundmessage.FieldStore:
+		return m.Store()
+	case xinboundmessage.FieldOrderNumber:
+		return m.OrderNumber()
+	case xinboundmessage.FieldOrderDate:
+		return m.OrderDate()
+	case xinboundmessage.FieldOrderTotal:
+		return m.OrderTotal()
+	case xinboundmessage.FieldSender:
+		return m.Sender()
+	case xinboundmessage.FieldSubject:
+		return m.Subject()
+	case xinboundmessage.FieldMimeType:
+		return m.MimeType()
+	case xinboundmessage.FieldExtractor:
+		return m.Extractor()
+	case xinboundmessage.FieldError:
+		return m.Error()
+	case xinboundmessage.FieldRaw:
+		return m.Raw()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *XInboundMessageMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case xinboundmessage.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case xinboundmessage.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case xinboundmessage.FieldGroupID:
+		return m.OldGroupID(ctx)
+	case xinboundmessage.FieldChannel:
+		return m.OldChannel(ctx)
+	case xinboundmessage.FieldStatus:
+		return m.OldStatus(ctx)
+	case xinboundmessage.FieldMessageID:
+		return m.OldMessageID(ctx)
+	case xinboundmessage.FieldContentHash:
+		return m.OldContentHash(ctx)
+	case xinboundmessage.FieldStore:
+		return m.OldStore(ctx)
+	case xinboundmessage.FieldOrderNumber:
+		return m.OldOrderNumber(ctx)
+	case xinboundmessage.FieldOrderDate:
+		return m.OldOrderDate(ctx)
+	case xinboundmessage.FieldOrderTotal:
+		return m.OldOrderTotal(ctx)
+	case xinboundmessage.FieldSender:
+		return m.OldSender(ctx)
+	case xinboundmessage.FieldSubject:
+		return m.OldSubject(ctx)
+	case xinboundmessage.FieldMimeType:
+		return m.OldMimeType(ctx)
+	case xinboundmessage.FieldExtractor:
+		return m.OldExtractor(ctx)
+	case xinboundmessage.FieldError:
+		return m.OldError(ctx)
+	case xinboundmessage.FieldRaw:
+		return m.OldRaw(ctx)
+	}
+	return nil, fmt.Errorf("unknown XInboundMessage field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *XInboundMessageMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case xinboundmessage.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case xinboundmessage.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case xinboundmessage.FieldGroupID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGroupID(v)
+		return nil
+	case xinboundmessage.FieldChannel:
+		v, ok := value.(xinboundmessage.Channel)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChannel(v)
+		return nil
+	case xinboundmessage.FieldStatus:
+		v, ok := value.(xinboundmessage.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case xinboundmessage.FieldMessageID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMessageID(v)
+		return nil
+	case xinboundmessage.FieldContentHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContentHash(v)
+		return nil
+	case xinboundmessage.FieldStore:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStore(v)
+		return nil
+	case xinboundmessage.FieldOrderNumber:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrderNumber(v)
+		return nil
+	case xinboundmessage.FieldOrderDate:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrderDate(v)
+		return nil
+	case xinboundmessage.FieldOrderTotal:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrderTotal(v)
+		return nil
+	case xinboundmessage.FieldSender:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSender(v)
+		return nil
+	case xinboundmessage.FieldSubject:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSubject(v)
+		return nil
+	case xinboundmessage.FieldMimeType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMimeType(v)
+		return nil
+	case xinboundmessage.FieldExtractor:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExtractor(v)
+		return nil
+	case xinboundmessage.FieldError:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetError(v)
+		return nil
+	case xinboundmessage.FieldRaw:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRaw(v)
+		return nil
+	}
+	return fmt.Errorf("unknown XInboundMessage field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *XInboundMessageMutation) AddedFields() []string {
+	var fields []string
+	if m.addorder_total != nil {
+		fields = append(fields, xinboundmessage.FieldOrderTotal)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *XInboundMessageMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case xinboundmessage.FieldOrderTotal:
+		return m.AddedOrderTotal()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *XInboundMessageMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case xinboundmessage.FieldOrderTotal:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOrderTotal(v)
+		return nil
+	}
+	return fmt.Errorf("unknown XInboundMessage numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *XInboundMessageMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(xinboundmessage.FieldOrderDate) {
+		fields = append(fields, xinboundmessage.FieldOrderDate)
+	}
+	if m.FieldCleared(xinboundmessage.FieldRaw) {
+		fields = append(fields, xinboundmessage.FieldRaw)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *XInboundMessageMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *XInboundMessageMutation) ClearField(name string) error {
+	switch name {
+	case xinboundmessage.FieldOrderDate:
+		m.ClearOrderDate()
+		return nil
+	case xinboundmessage.FieldRaw:
+		m.ClearRaw()
+		return nil
+	}
+	return fmt.Errorf("unknown XInboundMessage nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *XInboundMessageMutation) ResetField(name string) error {
+	switch name {
+	case xinboundmessage.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case xinboundmessage.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case xinboundmessage.FieldGroupID:
+		m.ResetGroupID()
+		return nil
+	case xinboundmessage.FieldChannel:
+		m.ResetChannel()
+		return nil
+	case xinboundmessage.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case xinboundmessage.FieldMessageID:
+		m.ResetMessageID()
+		return nil
+	case xinboundmessage.FieldContentHash:
+		m.ResetContentHash()
+		return nil
+	case xinboundmessage.FieldStore:
+		m.ResetStore()
+		return nil
+	case xinboundmessage.FieldOrderNumber:
+		m.ResetOrderNumber()
+		return nil
+	case xinboundmessage.FieldOrderDate:
+		m.ResetOrderDate()
+		return nil
+	case xinboundmessage.FieldOrderTotal:
+		m.ResetOrderTotal()
+		return nil
+	case xinboundmessage.FieldSender:
+		m.ResetSender()
+		return nil
+	case xinboundmessage.FieldSubject:
+		m.ResetSubject()
+		return nil
+	case xinboundmessage.FieldMimeType:
+		m.ResetMimeType()
+		return nil
+	case xinboundmessage.FieldExtractor:
+		m.ResetExtractor()
+		return nil
+	case xinboundmessage.FieldError:
+		m.ResetError()
+		return nil
+	case xinboundmessage.FieldRaw:
+		m.ResetRaw()
+		return nil
+	}
+	return fmt.Errorf("unknown XInboundMessage field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *XInboundMessageMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.candidates != nil {
+		edges = append(edges, xinboundmessage.EdgeCandidates)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *XInboundMessageMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case xinboundmessage.EdgeCandidates:
+		ids := make([]ent.Value, 0, len(m.candidates))
+		for id := range m.candidates {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *XInboundMessageMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.removedcandidates != nil {
+		edges = append(edges, xinboundmessage.EdgeCandidates)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *XInboundMessageMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case xinboundmessage.EdgeCandidates:
+		ids := make([]ent.Value, 0, len(m.removedcandidates))
+		for id := range m.removedcandidates {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *XInboundMessageMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedcandidates {
+		edges = append(edges, xinboundmessage.EdgeCandidates)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *XInboundMessageMutation) EdgeCleared(name string) bool {
+	switch name {
+	case xinboundmessage.EdgeCandidates:
+		return m.clearedcandidates
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *XInboundMessageMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown XInboundMessage unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *XInboundMessageMutation) ResetEdge(name string) error {
+	switch name {
+	case xinboundmessage.EdgeCandidates:
+		m.ResetCandidates()
+		return nil
+	}
+	return fmt.Errorf("unknown XInboundMessage edge %s", name)
 }
