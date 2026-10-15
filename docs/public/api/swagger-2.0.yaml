@@ -30,6 +30,194 @@ definitions:
     - RoleAdmin
     - RoleUser
     - RoleAttachments
+  capture.AcceptResult:
+    properties:
+      entityId:
+        type: string
+      item:
+        $ref: '#/definitions/capture.ItemOut'
+    type: object
+  capture.BulkResult:
+    properties:
+      accepted:
+        type: integer
+      itemIds:
+        items:
+          type: string
+        type: array
+      skipped:
+        type: integer
+    type: object
+  capture.DupMatch:
+    properties:
+      confidence:
+        enum:
+        - exact
+        - likely
+        - similar
+        type: string
+      id:
+        type: string
+      locationPath:
+        type: string
+      matchedOn:
+        type: string
+      name:
+        type: string
+      score:
+        type: number
+    type: object
+  capture.EditInput:
+    properties:
+      brand:
+        maxLength: 255
+        type: string
+      category:
+        maxLength: 255
+        type: string
+      modelNumber:
+        maxLength: 255
+        type: string
+      name:
+        maxLength: 255
+        minLength: 1
+        type: string
+      quantity:
+        maximum: 999999
+        minimum: 0.001
+        type: number
+      targetLocationId:
+        type: string
+        x-nullable: true
+    type: object
+  capture.ItemOut:
+    properties:
+      bbox:
+        allOf:
+        - $ref: '#/definitions/vision.BBox'
+        x-nullable: true
+        x-omitempty: true
+      brand:
+        type: string
+      bucket:
+        enum:
+        - ready
+        - review
+        - maybe
+        type: string
+      canUndo:
+        type: boolean
+      category:
+        type: string
+      confidence:
+        type: number
+      dupMatches:
+        items:
+          $ref: '#/definitions/capture.DupMatch'
+        type: array
+      entityId:
+        type: string
+        x-nullable: true
+        x-omitempty: true
+      hasCrop:
+        type: boolean
+      id:
+        type: string
+      modelNumber:
+        type: string
+      name:
+        type: string
+      photoId:
+        type: string
+      quantity:
+        type: number
+      ready:
+        type: boolean
+      state:
+        enum:
+        - pending
+        - accepted
+        - merged
+        - ignored
+        type: string
+      targetLocationId:
+        type: string
+        x-nullable: true
+        x-omitempty: true
+    type: object
+  capture.PhotoOut:
+    properties:
+      attempts:
+        type: integer
+      detections:
+        type: integer
+      error:
+        type: string
+      id:
+        type: string
+      status:
+        enum:
+        - queued
+        - running
+        - done
+        - failed
+        type: string
+    type: object
+  capture.SessionOut:
+    properties:
+      failed:
+        type: integer
+      id:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/capture.ItemOut'
+        type: array
+      locationId:
+        type: string
+        x-nullable: true
+        x-omitempty: true
+      mode:
+        enum:
+        - item
+        - shelf
+        type: string
+      pending:
+        description: Pending counts items awaiting a decision; ReadyCount those eligible
+          for bulk accept.
+        type: integer
+      photos:
+        items:
+          $ref: '#/definitions/capture.PhotoOut'
+        type: array
+      processing:
+        description: Processing counts photos still queued or running.
+        type: integer
+      readyCount:
+        type: integer
+      status:
+        enum:
+        - open
+        - done
+        type: string
+    type: object
+  capture.Status:
+    properties:
+      enabled:
+        type: boolean
+      local:
+        type: boolean
+      maxPhotoMb:
+        type: integer
+      maxPhotosPerDay:
+        type: integer
+      model:
+        type: string
+      provider:
+        type: string
+      queueDepth:
+        type: integer
+    type: object
   currencies.Currency:
     properties:
       code:
@@ -2564,6 +2752,26 @@ definitions:
         type: string
         x-nullable: true
     type: object
+  v1.CaptureMerge:
+    properties:
+      entityId:
+        type: string
+    required:
+    - entityId
+    type: object
+  v1.CaptureSessionCreate:
+    properties:
+      locationId:
+        type: string
+        x-nullable: true
+      mode:
+        enum:
+        - item
+        - shelf
+        type: string
+    required:
+    - mode
+    type: object
   v1.ChangePassword:
     properties:
       current:
@@ -2873,6 +3081,17 @@ definitions:
       fields:
         type: string
     type: object
+  vision.BBox:
+    properties:
+      h:
+        type: number
+      w:
+        type: number
+      x:
+        type: number
+      "y":
+        type: number
+    type: object
 info:
   contact:
     name: Homebox Team
@@ -3096,6 +3315,294 @@ paths:
       summary: What can I build?
       tags:
       - Use & Build
+  /v1/capture/items/{id}:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Fields to change
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/capture.EditInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/capture.ItemOut'
+      security:
+      - Bearer: []
+      summary: Edit a pending item
+      tags:
+      - Photo Capture
+  /v1/capture/items/{id}/accept:
+    post:
+      description: Creates the inventory item in the chosen location (or "Unsorted")
+        with the crop as its photo.
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/capture.AcceptResult'
+      security:
+      - Bearer: []
+      summary: Accept a detected item
+      tags:
+      - Photo Capture
+  /v1/capture/items/{id}/crop:
+    get:
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - image/jpeg
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+      security:
+      - Bearer: []
+      summary: Crop image of a detected item
+      tags:
+      - Photo Capture
+  /v1/capture/items/{id}/ignore:
+    post:
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/capture.ItemOut'
+      security:
+      - Bearer: []
+      summary: Ignore a detected item
+      tags:
+      - Photo Capture
+  /v1/capture/items/{id}/merge:
+    post:
+      consumes:
+      - application/json
+      description: Adds the detected quantity to an existing item instead of creating
+        a duplicate.
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Existing item
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/v1.CaptureMerge'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/capture.AcceptResult'
+      security:
+      - Bearer: []
+      summary: Merge a detected item into an existing one
+      tags:
+      - Photo Capture
+  /v1/capture/items/{id}/undo:
+    post:
+      description: Deletes the created item, restores the merged quantity, or un-ignores.
+        Works for 30 minutes after the decision.
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/capture.ItemOut'
+      security:
+      - Bearer: []
+      summary: Undo accept, merge or ignore
+      tags:
+      - Photo Capture
+  /v1/capture/photos/{id}/retry:
+    post:
+      parameters:
+      - description: Photo ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      security:
+      - Bearer: []
+      summary: Retry a failed photo
+      tags:
+      - Photo Capture
+  /v1/capture/sessions:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Mode and optional current location
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/v1.CaptureSessionCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/capture.SessionOut'
+      security:
+      - Bearer: []
+      summary: Start a capture session
+      tags:
+      - Photo Capture
+  /v1/capture/sessions/{id}:
+    get:
+      description: Photos with their processing state and the detected items. The
+        client polls this while photos are processing.
+      parameters:
+      - description: Session ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/capture.SessionOut'
+      security:
+      - Bearer: []
+      summary: Get a capture session
+      tags:
+      - Photo Capture
+  /v1/capture/sessions/{id}/accept:
+    post:
+      description: Accepts every pending item that is high-confidence and has no identifier
+        or identical-name duplicate.
+      parameters:
+      - description: Session ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/capture.BulkResult'
+      security:
+      - Bearer: []
+      summary: Accept all ready items
+      tags:
+      - Photo Capture
+  /v1/capture/sessions/{id}/finish:
+    post:
+      parameters:
+      - description: Session ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      security:
+      - Bearer: []
+      summary: Finish a capture session
+      tags:
+      - Photo Capture
+  /v1/capture/sessions/{id}/photos:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Queues the photo for analysis and returns immediately (202). Accepts
+        JPEG, PNG, WebP and HEIC; the photo is re-encoded and EXIF is stripped. 503
+        when no AI endpoint is configured, 415 for non-images, 413 when too large,
+        429 at the daily limit.
+      parameters:
+      - description: Session ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Photo
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/capture.PhotoOut'
+      security:
+      - Bearer: []
+      summary: Upload a photo to a capture session
+      tags:
+      - Photo Capture
+  /v1/capture/status:
+    get:
+      description: Whether an AI endpoint is configured, which one (never the key),
+        whether it looks local or cloud, and the queue depth.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/capture.Status'
+      security:
+      - Bearer: []
+      summary: Photo capture status
+      tags:
+      - Photo Capture
   /v1/currencies:
     get:
       produces:

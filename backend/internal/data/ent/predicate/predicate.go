@@ -60,6 +60,15 @@ type User func(*sql.Selector)
 // UserGroup is the predicate function for usergroup builders.
 type UserGroup func(*sql.Selector)
 
+// XCaptureItem is the predicate function for xcaptureitem builders.
+type XCaptureItem func(*sql.Selector)
+
+// XCapturePhoto is the predicate function for xcapturephoto builders.
+type XCapturePhoto func(*sql.Selector)
+
+// XCaptureSession is the predicate function for xcapturesession builders.
+type XCaptureSession func(*sql.Selector)
+
 // XEntityActivity is the predicate function for xentityactivity builders.
 type XEntityActivity func(*sql.Selector)
 

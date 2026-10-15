@@ -780,6 +780,7 @@
         "total_entries": "Total Entries"
     },
     "menu": {
+        "add_manually": "Enter manually",
         "build": "Build",
         "collection": "Collection",
         "create_item": "Item / Asset",
@@ -793,6 +794,8 @@
         "profile": "Profile",
         "scanner": "Scanner",
         "search": "Search",
+        "snap": "Snap",
+        "snap_to_add": "Snap to add",
         "templates": "Templates"
     },
     "pages": {
@@ -1185,5 +1188,120 @@
             "buildable_now": "Buildable now",
             "missing_parts": "Missing parts"
         }
+    },
+    "x_snap": {
+        "title": "Snap",
+        "intro": "Take photos of an item or a whole shelf, or pick photos from your gallery. The AI lists what it sees and you confirm.",
+        "enter_manually": "Enter manually instead",
+        "gallery": "From gallery",
+        "native_camera": "Take photo",
+        "photos_summary": "{total} photo(s) · {working} in progress",
+        "undo": "Undo",
+        "done": "Done",
+        "done_confirm": "{count} item(s) have not been reviewed yet and will be discarded. Finish anyway?",
+        "accept_all": "Accept all ready ({count})",
+        "nothing_found": "The AI did not find any items in these photos. Try a closer, brighter shot, or enter the item manually.",
+        "camera": {
+            "open": "Open camera",
+            "starting": "Starting camera…",
+            "close": "Close camera",
+            "flip": "Switch camera",
+            "shutter": "Take photo (hold for burst)",
+            "hint": "Tap for one photo, hold for a burst",
+            "error_insecure": "The live camera needs HTTPS. Use “Take photo” or “From gallery” instead, or open HomeBox over HTTPS.",
+            "error_denied": "Camera permission was denied. Allow camera access in the browser, or use “Take photo” / “From gallery”.",
+            "error_unsupported": "This browser has no live camera support. Use “Take photo” or “From gallery”."
+        },
+        "mode": {
+            "label": "What are you photographing?",
+            "item": "One item",
+            "item_hint": "A single thing, its box or its label",
+            "shelf": "Shelf or drawer",
+            "shelf_hint": "Many items in one photo"
+        },
+        "location": {
+            "label": "Where are you?",
+            "into": "New items go into “{name}”.",
+            "none": "No location chosen: new items go into “Unsorted”."
+        },
+        "provider": {
+            "local": "Local AI",
+            "cloud": "Cloud AI",
+            "local_hint": "Photos are analysed by an AI server on your own network.",
+            "cloud_hint": "Photos are sent to the cloud AI provider you configured."
+        },
+        "disabled": {
+            "title": "AI is not configured",
+            "body": "Snap needs a vision-capable AI endpoint. Set these environment variables (cloud OpenAI-compatible APIs, Ollama and LM Studio all work) and restart HomeBox, or enter items manually."
+        },
+        "status": {
+            "queued": "Queued",
+            "analysing": "Analysing"
+        },
+        "bucket": {
+            "ready": "Ready",
+            "review": "Check",
+            "maybe": "Maybe"
+        },
+        "section": {
+            "ready": "Ready to add ({count})",
+            "ready_hint": "High confidence and not in your inventory yet. Swipe right or tap Add; swipe left to ignore.",
+            "review": "Please check ({count})",
+            "review_hint": "Lower confidence, or it looks like something you already own.",
+            "maybe": "Low confidence ({count})",
+            "maybe_hint": "The AI is not sure about these. Ignore them or fix the name first.",
+            "done": "Handled ({count})"
+        },
+        "state": {
+            "accepted": "added",
+            "merged": "merged",
+            "ignored": "ignored",
+            "pending": "pending"
+        },
+        "card": {
+            "add": "Add",
+            "add_new": "Add as new",
+            "ignore": "Ignore",
+            "edit": "Edit",
+            "merge": "Merge",
+            "quantity": "Quantity",
+            "fewer": "Fewer",
+            "more": "More"
+        },
+        "dup": {
+            "likely": "Looks like something you already have",
+            "similar": "Similar to something you have",
+            "merge": "Merge"
+        },
+        "edit": {
+            "title": "Edit detected item",
+            "name": "Name",
+            "brand": "Brand",
+            "model": "Model number",
+            "category": "Category",
+            "quantity": "Quantity",
+            "location": "Location"
+        },
+        "toast": {
+            "added": "Added “{name}”",
+            "merged": "Merged “{name}” into your inventory",
+            "ignored": "Ignored “{name}”",
+            "bulk": "Added {count} item(s)",
+            "undone": "Undone"
+        },
+        "error": {
+            "disabled": "AI is not configured (HBOX_AI_BASE_URL / HBOX_AI_MODEL).",
+            "not_image": "That file is not a supported image.",
+            "too_large": "The photo is too large.",
+            "daily_cap": "Daily photo limit reached.",
+            "upload": "Upload failed. Tap the photo to retry.",
+            "network": "Network error. Tap the photo to retry.",
+            "session": "Could not start a capture session.",
+            "already_handled": "That item was already handled.",
+            "not_found": "That item no longer exists.",
+            "action": "That did not work. Please try again.",
+            "undo": "Some items could not be undone."
+        },
+        "create_hint": "Faster: snap a photo and let the AI fill this in →"
     }
 }

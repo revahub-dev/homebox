@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col gap-1">
     <Label :for="id" class="px-1">
-      {{ $t("components.location.selector.parent_location") }}
+      {{ label || $t("components.location.selector.parent_location") }}
     </Label>
 
     <Popover v-model:open="open">
@@ -74,6 +74,8 @@
   type Props = {
     modelValue?: EntitySummary | null;
     currentLocation?: EntitySummary;
+    /** Fork: overrides the default "Parent location" label. */
+    label?: string;
   };
 
   const props = defineProps<Props>();

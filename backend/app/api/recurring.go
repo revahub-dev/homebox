@@ -76,6 +76,11 @@ func registerRecurringTasks(app *app, cfg *config.Config, runner *graceful.Runne
 		runIdleDigest(ctx, app, cfg)
 	}))
 
+	// Fork: photo capture worker (see internal/core/services/x/capture).
+	// Photos are picked up as soon as they are uploaded; this loop recovers
+	// photos left queued or half-processed by a restart and purges old data.
+	runner.AddFunc("x-capture-worker", app.captureService().Run)
+
 	runner.AddFunc("collection-export-subscription", func(ctx context.Context) error {
 		return runJobSubscription(ctx, cfg, "collection_export", func(ctx context.Context, msg *pubsub.Message) {
 			gid, err := uuid.Parse(msg.Metadata["group_id"])

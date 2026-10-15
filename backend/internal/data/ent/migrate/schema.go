@@ -637,6 +637,122 @@ var (
 			},
 		},
 	}
+	// XCaptureItemsColumns holds the columns for the "x_capture_items" table.
+	XCaptureItemsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "group_id", Type: field.TypeUUID},
+		{Name: "session_id", Type: field.TypeUUID},
+		{Name: "photo_id", Type: field.TypeUUID},
+		{Name: "state", Type: field.TypeEnum, Enums: []string{"pending", "accepted", "merged", "ignored"}, Default: "pending"},
+		{Name: "name", Type: field.TypeString, Size: 255},
+		{Name: "brand", Type: field.TypeString, Size: 255, Default: ""},
+		{Name: "model_number", Type: field.TypeString, Size: 255, Default: ""},
+		{Name: "category", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "quantity", Type: field.TypeFloat64, Default: 1},
+		{Name: "confidence", Type: field.TypeFloat64, Default: 0},
+		{Name: "low_confidence", Type: field.TypeBool, Default: false},
+		{Name: "bbox", Type: field.TypeString, Size: 200, Default: ""},
+		{Name: "crop", Type: field.TypeBytes, Nullable: true},
+		{Name: "has_crop", Type: field.TypeBool, Default: false},
+		{Name: "dup_matches", Type: field.TypeString, Size: 2147483647, Default: "[]"},
+		{Name: "target_location_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "entity_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "attachment_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "applied_quantity", Type: field.TypeFloat64, Default: 0},
+		{Name: "handled_at", Type: field.TypeTime, Nullable: true},
+	}
+	// XCaptureItemsTable holds the schema information for the "x_capture_items" table.
+	XCaptureItemsTable = &schema.Table{
+		Name:       "x_capture_items",
+		Columns:    XCaptureItemsColumns,
+		PrimaryKey: []*schema.Column{XCaptureItemsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "xcaptureitem_session_id_state",
+				Unique:  false,
+				Columns: []*schema.Column{XCaptureItemsColumns[4], XCaptureItemsColumns[6]},
+			},
+			{
+				Name:    "xcaptureitem_photo_id",
+				Unique:  false,
+				Columns: []*schema.Column{XCaptureItemsColumns[5]},
+			},
+			{
+				Name:    "xcaptureitem_group_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{XCaptureItemsColumns[3], XCaptureItemsColumns[1]},
+			},
+		},
+	}
+	// XCapturePhotosColumns holds the columns for the "x_capture_photos" table.
+	XCapturePhotosColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "group_id", Type: field.TypeUUID},
+		{Name: "session_id", Type: field.TypeUUID},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"queued", "running", "done", "failed"}, Default: "queued"},
+		{Name: "attempts", Type: field.TypeInt, Default: 0},
+		{Name: "error", Type: field.TypeString, Size: 1000, Default: ""},
+		{Name: "mime_type", Type: field.TypeString, Size: 64, Default: "image/jpeg"},
+		{Name: "width", Type: field.TypeInt, Default: 0},
+		{Name: "height", Type: field.TypeInt, Default: 0},
+		{Name: "content_hash", Type: field.TypeString, Size: 64},
+		{Name: "image", Type: field.TypeBytes, Nullable: true},
+		{Name: "provider", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "latency_ms", Type: field.TypeInt, Default: 0},
+		{Name: "detections", Type: field.TypeInt, Default: 0},
+		{Name: "locked_at", Type: field.TypeTime, Nullable: true},
+	}
+	// XCapturePhotosTable holds the schema information for the "x_capture_photos" table.
+	XCapturePhotosTable = &schema.Table{
+		Name:       "x_capture_photos",
+		Columns:    XCapturePhotosColumns,
+		PrimaryKey: []*schema.Column{XCapturePhotosColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "xcapturephoto_status_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{XCapturePhotosColumns[5], XCapturePhotosColumns[1]},
+			},
+			{
+				Name:    "xcapturephoto_session_id_content_hash",
+				Unique:  true,
+				Columns: []*schema.Column{XCapturePhotosColumns[4], XCapturePhotosColumns[11]},
+			},
+			{
+				Name:    "xcapturephoto_group_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{XCapturePhotosColumns[3], XCapturePhotosColumns[1]},
+			},
+		},
+	}
+	// XCaptureSessionsColumns holds the columns for the "x_capture_sessions" table.
+	XCaptureSessionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "group_id", Type: field.TypeUUID},
+		{Name: "user_id", Type: field.TypeUUID},
+		{Name: "mode", Type: field.TypeEnum, Enums: []string{"item", "shelf"}},
+		{Name: "location_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"open", "done"}, Default: "open"},
+	}
+	// XCaptureSessionsTable holds the schema information for the "x_capture_sessions" table.
+	XCaptureSessionsTable = &schema.Table{
+		Name:       "x_capture_sessions",
+		Columns:    XCaptureSessionsColumns,
+		PrimaryKey: []*schema.Column{XCaptureSessionsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "xcapturesession_group_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{XCaptureSessionsColumns[3], XCaptureSessionsColumns[1]},
+			},
+		},
+	}
 	// XEntityActivitiesColumns holds the columns for the "x_entity_activities" table.
 	XEntityActivitiesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -917,6 +1033,9 @@ var (
 		TemplateFieldsTable,
 		UsersTable,
 		UserGroupsTable,
+		XCaptureItemsTable,
+		XCapturePhotosTable,
+		XCaptureSessionsTable,
 		XEntityActivitiesTable,
 		XIdleDigestsTable,
 		XImportCandidatesTable,
@@ -956,6 +1075,15 @@ func init() {
 	UserGroupsTable.ForeignKeys[1].RefTable = GroupsTable
 	UserGroupsTable.Annotation = &entsql.Annotation{
 		Table: "user_groups",
+	}
+	XCaptureItemsTable.Annotation = &entsql.Annotation{
+		Table: "x_capture_items",
+	}
+	XCapturePhotosTable.Annotation = &entsql.Annotation{
+		Table: "x_capture_photos",
+	}
+	XCaptureSessionsTable.Annotation = &entsql.Annotation{
+		Table: "x_capture_sessions",
 	}
 	XEntityActivitiesTable.Annotation = &entsql.Annotation{
 		Table: "x_entity_activities",

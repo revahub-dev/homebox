@@ -30,16 +30,27 @@
 
           <CollectionSelector />
 
+          <!-- Fork: photo-first. Snap is the primary way to add things; manual forms are secondary. -->
+          <SidebarMenuLink
+            href="/x/snap"
+            class="flex justify-center bg-primary text-primary-foreground drop-shadow-md hover:bg-primary/90 active:bg-primary/90 active:text-primary-foreground group-data-[collapsible=icon]:justify-start"
+            :tooltip="$t('menu.snap_to_add')"
+            data-testid="snap-primary"
+          >
+            <MdiCamera />
+            <span>{{ $t("menu.snap_to_add") }}</span>
+          </SidebarMenuLink>
+
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
               <SidebarMenuButton
-                class="flex justify-center bg-primary text-primary-foreground drop-shadow-md hover:bg-primary/90 active:bg-primary/90 active:text-primary-foreground group-data-[collapsible=icon]:justify-start"
-                :tooltip="$t('global.create')"
+                class="flex justify-center border bg-background text-foreground hover:bg-accent group-data-[collapsible=icon]:justify-start"
+                :tooltip="$t('menu.add_manually')"
                 hotkey="Shortcut: Ctrl+`"
               >
                 <MdiPlus />
                 <span>
-                  {{ $t("global.create") }}
+                  {{ $t("menu.add_manually") }}
                 </span>
               </SidebarMenuButton>
             </DropdownMenuTrigger>
@@ -212,6 +223,17 @@
           <slot />
           <div class="grow" />
 
+          <!-- Fork: phone shortcut to Snap -->
+          <NuxtLink
+            v-if="route.path !== '/x/snap'"
+            to="/x/snap"
+            class="fixed bottom-5 right-5 z-30 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg active:scale-95 sm:hidden"
+            :aria-label="$t('menu.snap_to_add')"
+            data-testid="snap-fab"
+          >
+            <MdiCamera class="size-7" />
+          </NuxtLink>
+
           <footer v-if="status" class="bottom-0 w-full pb-4 text-center">
             <p class="text-center text-sm">
               <span
@@ -250,6 +272,7 @@
   import MdiCog from "~icons/mdi/cog";
   import MdiWrench from "~icons/mdi/wrench";
   import MdiPlus from "~icons/mdi/plus";
+  import MdiCamera from "~icons/mdi/camera"; // Fork: snap
   import MdiLogout from "~icons/mdi/logout";
   import MdiFileDocumentMultiple from "~icons/mdi/file-document-multiple";
   import MdiChevronRight from "~icons/mdi/chevron-right";
@@ -445,6 +468,14 @@
       active: computed(() => route.path === "/maintenance"),
       name: computed(() => t("menu.maintenance")),
       to: "/maintenance",
+    },
+    // Fork: photo-first capture
+    {
+      icon: MdiCamera,
+      id: 89,
+      active: computed(() => route.path === "/x/snap"),
+      name: computed(() => t("menu.snap")),
+      to: "/x/snap",
     },
     // Fork: order import review inbox
     {

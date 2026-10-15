@@ -34,6 +34,9 @@ import (
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/templatefield"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/user"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/usergroup"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xcaptureitem"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xcapturephoto"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xcapturesession"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xentityactivity"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xidledigest"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/ximportcandidate"
@@ -84,6 +87,12 @@ type Client struct {
 	User *UserClient
 	// UserGroup is the client for interacting with the UserGroup builders.
 	UserGroup *UserGroupClient
+	// XCaptureItem is the client for interacting with the XCaptureItem builders.
+	XCaptureItem *XCaptureItemClient
+	// XCapturePhoto is the client for interacting with the XCapturePhoto builders.
+	XCapturePhoto *XCapturePhotoClient
+	// XCaptureSession is the client for interacting with the XCaptureSession builders.
+	XCaptureSession *XCaptureSessionClient
 	// XEntityActivity is the client for interacting with the XEntityActivity builders.
 	XEntityActivity *XEntityActivityClient
 	// XIdleDigest is the client for interacting with the XIdleDigest builders.
@@ -127,6 +136,9 @@ func (c *Client) init() {
 	c.TemplateField = NewTemplateFieldClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.UserGroup = NewUserGroupClient(c.config)
+	c.XCaptureItem = NewXCaptureItemClient(c.config)
+	c.XCapturePhoto = NewXCapturePhotoClient(c.config)
+	c.XCaptureSession = NewXCaptureSessionClient(c.config)
 	c.XEntityActivity = NewXEntityActivityClient(c.config)
 	c.XIdleDigest = NewXIdleDigestClient(c.config)
 	c.XImportCandidate = NewXImportCandidateClient(c.config)
@@ -244,6 +256,9 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		TemplateField:        NewTemplateFieldClient(cfg),
 		User:                 NewUserClient(cfg),
 		UserGroup:            NewUserGroupClient(cfg),
+		XCaptureItem:         NewXCaptureItemClient(cfg),
+		XCapturePhoto:        NewXCapturePhotoClient(cfg),
+		XCaptureSession:      NewXCaptureSessionClient(cfg),
 		XEntityActivity:      NewXEntityActivityClient(cfg),
 		XIdleDigest:          NewXIdleDigestClient(cfg),
 		XImportCandidate:     NewXImportCandidateClient(cfg),
@@ -288,6 +303,9 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		TemplateField:        NewTemplateFieldClient(cfg),
 		User:                 NewUserClient(cfg),
 		UserGroup:            NewUserGroupClient(cfg),
+		XCaptureItem:         NewXCaptureItemClient(cfg),
+		XCapturePhoto:        NewXCapturePhotoClient(cfg),
+		XCaptureSession:      NewXCaptureSessionClient(cfg),
 		XEntityActivity:      NewXEntityActivityClient(cfg),
 		XIdleDigest:          NewXIdleDigestClient(cfg),
 		XImportCandidate:     NewXImportCandidateClient(cfg),
@@ -327,8 +345,9 @@ func (c *Client) Use(hooks ...Hook) {
 		c.APIKey, c.Attachment, c.AuthRoles, c.AuthTokens, c.Entity, c.EntityField,
 		c.EntityTemplate, c.EntityType, c.Export, c.Group, c.GroupInvitationToken,
 		c.MaintenanceEntry, c.Notifier, c.PasswordResetTokens, c.Tag, c.TemplateField,
-		c.User, c.UserGroup, c.XEntityActivity, c.XIdleDigest, c.XImportCandidate,
-		c.XInboundAddress, c.XInboundMessage, c.XProject, c.XProjectPart,
+		c.User, c.UserGroup, c.XCaptureItem, c.XCapturePhoto, c.XCaptureSession,
+		c.XEntityActivity, c.XIdleDigest, c.XImportCandidate, c.XInboundAddress,
+		c.XInboundMessage, c.XProject, c.XProjectPart,
 	} {
 		n.Use(hooks...)
 	}
@@ -341,8 +360,9 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.APIKey, c.Attachment, c.AuthRoles, c.AuthTokens, c.Entity, c.EntityField,
 		c.EntityTemplate, c.EntityType, c.Export, c.Group, c.GroupInvitationToken,
 		c.MaintenanceEntry, c.Notifier, c.PasswordResetTokens, c.Tag, c.TemplateField,
-		c.User, c.UserGroup, c.XEntityActivity, c.XIdleDigest, c.XImportCandidate,
-		c.XInboundAddress, c.XInboundMessage, c.XProject, c.XProjectPart,
+		c.User, c.UserGroup, c.XCaptureItem, c.XCapturePhoto, c.XCaptureSession,
+		c.XEntityActivity, c.XIdleDigest, c.XImportCandidate, c.XInboundAddress,
+		c.XInboundMessage, c.XProject, c.XProjectPart,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -387,6 +407,12 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.User.mutate(ctx, m)
 	case *UserGroupMutation:
 		return c.UserGroup.mutate(ctx, m)
+	case *XCaptureItemMutation:
+		return c.XCaptureItem.mutate(ctx, m)
+	case *XCapturePhotoMutation:
+		return c.XCapturePhoto.mutate(ctx, m)
+	case *XCaptureSessionMutation:
+		return c.XCaptureSession.mutate(ctx, m)
 	case *XEntityActivityMutation:
 		return c.XEntityActivity.mutate(ctx, m)
 	case *XIdleDigestMutation:
@@ -3567,6 +3593,405 @@ func (c *UserGroupClient) mutate(ctx context.Context, m *UserGroupMutation) (Val
 	}
 }
 
+// XCaptureItemClient is a client for the XCaptureItem schema.
+type XCaptureItemClient struct {
+	config
+}
+
+// NewXCaptureItemClient returns a client for the XCaptureItem from the given config.
+func NewXCaptureItemClient(c config) *XCaptureItemClient {
+	return &XCaptureItemClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `xcaptureitem.Hooks(f(g(h())))`.
+func (c *XCaptureItemClient) Use(hooks ...Hook) {
+	c.hooks.XCaptureItem = append(c.hooks.XCaptureItem, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `xcaptureitem.Intercept(f(g(h())))`.
+func (c *XCaptureItemClient) Intercept(interceptors ...Interceptor) {
+	c.inters.XCaptureItem = append(c.inters.XCaptureItem, interceptors...)
+}
+
+// Create returns a builder for creating a XCaptureItem entity.
+func (c *XCaptureItemClient) Create() *XCaptureItemCreate {
+	mutation := newXCaptureItemMutation(c.config, OpCreate)
+	return &XCaptureItemCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of XCaptureItem entities.
+func (c *XCaptureItemClient) CreateBulk(builders ...*XCaptureItemCreate) *XCaptureItemCreateBulk {
+	return &XCaptureItemCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *XCaptureItemClient) MapCreateBulk(slice any, setFunc func(*XCaptureItemCreate, int)) *XCaptureItemCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &XCaptureItemCreateBulk{err: fmt.Errorf("calling to XCaptureItemClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*XCaptureItemCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &XCaptureItemCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for XCaptureItem.
+func (c *XCaptureItemClient) Update() *XCaptureItemUpdate {
+	mutation := newXCaptureItemMutation(c.config, OpUpdate)
+	return &XCaptureItemUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *XCaptureItemClient) UpdateOne(_m *XCaptureItem) *XCaptureItemUpdateOne {
+	mutation := newXCaptureItemMutation(c.config, OpUpdateOne, withXCaptureItem(_m))
+	return &XCaptureItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *XCaptureItemClient) UpdateOneID(id uuid.UUID) *XCaptureItemUpdateOne {
+	mutation := newXCaptureItemMutation(c.config, OpUpdateOne, withXCaptureItemID(id))
+	return &XCaptureItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for XCaptureItem.
+func (c *XCaptureItemClient) Delete() *XCaptureItemDelete {
+	mutation := newXCaptureItemMutation(c.config, OpDelete)
+	return &XCaptureItemDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *XCaptureItemClient) DeleteOne(_m *XCaptureItem) *XCaptureItemDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *XCaptureItemClient) DeleteOneID(id uuid.UUID) *XCaptureItemDeleteOne {
+	builder := c.Delete().Where(xcaptureitem.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &XCaptureItemDeleteOne{builder}
+}
+
+// Query returns a query builder for XCaptureItem.
+func (c *XCaptureItemClient) Query() *XCaptureItemQuery {
+	return &XCaptureItemQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeXCaptureItem},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a XCaptureItem entity by its id.
+func (c *XCaptureItemClient) Get(ctx context.Context, id uuid.UUID) (*XCaptureItem, error) {
+	return c.Query().Where(xcaptureitem.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *XCaptureItemClient) GetX(ctx context.Context, id uuid.UUID) *XCaptureItem {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *XCaptureItemClient) Hooks() []Hook {
+	return c.hooks.XCaptureItem
+}
+
+// Interceptors returns the client interceptors.
+func (c *XCaptureItemClient) Interceptors() []Interceptor {
+	return c.inters.XCaptureItem
+}
+
+func (c *XCaptureItemClient) mutate(ctx context.Context, m *XCaptureItemMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&XCaptureItemCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&XCaptureItemUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&XCaptureItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&XCaptureItemDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown XCaptureItem mutation op: %q", m.Op())
+	}
+}
+
+// XCapturePhotoClient is a client for the XCapturePhoto schema.
+type XCapturePhotoClient struct {
+	config
+}
+
+// NewXCapturePhotoClient returns a client for the XCapturePhoto from the given config.
+func NewXCapturePhotoClient(c config) *XCapturePhotoClient {
+	return &XCapturePhotoClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `xcapturephoto.Hooks(f(g(h())))`.
+func (c *XCapturePhotoClient) Use(hooks ...Hook) {
+	c.hooks.XCapturePhoto = append(c.hooks.XCapturePhoto, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `xcapturephoto.Intercept(f(g(h())))`.
+func (c *XCapturePhotoClient) Intercept(interceptors ...Interceptor) {
+	c.inters.XCapturePhoto = append(c.inters.XCapturePhoto, interceptors...)
+}
+
+// Create returns a builder for creating a XCapturePhoto entity.
+func (c *XCapturePhotoClient) Create() *XCapturePhotoCreate {
+	mutation := newXCapturePhotoMutation(c.config, OpCreate)
+	return &XCapturePhotoCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of XCapturePhoto entities.
+func (c *XCapturePhotoClient) CreateBulk(builders ...*XCapturePhotoCreate) *XCapturePhotoCreateBulk {
+	return &XCapturePhotoCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *XCapturePhotoClient) MapCreateBulk(slice any, setFunc func(*XCapturePhotoCreate, int)) *XCapturePhotoCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &XCapturePhotoCreateBulk{err: fmt.Errorf("calling to XCapturePhotoClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*XCapturePhotoCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &XCapturePhotoCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for XCapturePhoto.
+func (c *XCapturePhotoClient) Update() *XCapturePhotoUpdate {
+	mutation := newXCapturePhotoMutation(c.config, OpUpdate)
+	return &XCapturePhotoUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *XCapturePhotoClient) UpdateOne(_m *XCapturePhoto) *XCapturePhotoUpdateOne {
+	mutation := newXCapturePhotoMutation(c.config, OpUpdateOne, withXCapturePhoto(_m))
+	return &XCapturePhotoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *XCapturePhotoClient) UpdateOneID(id uuid.UUID) *XCapturePhotoUpdateOne {
+	mutation := newXCapturePhotoMutation(c.config, OpUpdateOne, withXCapturePhotoID(id))
+	return &XCapturePhotoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for XCapturePhoto.
+func (c *XCapturePhotoClient) Delete() *XCapturePhotoDelete {
+	mutation := newXCapturePhotoMutation(c.config, OpDelete)
+	return &XCapturePhotoDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *XCapturePhotoClient) DeleteOne(_m *XCapturePhoto) *XCapturePhotoDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *XCapturePhotoClient) DeleteOneID(id uuid.UUID) *XCapturePhotoDeleteOne {
+	builder := c.Delete().Where(xcapturephoto.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &XCapturePhotoDeleteOne{builder}
+}
+
+// Query returns a query builder for XCapturePhoto.
+func (c *XCapturePhotoClient) Query() *XCapturePhotoQuery {
+	return &XCapturePhotoQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeXCapturePhoto},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a XCapturePhoto entity by its id.
+func (c *XCapturePhotoClient) Get(ctx context.Context, id uuid.UUID) (*XCapturePhoto, error) {
+	return c.Query().Where(xcapturephoto.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *XCapturePhotoClient) GetX(ctx context.Context, id uuid.UUID) *XCapturePhoto {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *XCapturePhotoClient) Hooks() []Hook {
+	return c.hooks.XCapturePhoto
+}
+
+// Interceptors returns the client interceptors.
+func (c *XCapturePhotoClient) Interceptors() []Interceptor {
+	return c.inters.XCapturePhoto
+}
+
+func (c *XCapturePhotoClient) mutate(ctx context.Context, m *XCapturePhotoMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&XCapturePhotoCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&XCapturePhotoUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&XCapturePhotoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&XCapturePhotoDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown XCapturePhoto mutation op: %q", m.Op())
+	}
+}
+
+// XCaptureSessionClient is a client for the XCaptureSession schema.
+type XCaptureSessionClient struct {
+	config
+}
+
+// NewXCaptureSessionClient returns a client for the XCaptureSession from the given config.
+func NewXCaptureSessionClient(c config) *XCaptureSessionClient {
+	return &XCaptureSessionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `xcapturesession.Hooks(f(g(h())))`.
+func (c *XCaptureSessionClient) Use(hooks ...Hook) {
+	c.hooks.XCaptureSession = append(c.hooks.XCaptureSession, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `xcapturesession.Intercept(f(g(h())))`.
+func (c *XCaptureSessionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.XCaptureSession = append(c.inters.XCaptureSession, interceptors...)
+}
+
+// Create returns a builder for creating a XCaptureSession entity.
+func (c *XCaptureSessionClient) Create() *XCaptureSessionCreate {
+	mutation := newXCaptureSessionMutation(c.config, OpCreate)
+	return &XCaptureSessionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of XCaptureSession entities.
+func (c *XCaptureSessionClient) CreateBulk(builders ...*XCaptureSessionCreate) *XCaptureSessionCreateBulk {
+	return &XCaptureSessionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *XCaptureSessionClient) MapCreateBulk(slice any, setFunc func(*XCaptureSessionCreate, int)) *XCaptureSessionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &XCaptureSessionCreateBulk{err: fmt.Errorf("calling to XCaptureSessionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*XCaptureSessionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &XCaptureSessionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for XCaptureSession.
+func (c *XCaptureSessionClient) Update() *XCaptureSessionUpdate {
+	mutation := newXCaptureSessionMutation(c.config, OpUpdate)
+	return &XCaptureSessionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *XCaptureSessionClient) UpdateOne(_m *XCaptureSession) *XCaptureSessionUpdateOne {
+	mutation := newXCaptureSessionMutation(c.config, OpUpdateOne, withXCaptureSession(_m))
+	return &XCaptureSessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *XCaptureSessionClient) UpdateOneID(id uuid.UUID) *XCaptureSessionUpdateOne {
+	mutation := newXCaptureSessionMutation(c.config, OpUpdateOne, withXCaptureSessionID(id))
+	return &XCaptureSessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for XCaptureSession.
+func (c *XCaptureSessionClient) Delete() *XCaptureSessionDelete {
+	mutation := newXCaptureSessionMutation(c.config, OpDelete)
+	return &XCaptureSessionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *XCaptureSessionClient) DeleteOne(_m *XCaptureSession) *XCaptureSessionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *XCaptureSessionClient) DeleteOneID(id uuid.UUID) *XCaptureSessionDeleteOne {
+	builder := c.Delete().Where(xcapturesession.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &XCaptureSessionDeleteOne{builder}
+}
+
+// Query returns a query builder for XCaptureSession.
+func (c *XCaptureSessionClient) Query() *XCaptureSessionQuery {
+	return &XCaptureSessionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeXCaptureSession},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a XCaptureSession entity by its id.
+func (c *XCaptureSessionClient) Get(ctx context.Context, id uuid.UUID) (*XCaptureSession, error) {
+	return c.Query().Where(xcapturesession.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *XCaptureSessionClient) GetX(ctx context.Context, id uuid.UUID) *XCaptureSession {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *XCaptureSessionClient) Hooks() []Hook {
+	return c.hooks.XCaptureSession
+}
+
+// Interceptors returns the client interceptors.
+func (c *XCaptureSessionClient) Interceptors() []Interceptor {
+	return c.inters.XCaptureSession
+}
+
+func (c *XCaptureSessionClient) mutate(ctx context.Context, m *XCaptureSessionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&XCaptureSessionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&XCaptureSessionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&XCaptureSessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&XCaptureSessionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown XCaptureSession mutation op: %q", m.Op())
+	}
+}
+
 // XEntityActivityClient is a client for the XEntityActivity schema.
 type XEntityActivityClient struct {
 	config
@@ -4567,15 +4992,15 @@ type (
 	hooks struct {
 		APIKey, Attachment, AuthRoles, AuthTokens, Entity, EntityField, EntityTemplate,
 		EntityType, Export, Group, GroupInvitationToken, MaintenanceEntry, Notifier,
-		PasswordResetTokens, Tag, TemplateField, User, UserGroup, XEntityActivity,
-		XIdleDigest, XImportCandidate, XInboundAddress, XInboundMessage, XProject,
-		XProjectPart []ent.Hook
+		PasswordResetTokens, Tag, TemplateField, User, UserGroup, XCaptureItem,
+		XCapturePhoto, XCaptureSession, XEntityActivity, XIdleDigest, XImportCandidate,
+		XInboundAddress, XInboundMessage, XProject, XProjectPart []ent.Hook
 	}
 	inters struct {
 		APIKey, Attachment, AuthRoles, AuthTokens, Entity, EntityField, EntityTemplate,
 		EntityType, Export, Group, GroupInvitationToken, MaintenanceEntry, Notifier,
-		PasswordResetTokens, Tag, TemplateField, User, UserGroup, XEntityActivity,
-		XIdleDigest, XImportCandidate, XInboundAddress, XInboundMessage, XProject,
-		XProjectPart []ent.Interceptor
+		PasswordResetTokens, Tag, TemplateField, User, UserGroup, XCaptureItem,
+		XCapturePhoto, XCaptureSession, XEntityActivity, XIdleDigest, XImportCandidate,
+		XInboundAddress, XInboundMessage, XProject, XProjectPart []ent.Interceptor
 	}
 )
