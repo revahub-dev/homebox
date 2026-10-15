@@ -1,0 +1,22 @@
+{
+  "extName": { "message": "Homebox Duplicate Check" },
+  "extDescription": { "message": "Shows whether you already own a product in your Homebox inventory while shopping." },
+  "badgeExact": { "message": "You own $COUNT$ (exact)", "placeholders": { "count": { "content": "$1" } } },
+  "badgeLikely": { "message": "You likely own $COUNT$", "placeholders": { "count": { "content": "$1" } } },
+  "badgeSimilar": { "message": "Similar: $COUNT$", "placeholders": { "count": { "content": "$1" } } },
+  "badgeOpen": { "message": "Open in Homebox" },
+  "badgeDismiss": { "message": "Dismiss" },
+  "optionsTitle": { "message": "Homebox Duplicate Check settings" },
+  "optionsServerUrl": { "message": "Homebox server URL" },
+  "optionsApiKey": { "message": "API key" },
+  "optionsApiKeyHelp": { "message": "Create an API key in Homebox under Profile. It is stored only in this browser." },
+  "optionsSave": { "message": "Save" },
+  "optionsTest": { "message": "Test connection" },
+  "optionsSaved": { "message": "Saved." },
+  "optionsPermissionDenied": { "message": "Permission to access the server was not granted." },
+  "optionsInvalidUrl": { "message": "Enter a valid http(s) URL." },
+  "optionsTestOk": { "message": "Connected as $NAME$.", "placeholders": { "name": { "content": "$1" } } },
+  "optionsTestUnauthorized": { "message": "The server rejected the API key." },
+  "optionsTestFailed": { "message": "Could not reach the server." },
+  "optionsNotConfigured": { "message": "Save a server URL and API key first." }
+}

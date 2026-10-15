@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title data-i18n="optionsTitle"></title>
+  <style>
+    body{font:14px system-ui,sans-serif;max-width:520px;margin:32px auto;padding:0 16px;color:#101828}
+    label{display:block;margin-top:16px;font-weight:600} input{width:100%;padding:6px;box-sizing:border-box;margin-top:4px}
+    small{color:#667085} .row{margin-top:20px;display:flex;gap:8px} #status{margin-top:12px;min-height:1.4em}
+  </style>
+</head>
+<body>
+  <h1 data-i18n="optionsTitle"></h1>
+  <label for="serverUrl" data-i18n="optionsServerUrl"></label>
+  <input id="serverUrl" type="url" placeholder="https://homebox.example.com" autocomplete="off" />
+  <label for="apiKey" data-i18n="optionsApiKey"></label>
+  <input id="apiKey" type="password" autocomplete="off" />
+  <small data-i18n="optionsApiKeyHelp"></small>
+  <div class="row">
+    <button id="save" data-i18n="optionsSave"></button>
+    <button id="test" data-i18n="optionsTest"></button>
+  </div>
+  <div id="status" role="status"></div>
+  <script src="options.js"></script>
+</body>
+</html>
