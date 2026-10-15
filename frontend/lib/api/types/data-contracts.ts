@@ -1395,6 +1395,68 @@ export interface XImportCandidate {
   url: string;
 }
 
+export interface XInvItem {
+  createdAt: Date | string;
+  description: string;
+  forSale: boolean;
+  id: string;
+  /** LastTouchedAt is the latest of created, edited and used. */
+  lastTouchedAt: string;
+  lastUsedAt?: string | null;
+  locationPath: string;
+  name: string;
+  purchaseDate?: string | null;
+  purchasePrice: number;
+  quantity: number;
+  /** ReservedQuantity is the total reserved by saved projects. */
+  reservedQuantity: number;
+  saleDraft: string;
+  snoozedUntil?: string | null;
+  updatedAt: Date | string;
+  useCount: number;
+}
+
+export interface XMissingPart {
+  name: string;
+  note: string;
+  quantity: number;
+}
+
+export interface XProjectIn {
+  buildStatus: "buildable_now" | "missing_parts";
+  description: string;
+  missingParts: XMissingPart[];
+  /** @maxLength 255 */
+  name: string;
+  ownedParts: XProjectPartIn[];
+  steps: string[];
+}
+
+export interface XProjectOut {
+  buildStatus: string;
+  createdAt: Date | string;
+  description: string;
+  id: string;
+  missingParts: XMissingPart[];
+  name: string;
+  parts: XProjectPartOut[];
+  steps: string[];
+}
+
+export interface XProjectPartIn {
+  entityId: string;
+  quantity: number;
+  /** @maxLength 255 */
+  role: string;
+}
+
+export interface XProjectPartOut {
+  entityId: string;
+  name: string;
+  quantity: number;
+  role: string;
+}
+
 export interface Latest {
   date: Date | string;
   version: string;
@@ -1405,6 +1467,31 @@ export interface UserRegistration {
   name: string;
   password: string;
   token: string;
+}
+
+export interface UsebuildBuildResult {
+  ideas: UsebuildIdea[];
+  itemsSent: number;
+  itemsTotal: number;
+  truncated: boolean;
+}
+
+export interface UsebuildIdea {
+  description: string;
+  /** DroppedRefs counts owned-part references the model invented. */
+  droppedRefs: number;
+  missingParts: XMissingPart[];
+  ownedParts: UsebuildOwnedPart[];
+  status: "buildable_now" | "missing_parts";
+  steps: string[];
+  title: string;
+}
+
+export interface UsebuildOwnedPart {
+  entityId: string;
+  name: string;
+  quantity: number;
+  role: string;
 }
 
 export interface APISummary {
@@ -1429,6 +1516,15 @@ export interface Build {
   buildTime: string;
   commit: string;
   version: string;
+}
+
+export interface BuildStatus {
+  aiEnabled: boolean;
+}
+
+export interface BuildSuggestInput {
+  locationId?: string | null;
+  tagId?: string | null;
 }
 
 export interface ChangePassword {
@@ -1527,6 +1623,14 @@ export interface GroupInvitationCreate {
   uses: number;
 }
 
+export interface IdleList {
+  aiEnabled: boolean;
+  days: number;
+  forSale: XInvItem[];
+  items: XInvItem[];
+  snoozeDays: number;
+}
+
 export interface ImportFileResult {
   error: string;
   fileName: string;
@@ -1579,6 +1683,12 @@ export interface ResetPasswordRequest {
 
 export interface ResultsRepoExportOut {
   items: ExportOut[];
+}
+
+export interface SaleDraftOut {
+  draft: string;
+  generated: boolean;
+  suggestedPrice: number;
 }
 
 export interface TelemetryStatus {

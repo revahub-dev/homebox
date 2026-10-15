@@ -66,6 +66,9 @@ type Config struct {
 	Search     SearchConf     `yaml:"search"`
 	// Fork: order import (see FORK_NOTES.md)
 	OrderImport OrderImportConf `yaml:"order_import"`
+	// Fork: shared AI endpoint and idle-item nudges (see FORK_NOTES.md)
+	AI   AIConf   `yaml:"ai"`
+	Idle IdleConf `yaml:"idle"`
 }
 
 // SearchConf selects and configures the free-text search engine. The default
@@ -246,6 +249,47 @@ func (c OrderImportConf) MarshalJSON() ([]byte, error) {
 		a.LLMApiKey = redactedValue
 	}
 	return json.Marshal(a)
+}
+
+// AIConf is the fork's shared OpenAI-compatible endpoint (HBOX_AI_*), used by
+// "What can I build?" and sale-listing drafts. When BaseURL/Model are empty
+// the order-import LLM settings (HBOX_ORDER_IMPORT_LLM_*) are used instead.
+type AIConf struct {
+	BaseURL    string `yaml:"base_url"`
+	APIKey     string `yaml:"api_key"`
+	Model      string `yaml:"model"`
+	TimeoutSec int    `yaml:"timeout_sec" conf:"default:90"`
+}
+
+func (c AIConf) MarshalJSON() ([]byte, error) {
+	type alias AIConf
+	a := alias(c)
+	if a.APIKey != "" {
+		a.APIKey = redactedValue
+	}
+	return json.Marshal(a)
+}
+
+// AIResolved returns the effective AI settings, falling back to the
+// order-import LLM configuration.
+func (c *Config) AIResolved() AIConf {
+	a := c.AI
+	if a.BaseURL == "" || a.Model == "" {
+		a.BaseURL, a.APIKey, a.Model = c.OrderImport.LLMBaseURL, c.OrderImport.LLMApiKey, c.OrderImport.LLMModel
+	}
+	if a.TimeoutSec <= 0 {
+		a.TimeoutSec = 90
+	}
+	return a
+}
+
+// IdleConf configures the weekly idle-item digest (HBOX_IDLE_*).
+type IdleConf struct {
+	Enabled      bool `yaml:"enabled"       conf:"default:true"`
+	Days         int  `yaml:"days"          conf:"default:180"`
+	DigestLimit  int  `yaml:"digest_limit"  conf:"default:10"`
+	SnoozeDays   int  `yaml:"snooze_days"   conf:"default:90"`
+	IntervalDays int  `yaml:"interval_days" conf:"default:7"`
 }
 
 type AuthConfig struct {

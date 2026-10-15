@@ -4,12 +4,15 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/hay-kot/httpkit/graceful"
 	"github.com/rs/zerolog/log"
+	"github.com/sysadminsmedia/homebox/backend/internal/core/services/x/usebuild"
 	"github.com/sysadminsmedia/homebox/backend/internal/sys/config"
+	"github.com/sysadminsmedia/homebox/backend/internal/sys/validate"
 	"github.com/sysadminsmedia/homebox/backend/pkgs/utils"
 	"gocloud.dev/blob"
 	"gocloud.dev/gcerrors"
@@ -65,6 +68,12 @@ func registerRecurringTasks(app *app, cfg *config.Config, runner *graceful.Runne
 				log.Error().Err(err).Msg("failed to send notifiers")
 			}
 		}
+	}))
+
+	// Fork: weekly idle-item digest (see internal/core/services/x/usebuild).
+	// Runs hourly; each collection gets at most one digest per HBOX_IDLE_INTERVAL_DAYS.
+	runner.AddPlugin(NewTask("x-idle-digest", time.Hour, func(ctx context.Context) {
+		runIdleDigest(ctx, app, cfg)
 	}))
 
 	runner.AddFunc("collection-export-subscription", func(ctx context.Context) error {
@@ -301,4 +310,27 @@ func purgeStaleExports(ctx context.Context, app *app) {
 		Int("purged", purged).
 		Int("candidates", len(candidates)).
 		Msg("purged stale collection exports")
+}
+
+// runIdleDigest is the fork's idle-item digest job body.
+func runIdleDigest(ctx context.Context, app *app, cfg *config.Config) {
+	job := &usebuild.DigestJob{
+		Repos: app.repos,
+		Conf:  cfg.Idle,
+		Notify: func(url, msg string) error {
+			if err := validate.ValidateNotifierURL(url, &cfg.Notifier); err != nil {
+				return err
+			}
+			return validate.SendNotifierMessage(url, msg, &cfg.Notifier)
+		},
+	}
+	if base := strings.TrimSuffix(cfg.Options.Hostname, "/"); base != "" {
+		if !strings.HasPrefix(base, "http://") && !strings.HasPrefix(base, "https://") {
+			base = "https://" + base
+		}
+		job.BaseURL = base
+	}
+	if err := job.Run(ctx, time.Now()); err != nil {
+		log.Error().Err(err).Msg("failed to send idle-item digest")
+	}
 }

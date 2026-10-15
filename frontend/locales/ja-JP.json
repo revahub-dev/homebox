@@ -512,10 +512,12 @@
         "total_entries": "合計項目数"
     },
     "menu": {
+        "build": "作る",
         "collection": "プロファイル",
         "create_item": "アイテム",
         "create_location": "場所",
         "home": "ホーム",
+        "idle_items": "使っていないアイテム",
         "locations": "ロケーション",
         "maintenance": "メンテナンス情報",
         "order_inbox": "注文インボックス",
@@ -774,6 +776,60 @@
             "too_many_files": "ファイルが多すぎます（最大{max}件）",
             "upload_failed": "アップロードに失敗しました",
             "uploaded": "{total}件中{imported}件を取り込みました"
+        }
+    },
+    "x_idle": {
+        "title": "使っていないアイテム",
+        "help": "{days}日以上使用・編集されていないアイテムです。「残す」を押すと{snooze}日間通知しません。",
+        "empty": "使っていないアイテムはありません。",
+        "untouched": "{days}日間未使用",
+        "keep": "残す",
+        "use": "使った",
+        "sell": "売る",
+        "archive": "アーカイブ",
+        "archive_confirm": "「{name}」をアーカイブしますか？一覧から非表示になりますが削除はされません。",
+        "mark_used": "使った",
+        "for_sale": "出品予定",
+        "draft_ai": "出品文はAIが作成した下書きです。投稿前に確認してください。自動では投稿されません。",
+        "draft_template": "出品文はテンプレートから作成した下書きです（AI未設定）。自動では投稿されません。",
+        "unsell": "出品しない",
+        "copy_draft": "下書きをコピー",
+        "toast": {
+            "load_failed": "読み込みに失敗しました",
+            "failed": "操作に失敗しました",
+            "keep": "通知を延期しました",
+            "use": "使用済みにしました",
+            "used": "使用済みにしました",
+            "sell": "出品予定にしました（下書きあり）",
+            "archive": "アーカイブしました",
+            "copied": "コピーしました"
+        }
+    },
+    "x_build": {
+        "button": "何が作れる？",
+        "title": "何が作れる？",
+        "page_title": "作る",
+        "page_help": "持っているもので作れるプロジェクトを提案します。対象アイテムの名前・数量・説明が設定済みのAIエンドポイントに送信されます。",
+        "all_inventory": "何が作れる？（全アイテム）",
+        "privacy": "アイテムの名前・数量・説明が設定済みのAIエンドポイントに送信されます。所有パーツは必ず実在のアイテムにリンクされます。",
+        "thinking": "考え中…",
+        "ai_disabled": "AIエンドポイントが設定されていません（HBOX_AI_* または HBOX_ORDER_IMPORT_LLM_*）。",
+        "no_items": "対象のアイテムがありません。",
+        "failed": "エラーが発生しました。もう一度お試しください。",
+        "truncated": "{total}件中{sent}件のみ送信しました。",
+        "owned": "所有",
+        "missing": "不足",
+        "save_project": "プロジェクトとして保存",
+        "saved": "保存しました",
+        "save_failed": "プロジェクトの保存に失敗しました",
+        "projects": "保存したプロジェクト",
+        "no_projects": "保存したプロジェクトはまだありません。",
+        "reserved": "確保したパーツ",
+        "delete": "削除",
+        "delete_confirm": "「{name}」を削除して確保したパーツを解放しますか？",
+        "status": {
+            "buildable_now": "今すぐ作れる",
+            "missing_parts": "パーツ不足"
         }
     }
 }

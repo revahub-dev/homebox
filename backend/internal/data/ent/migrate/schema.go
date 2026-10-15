@@ -637,6 +637,60 @@ var (
 			},
 		},
 	}
+	// XEntityActivitiesColumns holds the columns for the "x_entity_activities" table.
+	XEntityActivitiesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "group_id", Type: field.TypeUUID},
+		{Name: "entity_id", Type: field.TypeUUID},
+		{Name: "last_used_at", Type: field.TypeTime, Nullable: true},
+		{Name: "use_count", Type: field.TypeInt, Default: 0},
+		{Name: "snoozed_until", Type: field.TypeTime, Nullable: true},
+		{Name: "for_sale", Type: field.TypeBool, Default: false},
+		{Name: "sale_draft", Type: field.TypeString, Size: 2147483647, Default: ""},
+		{Name: "last_nudged_at", Type: field.TypeTime, Nullable: true},
+	}
+	// XEntityActivitiesTable holds the schema information for the "x_entity_activities" table.
+	XEntityActivitiesTable = &schema.Table{
+		Name:       "x_entity_activities",
+		Columns:    XEntityActivitiesColumns,
+		PrimaryKey: []*schema.Column{XEntityActivitiesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "xentityactivity_entity_id",
+				Unique:  true,
+				Columns: []*schema.Column{XEntityActivitiesColumns[4]},
+			},
+			{
+				Name:    "xentityactivity_group_id",
+				Unique:  false,
+				Columns: []*schema.Column{XEntityActivitiesColumns[3]},
+			},
+		},
+	}
+	// XIdleDigestsColumns holds the columns for the "x_idle_digests" table.
+	XIdleDigestsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "group_id", Type: field.TypeUUID},
+		{Name: "last_sent_at", Type: field.TypeTime},
+		{Name: "item_count", Type: field.TypeInt, Default: 0},
+	}
+	// XIdleDigestsTable holds the schema information for the "x_idle_digests" table.
+	XIdleDigestsTable = &schema.Table{
+		Name:       "x_idle_digests",
+		Columns:    XIdleDigestsColumns,
+		PrimaryKey: []*schema.Column{XIdleDigestsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "xidledigest_group_id",
+				Unique:  true,
+				Columns: []*schema.Column{XIdleDigestsColumns[3]},
+			},
+		},
+	}
 	// XImportCandidatesColumns holds the columns for the "x_import_candidates" table.
 	XImportCandidatesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -757,6 +811,67 @@ var (
 			},
 		},
 	}
+	// XProjectsColumns holds the columns for the "x_projects" table.
+	XProjectsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "group_id", Type: field.TypeUUID},
+		{Name: "name", Type: field.TypeString, Size: 255},
+		{Name: "description", Type: field.TypeString, Size: 2147483647, Default: ""},
+		{Name: "build_status", Type: field.TypeEnum, Enums: []string{"buildable_now", "missing_parts"}, Default: "missing_parts"},
+		{Name: "steps", Type: field.TypeString, Size: 2147483647, Default: "[]"},
+		{Name: "missing_parts", Type: field.TypeString, Size: 2147483647, Default: "[]"},
+	}
+	// XProjectsTable holds the schema information for the "x_projects" table.
+	XProjectsTable = &schema.Table{
+		Name:       "x_projects",
+		Columns:    XProjectsColumns,
+		PrimaryKey: []*schema.Column{XProjectsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "xproject_group_id",
+				Unique:  false,
+				Columns: []*schema.Column{XProjectsColumns[3]},
+			},
+		},
+	}
+	// XProjectPartsColumns holds the columns for the "x_project_parts" table.
+	XProjectPartsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "entity_id", Type: field.TypeUUID},
+		{Name: "quantity", Type: field.TypeFloat64, Default: 1},
+		{Name: "role", Type: field.TypeString, Size: 255, Default: ""},
+		{Name: "project_id", Type: field.TypeUUID},
+	}
+	// XProjectPartsTable holds the schema information for the "x_project_parts" table.
+	XProjectPartsTable = &schema.Table{
+		Name:       "x_project_parts",
+		Columns:    XProjectPartsColumns,
+		PrimaryKey: []*schema.Column{XProjectPartsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "x_project_parts_x_projects_parts",
+				Columns:    []*schema.Column{XProjectPartsColumns[6]},
+				RefColumns: []*schema.Column{XProjectsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "xprojectpart_entity_id",
+				Unique:  false,
+				Columns: []*schema.Column{XProjectPartsColumns[3]},
+			},
+			{
+				Name:    "xprojectpart_project_id_entity_id",
+				Unique:  true,
+				Columns: []*schema.Column{XProjectPartsColumns[6], XProjectPartsColumns[3]},
+			},
+		},
+	}
 	// TagEntitiesColumns holds the columns for the "tag_entities" table.
 	TagEntitiesColumns = []*schema.Column{
 		{Name: "tag_id", Type: field.TypeUUID},
@@ -802,9 +917,13 @@ var (
 		TemplateFieldsTable,
 		UsersTable,
 		UserGroupsTable,
+		XEntityActivitiesTable,
+		XIdleDigestsTable,
 		XImportCandidatesTable,
 		XInboundAddressesTable,
 		XInboundMessagesTable,
+		XProjectsTable,
+		XProjectPartsTable,
 		TagEntitiesTable,
 	}
 )
@@ -838,6 +957,12 @@ func init() {
 	UserGroupsTable.Annotation = &entsql.Annotation{
 		Table: "user_groups",
 	}
+	XEntityActivitiesTable.Annotation = &entsql.Annotation{
+		Table: "x_entity_activities",
+	}
+	XIdleDigestsTable.Annotation = &entsql.Annotation{
+		Table: "x_idle_digests",
+	}
 	XImportCandidatesTable.ForeignKeys[0].RefTable = XInboundMessagesTable
 	XImportCandidatesTable.Annotation = &entsql.Annotation{
 		Table: "x_import_candidates",
@@ -847,6 +972,13 @@ func init() {
 	}
 	XInboundMessagesTable.Annotation = &entsql.Annotation{
 		Table: "x_inbound_messages",
+	}
+	XProjectsTable.Annotation = &entsql.Annotation{
+		Table: "x_projects",
+	}
+	XProjectPartsTable.ForeignKeys[0].RefTable = XProjectsTable
+	XProjectPartsTable.Annotation = &entsql.Annotation{
+		Table: "x_project_parts",
 	}
 	TagEntitiesTable.ForeignKeys[0].RefTable = TagsTable
 	TagEntitiesTable.ForeignKeys[1].RefTable = EntitiesTable

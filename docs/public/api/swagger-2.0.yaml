@@ -2294,6 +2294,130 @@ definitions:
       url:
         type: string
     type: object
+  repo.XInvItem:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      forSale:
+        type: boolean
+      id:
+        type: string
+      lastTouchedAt:
+        description: LastTouchedAt is the latest of created, edited and used.
+        type: string
+      lastUsedAt:
+        type: string
+        x-nullable: true
+      locationPath:
+        type: string
+      name:
+        type: string
+      purchaseDate:
+        type: string
+        x-nullable: true
+      purchasePrice:
+        type: number
+      quantity:
+        type: number
+      reservedQuantity:
+        description: ReservedQuantity is the total reserved by saved projects.
+        type: number
+      saleDraft:
+        type: string
+      snoozedUntil:
+        type: string
+        x-nullable: true
+      updatedAt:
+        type: string
+      useCount:
+        type: integer
+    type: object
+  repo.XMissingPart:
+    properties:
+      name:
+        type: string
+      note:
+        type: string
+      quantity:
+        type: number
+    type: object
+  repo.XProjectIn:
+    properties:
+      buildStatus:
+        enum:
+        - buildable_now
+        - missing_parts
+        type: string
+      description:
+        type: string
+      missingParts:
+        items:
+          $ref: '#/definitions/repo.XMissingPart'
+        type: array
+      name:
+        maxLength: 255
+        type: string
+      ownedParts:
+        items:
+          $ref: '#/definitions/repo.XProjectPartIn'
+        type: array
+      steps:
+        items:
+          type: string
+        type: array
+    required:
+    - name
+    type: object
+  repo.XProjectOut:
+    properties:
+      buildStatus:
+        type: string
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      missingParts:
+        items:
+          $ref: '#/definitions/repo.XMissingPart'
+        type: array
+      name:
+        type: string
+      parts:
+        items:
+          $ref: '#/definitions/repo.XProjectPartOut'
+        type: array
+      steps:
+        items:
+          type: string
+        type: array
+    type: object
+  repo.XProjectPartIn:
+    properties:
+      entityId:
+        type: string
+      quantity:
+        type: number
+      role:
+        maxLength: 255
+        type: string
+    required:
+    - entityId
+    type: object
+  repo.XProjectPartOut:
+    properties:
+      entityId:
+        type: string
+      name:
+        type: string
+      quantity:
+        type: number
+      role:
+        type: string
+    type: object
   services.Latest:
     properties:
       date:
@@ -2324,6 +2448,57 @@ definitions:
     - TypeNumber
     - TypeBoolean
     - TypeTime
+  usebuild.BuildResult:
+    properties:
+      ideas:
+        items:
+          $ref: '#/definitions/usebuild.Idea'
+        type: array
+      itemsSent:
+        type: integer
+      itemsTotal:
+        type: integer
+      truncated:
+        type: boolean
+    type: object
+  usebuild.Idea:
+    properties:
+      description:
+        type: string
+      droppedRefs:
+        description: DroppedRefs counts owned-part references the model invented.
+        type: integer
+      missingParts:
+        items:
+          $ref: '#/definitions/repo.XMissingPart'
+        type: array
+      ownedParts:
+        items:
+          $ref: '#/definitions/usebuild.OwnedPart'
+        type: array
+      status:
+        enum:
+        - buildable_now
+        - missing_parts
+        type: string
+      steps:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+    type: object
+  usebuild.OwnedPart:
+    properties:
+      entityId:
+        type: string
+      name:
+        type: string
+      quantity:
+        type: number
+      role:
+        type: string
+    type: object
   usergroup.Role:
     enum:
     - user
@@ -2374,6 +2549,20 @@ definitions:
         type: string
       version:
         type: string
+    type: object
+  v1.BuildStatus:
+    properties:
+      aiEnabled:
+        type: boolean
+    type: object
+  v1.BuildSuggestInput:
+    properties:
+      locationId:
+        type: string
+        x-nullable: true
+      tagId:
+        type: string
+        x-nullable: true
     type: object
   v1.ChangePassword:
     properties:
@@ -2521,6 +2710,23 @@ definitions:
     required:
     - uses
     type: object
+  v1.IdleList:
+    properties:
+      aiEnabled:
+        type: boolean
+      days:
+        type: integer
+      forSale:
+        items:
+          $ref: '#/definitions/repo.XInvItem'
+        type: array
+      items:
+        items:
+          $ref: '#/definitions/repo.XInvItem'
+        type: array
+      snoozeDays:
+        type: integer
+    type: object
   v1.ImportFileResult:
     properties:
       error:
@@ -2612,6 +2818,15 @@ definitions:
         items:
           $ref: '#/definitions/repo.ExportOut'
         type: array
+    type: object
+  v1.SaleDraftOut:
+    properties:
+      draft:
+        type: string
+      generated:
+        type: boolean
+      suggestedPrice:
+        type: integer
     type: object
   v1.TelemetryStatus:
     properties:
@@ -2782,6 +2997,105 @@ paths:
       summary: Get Item by Asset ID
       tags:
       - Items
+  /v1/build/projects:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/repo.XProjectOut'
+            type: array
+      security:
+      - Bearer: []
+      summary: List saved projects (with reserved parts)
+      tags:
+      - Use & Build
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Project
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/repo.XProjectIn'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/repo.XProjectOut'
+      security:
+      - Bearer: []
+      summary: Save an idea as a project and reserve its owned parts
+      tags:
+      - Use & Build
+  /v1/build/projects/{id}:
+    delete:
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      security:
+      - Bearer: []
+      summary: Delete a project and release its reserved parts
+      tags:
+      - Use & Build
+  /v1/build/status:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.BuildStatus'
+      security:
+      - Bearer: []
+      summary: Whether "What can I build?" is available (an LLM is configured)
+      tags:
+      - Use & Build
+  /v1/build/suggest:
+    post:
+      consumes:
+      - application/json
+      description: Sends the owned items in scope (names, quantities, descriptions)
+        to the configured OpenAI-compatible LLM and returns 3-5 validated project
+        ideas. Owned parts always reference real item IDs; invented references are
+        dropped. 503 when no LLM is configured.
+      parameters:
+      - description: Scope
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/v1.BuildSuggestInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/usebuild.BuildResult'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/validate.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: What can I build?
+      tags:
+      - Use & Build
   /v1/currencies:
     get:
       produces:
@@ -3824,6 +4138,113 @@ paths:
       summary: Get Tags Statistics
       tags:
       - Statistics
+  /v1/idle:
+    get:
+      parameters:
+      - description: max idle items (default 100)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.IdleList'
+      security:
+      - Bearer: []
+      summary: List idle items (untouched for HBOX_IDLE_DAYS) and items marked for
+        sale
+      tags:
+      - Use & Build
+  /v1/idle/{id}/archive:
+    post:
+      parameters:
+      - description: Entity ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      security:
+      - Bearer: []
+      summary: Archive an idle item
+      tags:
+      - Use & Build
+  /v1/idle/{id}/keep:
+    post:
+      parameters:
+      - description: Entity ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      security:
+      - Bearer: []
+      summary: Keep an idle item (snooze nudges for HBOX_IDLE_SNOOZE_DAYS, default
+        90)
+      tags:
+      - Use & Build
+  /v1/idle/{id}/sell:
+    post:
+      description: Uses the LLM when configured, otherwise a template. Nothing is
+        posted anywhere.
+      parameters:
+      - description: Entity ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.SaleDraftOut'
+      security:
+      - Bearer: []
+      summary: Mark an item for sale and draft a Mercari-style listing
+      tags:
+      - Use & Build
+  /v1/idle/{id}/unsell:
+    post:
+      parameters:
+      - description: Entity ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      security:
+      - Bearer: []
+      summary: Remove the for-sale mark from an item
+      tags:
+      - Use & Build
+  /v1/idle/{id}/use:
+    post:
+      parameters:
+      - description: Entity ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      security:
+      - Bearer: []
+      summary: Mark an item as used (resets its idle timer)
+      tags:
+      - Use & Build
   /v1/import/candidates:
     get:
       parameters:

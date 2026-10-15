@@ -30,9 +30,13 @@ import (
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/templatefield"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/user"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/usergroup"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xentityactivity"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xidledigest"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/ximportcandidate"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xinboundaddress"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xinboundmessage"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xproject"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xprojectpart"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -111,9 +115,13 @@ func checkColumn(t, c string) error {
 			templatefield.Table:        templatefield.ValidColumn,
 			user.Table:                 user.ValidColumn,
 			usergroup.Table:            usergroup.ValidColumn,
+			xentityactivity.Table:      xentityactivity.ValidColumn,
+			xidledigest.Table:          xidledigest.ValidColumn,
 			ximportcandidate.Table:     ximportcandidate.ValidColumn,
 			xinboundaddress.Table:      xinboundaddress.ValidColumn,
 			xinboundmessage.Table:      xinboundmessage.ValidColumn,
+			xproject.Table:             xproject.ValidColumn,
+			xprojectpart.Table:         xprojectpart.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

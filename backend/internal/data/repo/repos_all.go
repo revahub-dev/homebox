@@ -25,6 +25,8 @@ type AllRepos struct {
 	Exports             *ExportRepository
 	// Fork: order import
 	XOrderImport *XOrderImportRepository
+	// Fork: use & build
+	XUseBuild *XUseBuildRepository
 }
 
 // New constructs the repository container. searchEngine selects the free-text
@@ -49,5 +51,6 @@ func New(db *ent.Client, bus *eventbus.EventBus, storage config.Storage, pubSubC
 		Notifiers:           NewNotifierRepository(db),
 		Exports:             &ExportRepository{db},
 		XOrderImport:        NewXOrderImportRepository(db),
+		XUseBuild:           NewXUseBuildRepository(db),
 	}
 }

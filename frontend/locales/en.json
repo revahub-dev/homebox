@@ -780,11 +780,13 @@
         "total_entries": "Total Entries"
     },
     "menu": {
+        "build": "Build",
         "collection": "Collection",
         "create_item": "Item / Asset",
         "create_location": "Location",
         "create_tag": "Tag",
         "home": "Home",
+        "idle_items": "Idle items",
         "locations": "Locations",
         "maintenance": "Maintenance",
         "order_inbox": "Order inbox",
@@ -1128,6 +1130,60 @@
             "too_many_files": "Too many files (max {max})",
             "upload_failed": "Upload failed",
             "uploaded": "Imported {imported} of {total} files"
+        }
+    },
+    "x_idle": {
+        "title": "Idle items",
+        "help": "Items not used or edited for {days}+ days. Keep snoozes reminders for {snooze} days.",
+        "empty": "Nothing idle. Nice!",
+        "untouched": "untouched for {days} days",
+        "keep": "Keep",
+        "use": "Use",
+        "sell": "Sell",
+        "archive": "Archive",
+        "archive_confirm": "Archive \"{name}\"? It will be hidden from lists but not deleted.",
+        "mark_used": "Mark used",
+        "for_sale": "Marked for sale",
+        "draft_ai": "Listing drafts were written by the AI. Check them before posting; nothing is posted automatically.",
+        "draft_template": "Listing drafts use a simple template (no AI configured). Nothing is posted automatically.",
+        "unsell": "Not selling",
+        "copy_draft": "Copy draft",
+        "toast": {
+            "load_failed": "Failed to load idle items",
+            "failed": "Action failed",
+            "keep": "Snoozed",
+            "use": "Marked as used",
+            "used": "Marked as used",
+            "sell": "Marked for sale, draft ready",
+            "archive": "Archived",
+            "copied": "Copied"
+        }
+    },
+    "x_build": {
+        "button": "What can I build?",
+        "title": "What can I build?",
+        "page_title": "Build",
+        "page_help": "Get project ideas from what you already own. Item names, quantities and descriptions in scope are sent to the configured AI endpoint.",
+        "all_inventory": "What can I build? (all inventory)",
+        "privacy": "Item names, quantities and descriptions are sent to your configured AI endpoint. Owned parts always link to your real items.",
+        "thinking": "Thinking…",
+        "ai_disabled": "No AI endpoint is configured (HBOX_AI_* or HBOX_ORDER_IMPORT_LLM_*).",
+        "no_items": "There are no items in this scope.",
+        "failed": "Something went wrong. Please try again.",
+        "truncated": "Only {sent} of {total} items were sent.",
+        "owned": "You own",
+        "missing": "Missing",
+        "save_project": "Save as project",
+        "saved": "Saved",
+        "save_failed": "Failed to save the project",
+        "projects": "Saved projects",
+        "no_projects": "No saved projects yet.",
+        "reserved": "Reserved parts",
+        "delete": "Delete",
+        "delete_confirm": "Delete \"{name}\" and release its reserved parts?",
+        "status": {
+            "buildable_now": "Buildable now",
+            "missing_parts": "Missing parts"
         }
     }
 }

@@ -60,6 +60,12 @@ type User func(*sql.Selector)
 // UserGroup is the predicate function for usergroup builders.
 type UserGroup func(*sql.Selector)
 
+// XEntityActivity is the predicate function for xentityactivity builders.
+type XEntityActivity func(*sql.Selector)
+
+// XIdleDigest is the predicate function for xidledigest builders.
+type XIdleDigest func(*sql.Selector)
+
 // XImportCandidate is the predicate function for ximportcandidate builders.
 type XImportCandidate func(*sql.Selector)
 
@@ -68,3 +74,9 @@ type XInboundAddress func(*sql.Selector)
 
 // XInboundMessage is the predicate function for xinboundmessage builders.
 type XInboundMessage func(*sql.Selector)
+
+// XProject is the predicate function for xproject builders.
+type XProject func(*sql.Selector)
+
+// XProjectPart is the predicate function for xprojectpart builders.
+type XProjectPart func(*sql.Selector)

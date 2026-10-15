@@ -225,6 +225,30 @@ func (f UserGroupFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, e
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserGroupMutation", m)
 }
 
+// The XEntityActivityFunc type is an adapter to allow the use of ordinary
+// function as XEntityActivity mutator.
+type XEntityActivityFunc func(context.Context, *ent.XEntityActivityMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f XEntityActivityFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.XEntityActivityMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.XEntityActivityMutation", m)
+}
+
+// The XIdleDigestFunc type is an adapter to allow the use of ordinary
+// function as XIdleDigest mutator.
+type XIdleDigestFunc func(context.Context, *ent.XIdleDigestMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f XIdleDigestFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.XIdleDigestMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.XIdleDigestMutation", m)
+}
+
 // The XImportCandidateFunc type is an adapter to allow the use of ordinary
 // function as XImportCandidate mutator.
 type XImportCandidateFunc func(context.Context, *ent.XImportCandidateMutation) (ent.Value, error)
@@ -259,6 +283,30 @@ func (f XInboundMessageFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Va
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.XInboundMessageMutation", m)
+}
+
+// The XProjectFunc type is an adapter to allow the use of ordinary
+// function as XProject mutator.
+type XProjectFunc func(context.Context, *ent.XProjectMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f XProjectFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.XProjectMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.XProjectMutation", m)
+}
+
+// The XProjectPartFunc type is an adapter to allow the use of ordinary
+// function as XProjectPart mutator.
+type XProjectPartFunc func(context.Context, *ent.XProjectPartMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f XProjectPartFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.XProjectPartMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.XProjectPartMutation", m)
 }
 
 // Condition is a hook condition function.
