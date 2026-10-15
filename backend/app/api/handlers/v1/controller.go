@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -15,6 +16,7 @@ import (
 	"github.com/sysadminsmedia/homebox/backend/app/api/providers"
 	"github.com/sysadminsmedia/homebox/backend/internal/core/services"
 	"github.com/sysadminsmedia/homebox/backend/internal/core/services/reporting/eventbus"
+	"github.com/sysadminsmedia/homebox/backend/internal/core/services/x/capture"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/repo"
 	"github.com/sysadminsmedia/homebox/backend/internal/sys/config"
 	"github.com/sysadminsmedia/homebox/backend/internal/sys/validate"
@@ -88,6 +90,13 @@ func WithSecureCookies(secure bool) func(*V1Controller) {
 	}
 }
 
+// WithCapture injects the photo-capture service (fork).
+func WithCapture(svc *capture.Service) func(*V1Controller) {
+	return func(ctrl *V1Controller) {
+		ctrl.capture = svc
+	}
+}
+
 func WithURL(url string) func(*V1Controller) {
 	return func(ctrl *V1Controller) {
 		ctrl.url = url
@@ -107,6 +116,10 @@ type V1Controller struct {
 	cookieSecure      bool
 	isDemo            bool
 	allowRegistration bool
+
+	// Fork: photo capture service (shared with the background worker).
+	capture     *capture.Service
+	captureOnce sync.Once
 }
 
 type (

@@ -30,6 +30,9 @@ import (
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/templatefield"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/user"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/usergroup"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xcaptureitem"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xcapturephoto"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xcapturesession"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xentityactivity"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xidledigest"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/ximportcandidate"
@@ -115,6 +118,9 @@ func checkColumn(t, c string) error {
 			templatefield.Table:        templatefield.ValidColumn,
 			user.Table:                 user.ValidColumn,
 			usergroup.Table:            usergroup.ValidColumn,
+			xcaptureitem.Table:         xcaptureitem.ValidColumn,
+			xcapturephoto.Table:        xcapturephoto.ValidColumn,
+			xcapturesession.Table:      xcapturesession.ValidColumn,
 			xentityactivity.Table:      xentityactivity.ValidColumn,
 			xidledigest.Table:          xidledigest.ValidColumn,
 			ximportcandidate.Table:     ximportcandidate.ValidColumn,

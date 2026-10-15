@@ -91,6 +91,99 @@ export enum AttachmentType {
   TypeThumbnail = "thumbnail",
 }
 
+export interface CaptureAcceptResult {
+  entityId: string;
+  item: CaptureItemOut;
+}
+
+export interface CaptureBulkResult {
+  accepted: number;
+  itemIds: string[];
+  skipped: number;
+}
+
+export interface CaptureDupMatch {
+  confidence: "exact" | "likely" | "similar";
+  id: string;
+  locationPath: string;
+  matchedOn: string;
+  name: string;
+  score: number;
+}
+
+export interface CaptureEditInput {
+  /** @maxLength 255 */
+  brand: string;
+  /** @maxLength 255 */
+  category: string;
+  /** @maxLength 255 */
+  modelNumber: string;
+  /**
+   * @minLength 1
+   * @maxLength 255
+   */
+  name: string;
+  /**
+   * @min 0.001
+   * @max 999999
+   */
+  quantity: number;
+  targetLocationId?: string | null;
+}
+
+export interface CaptureItemOut {
+  bbox?: VisionBBox | null;
+  brand: string;
+  bucket: "ready" | "review" | "maybe";
+  canUndo: boolean;
+  category: string;
+  confidence: number;
+  dupMatches: CaptureDupMatch[];
+  entityId?: string | null;
+  hasCrop: boolean;
+  id: string;
+  modelNumber: string;
+  name: string;
+  photoId: string;
+  quantity: number;
+  ready: boolean;
+  state: "pending" | "accepted" | "merged" | "ignored";
+  targetLocationId?: string | null;
+}
+
+export interface CapturePhotoOut {
+  attempts: number;
+  detections: number;
+  error: string;
+  id: string;
+  status: "queued" | "running" | "done" | "failed";
+}
+
+export interface CaptureSessionOut {
+  failed: number;
+  id: string;
+  items: CaptureItemOut[];
+  locationId?: string | null;
+  mode: "item" | "shelf";
+  /** Pending counts items awaiting a decision; ReadyCount those eligible for bulk accept. */
+  pending: number;
+  photos: CapturePhotoOut[];
+  /** Processing counts photos still queued or running. */
+  processing: number;
+  readyCount: number;
+  status: "open" | "done";
+}
+
+export interface CaptureStatus {
+  enabled: boolean;
+  local: boolean;
+  maxPhotoMb: number;
+  maxPhotosPerDay: number;
+  model: string;
+  provider: string;
+  queueDepth: number;
+}
+
 export interface CurrenciesCurrency {
   code: string;
   decimals: number;
@@ -1527,6 +1620,15 @@ export interface BuildSuggestInput {
   tagId?: string | null;
 }
 
+export interface CaptureMerge {
+  entityId: string;
+}
+
+export interface CaptureSessionCreate {
+  locationId?: string | null;
+  mode: "item" | "shelf";
+}
+
 export interface ChangePassword {
   current: string;
   new: string;
@@ -1721,4 +1823,11 @@ export interface ExternalAttachmentRequest {
 export interface ValidateErrorResponse {
   error: string;
   fields: string;
+}
+
+export interface VisionBBox {
+  h: number;
+  w: number;
+  x: number;
+  y: number;
 }

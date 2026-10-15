@@ -8,12 +8,14 @@ package aichat
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"strings"
+	"sync/atomic"
 	"time"
 )
 
@@ -26,12 +28,30 @@ type Chatter interface {
 	Chat(ctx context.Context, system, user string, jsonMode bool) (string, error)
 }
 
+// Image is an image attached to a chat request.
+type Image struct {
+	MIME string
+	Data []byte
+}
+
+// VisionChatter is a Chatter that can also look at images. The built-in
+// client implements it; tests can fake it.
+type VisionChatter interface {
+	Chatter
+	ChatVision(ctx context.Context, system, user string, images []Image, jsonMode bool) (string, error)
+}
+
 // Config for the OpenAI-compatible endpoint.
 type Config struct {
 	BaseURL string
 	APIKey  string
 	Model   string
-	Timeout time.Duration
+	// VisionModel is used for image requests; defaults to Model.
+	VisionModel string
+	// ResponseFormat selects how JSON mode is requested: "json_object"
+	// (default), "json_schema" (LM Studio) or "none".
+	ResponseFormat string
+	Timeout        time.Duration
 }
 
 // Enabled reports whether enough is configured to call an endpoint.
@@ -53,28 +73,82 @@ const maxResponseBytes = 1 << 20
 type client struct {
 	cfg  Config
 	http *http.Client
+	// formatRejected is set once the server refused response_format and
+	// accepted the same request without it.
+	formatRejected atomic.Bool
 }
 
 func (c *client) Chat(ctx context.Context, system, user string, jsonMode bool) (string, error) {
-	req := map[string]any{
-		"model": c.cfg.Model,
-		"messages": []map[string]string{
-			{"role": "system", "content": system},
-			{"role": "user", "content": user},
-		},
-		"temperature": 0.4,
+	return c.do(ctx, c.cfg.Model, []map[string]any{
+		{"role": "system", "content": system},
+		{"role": "user", "content": user},
+	}, jsonMode)
+}
+
+func (c *client) ChatVision(ctx context.Context, system, user string, images []Image, jsonMode bool) (string, error) {
+	parts := []map[string]any{{"type": "text", "text": user}}
+	for _, im := range images {
+		parts = append(parts, map[string]any{
+			"type":      "image_url",
+			"image_url": map[string]string{"url": "data:" + im.MIME + ";base64," + base64.StdEncoding.EncodeToString(im.Data)},
+		})
 	}
-	if jsonMode {
-		req["response_format"] = map[string]string{"type": "json_object"}
+	model := c.cfg.VisionModel
+	if model == "" {
+		model = c.cfg.Model
+	}
+	return c.do(ctx, model, []map[string]any{
+		{"role": "system", "content": system},
+		{"role": "user", "content": parts},
+	}, jsonMode)
+}
+
+// jsonSchemaFormat is the loosest schema that still satisfies servers (LM
+// Studio) that only accept json_schema: any JSON object.
+var jsonSchemaFormat = map[string]any{
+	"type": "json_schema",
+	"json_schema": map[string]any{
+		"name":   "reply",
+		"strict": false,
+		"schema": map[string]any{"type": "object"},
+	},
+}
+
+func (c *client) do(ctx context.Context, model string, msgs []map[string]any, jsonMode bool) (string, error) {
+	format := strings.ToLower(c.cfg.ResponseFormat)
+	useFormat := jsonMode && format != "none" && !c.formatRejected.Load()
+	out, status, err := c.post(ctx, model, msgs, useFormat, format)
+	if err != nil && useFormat && status == http.StatusBadRequest {
+		// Some servers reject response_format outright; the prompts already
+		// demand JSON, so retry once without it. If that works, remember it
+		// so later calls skip the doomed first attempt.
+		var rerr error
+		out, _, rerr = c.post(ctx, model, msgs, false, format)
+		if rerr == nil {
+			c.formatRejected.Store(true)
+		}
+		err = rerr
+	}
+	return out, err
+}
+
+func (c *client) post(ctx context.Context, model string, msgs []map[string]any, withFormat bool, format string) (string, int, error) {
+	req := map[string]any{"model": model, "messages": msgs, "temperature": 0.4}
+	if withFormat {
+		if format == "json_schema" {
+			req["response_format"] = jsonSchemaFormat
+		} else {
+			req["response_format"] = map[string]string{"type": "json_object"}
+		}
 	}
 	body, err := json.Marshal(req)
 	if err != nil {
-		return "", err
+		return "", 0, err
 	}
 	endpoint := strings.TrimRight(c.cfg.BaseURL, "/") + "/chat/completions"
 	hr, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(body))
 	if err != nil {
-		return "", err
+		return "", 0, err
 	}
 	hr.Header.Set("Content-Type", "application/json")
 	if c.cfg.APIKey != "" {
@@ -82,11 +156,11 @@ func (c *client) Chat(ctx context.Context, system, user string, jsonMode bool) (
 	}
 	res, err := c.http.Do(hr)
 	if err != nil {
-		return "", fmt.Errorf("ai request: %w", err)
+		return "", 0, fmt.Errorf("ai request: %w", err)
 	}
 	defer func() { _ = res.Body.Close() }()
 	if res.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("ai request: status %d", res.StatusCode)
+		return "", res.StatusCode, fmt.Errorf("ai request: status %d", res.StatusCode)
 	}
 	var out struct {
 		Choices []struct {
@@ -96,12 +170,12 @@ func (c *client) Chat(ctx context.Context, system, user string, jsonMode bool) (
 		} `json:"choices"`
 	}
 	if err := json.NewDecoder(io.LimitReader(res.Body, maxResponseBytes)).Decode(&out); err != nil {
-		return "", fmt.Errorf("ai response: %w", err)
+		return "", res.StatusCode, fmt.Errorf("ai response: %w", err)
 	}
 	if len(out.Choices) == 0 {
-		return "", errors.New("ai response: no choices")
+		return "", res.StatusCode, errors.New("ai response: no choices")
 	}
-	return out.Choices[0].Message.Content, nil
+	return out.Choices[0].Message.Content, res.StatusCode, nil
 }
 
 // ExtractJSON trims code fences and surrounding prose from a model reply and

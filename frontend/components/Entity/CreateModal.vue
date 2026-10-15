@@ -51,6 +51,17 @@
     </template>
 
     <form class="flex min-w-0 flex-col gap-2" @submit.prevent="create()">
+      <!-- Fork: photo-first. Manual entry stays available, but photos are faster. -->
+      <NuxtLink
+        v-if="!selectedEntityType?.isLocation"
+        to="/x/snap"
+        class="flex items-center gap-2 rounded-md border border-primary/40 bg-primary/5 px-3 py-2 text-sm hover:bg-primary/10"
+        data-testid="create-snap-hint"
+        @click="closeDialog(DialogID.CreateEntity)"
+      >
+        <MdiCamera class="size-4 shrink-0 text-primary" />
+        <span>{{ $t("x_snap.create_hint") }}</span>
+      </NuxtLink>
       <LocationSelector v-model="form.location" />
 
       <!-- Template Info Display - Collapsible banner with distinct styling -->
@@ -240,6 +251,7 @@
   import { useTagStore } from "~/stores/tags";
   import { useLocationStore } from "~~/stores/locations";
   import MdiBarcode from "~icons/mdi/barcode";
+  import MdiCamera from "~icons/mdi/camera"; // Fork: snap hint
   import MdiBarcodeScan from "~icons/mdi/barcode-scan";
   import MdiPackageVariant from "~icons/mdi/package-variant";
   import MdiPackageVariantClosed from "~icons/mdi/package-variant-closed";

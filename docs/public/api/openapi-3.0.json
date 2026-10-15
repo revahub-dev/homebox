@@ -375,6 +375,499 @@
                 }
             }
         },
+        "/v1/capture/items/{id}": {
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "tags": [
+                    "Photo Capture"
+                ],
+                "summary": "Edit a pending item",
+                "parameters": [
+                    {
+                        "description": "Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/capture.EditInput"
+                            }
+                        }
+                    },
+                    "description": "Fields to change",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/capture.ItemOut"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/capture/items/{id}/accept": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Creates the inventory item in the chosen location (or \"Unsorted\") with the crop as its photo.",
+                "tags": [
+                    "Photo Capture"
+                ],
+                "summary": "Accept a detected item",
+                "parameters": [
+                    {
+                        "description": "Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/capture.AcceptResult"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/capture/items/{id}/crop": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "tags": [
+                    "Photo Capture"
+                ],
+                "summary": "Crop image of a detected item",
+                "parameters": [
+                    {
+                        "description": "Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "image/jpeg": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/capture/items/{id}/ignore": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "tags": [
+                    "Photo Capture"
+                ],
+                "summary": "Ignore a detected item",
+                "parameters": [
+                    {
+                        "description": "Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/capture.ItemOut"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/capture/items/{id}/merge": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Adds the detected quantity to an existing item instead of creating a duplicate.",
+                "tags": [
+                    "Photo Capture"
+                ],
+                "summary": "Merge a detected item into an existing one",
+                "parameters": [
+                    {
+                        "description": "Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/v1.CaptureMerge"
+                            }
+                        }
+                    },
+                    "description": "Existing item",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/capture.AcceptResult"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/capture/items/{id}/undo": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Deletes the created item, restores the merged quantity, or un-ignores. Works for 30 minutes after the decision.",
+                "tags": [
+                    "Photo Capture"
+                ],
+                "summary": "Undo accept, merge or ignore",
+                "parameters": [
+                    {
+                        "description": "Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/capture.ItemOut"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/capture/photos/{id}/retry": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "tags": [
+                    "Photo Capture"
+                ],
+                "summary": "Retry a failed photo",
+                "parameters": [
+                    {
+                        "description": "Photo ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/v1/capture/sessions": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "tags": [
+                    "Photo Capture"
+                ],
+                "summary": "Start a capture session",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/v1.CaptureSessionCreate"
+                            }
+                        }
+                    },
+                    "description": "Mode and optional current location",
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/capture.SessionOut"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/capture/sessions/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Photos with their processing state and the detected items. The client polls this while photos are processing.",
+                "tags": [
+                    "Photo Capture"
+                ],
+                "summary": "Get a capture session",
+                "parameters": [
+                    {
+                        "description": "Session ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/capture.SessionOut"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/capture/sessions/{id}/accept": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Accepts every pending item that is high-confidence and has no identifier or identical-name duplicate.",
+                "tags": [
+                    "Photo Capture"
+                ],
+                "summary": "Accept all ready items",
+                "parameters": [
+                    {
+                        "description": "Session ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/capture.BulkResult"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/capture/sessions/{id}/finish": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "tags": [
+                    "Photo Capture"
+                ],
+                "summary": "Finish a capture session",
+                "parameters": [
+                    {
+                        "description": "Session ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/v1/capture/sessions/{id}/photos": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Queues the photo for analysis and returns immediately (202). Accepts JPEG, PNG, WebP and HEIC; the photo is re-encoded and EXIF is stripped. 503 when no AI endpoint is configured, 415 for non-images, 413 when too large, 429 at the daily limit.",
+                "tags": [
+                    "Photo Capture"
+                ],
+                "summary": "Upload a photo to a capture session",
+                "parameters": [
+                    {
+                        "description": "Session ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "file": {
+                                        "description": "Photo",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "required": [
+                                    "file"
+                                ]
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/capture.PhotoOut"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/capture/status": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Whether an AI endpoint is configured, which one (never the key), whether it looks local or cloud, and the queue depth.",
+                "tags": [
+                    "Photo Capture"
+                ],
+                "summary": "Photo capture status",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/capture.Status"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/v1/currencies": {
             "get": {
                 "tags": [
@@ -4336,6 +4829,278 @@
                     "RoleAttachments"
                 ]
             },
+            "capture.AcceptResult": {
+                "type": "object",
+                "properties": {
+                    "entityId": {
+                        "type": "string"
+                    },
+                    "item": {
+                        "$ref": "#/components/schemas/capture.ItemOut"
+                    }
+                }
+            },
+            "capture.BulkResult": {
+                "type": "object",
+                "properties": {
+                    "accepted": {
+                        "type": "integer"
+                    },
+                    "itemIds": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "skipped": {
+                        "type": "integer"
+                    }
+                }
+            },
+            "capture.DupMatch": {
+                "type": "object",
+                "properties": {
+                    "confidence": {
+                        "type": "string",
+                        "enum": [
+                            "exact",
+                            "likely",
+                            "similar"
+                        ]
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "locationPath": {
+                        "type": "string"
+                    },
+                    "matchedOn": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "score": {
+                        "type": "number"
+                    }
+                }
+            },
+            "capture.EditInput": {
+                "type": "object",
+                "properties": {
+                    "brand": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "category": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "modelNumber": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "minLength": 1
+                    },
+                    "quantity": {
+                        "type": "number",
+                        "maximum": 999999,
+                        "minimum": 0.001
+                    },
+                    "targetLocationId": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                }
+            },
+            "capture.ItemOut": {
+                "type": "object",
+                "properties": {
+                    "bbox": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/vision.BBox"
+                            }
+                        ],
+                        "x-omitempty": true,
+                        "nullable": true
+                    },
+                    "brand": {
+                        "type": "string"
+                    },
+                    "bucket": {
+                        "type": "string",
+                        "enum": [
+                            "ready",
+                            "review",
+                            "maybe"
+                        ]
+                    },
+                    "canUndo": {
+                        "type": "boolean"
+                    },
+                    "category": {
+                        "type": "string"
+                    },
+                    "confidence": {
+                        "type": "number"
+                    },
+                    "dupMatches": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/capture.DupMatch"
+                        }
+                    },
+                    "entityId": {
+                        "type": "string",
+                        "x-omitempty": true,
+                        "nullable": true
+                    },
+                    "hasCrop": {
+                        "type": "boolean"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "modelNumber": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "photoId": {
+                        "type": "string"
+                    },
+                    "quantity": {
+                        "type": "number"
+                    },
+                    "ready": {
+                        "type": "boolean"
+                    },
+                    "state": {
+                        "type": "string",
+                        "enum": [
+                            "pending",
+                            "accepted",
+                            "merged",
+                            "ignored"
+                        ]
+                    },
+                    "targetLocationId": {
+                        "type": "string",
+                        "x-omitempty": true,
+                        "nullable": true
+                    }
+                }
+            },
+            "capture.PhotoOut": {
+                "type": "object",
+                "properties": {
+                    "attempts": {
+                        "type": "integer"
+                    },
+                    "detections": {
+                        "type": "integer"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "queued",
+                            "running",
+                            "done",
+                            "failed"
+                        ]
+                    }
+                }
+            },
+            "capture.SessionOut": {
+                "type": "object",
+                "properties": {
+                    "failed": {
+                        "type": "integer"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/capture.ItemOut"
+                        }
+                    },
+                    "locationId": {
+                        "type": "string",
+                        "x-omitempty": true,
+                        "nullable": true
+                    },
+                    "mode": {
+                        "type": "string",
+                        "enum": [
+                            "item",
+                            "shelf"
+                        ]
+                    },
+                    "pending": {
+                        "description": "Pending counts items awaiting a decision; ReadyCount those eligible for bulk accept.",
+                        "type": "integer"
+                    },
+                    "photos": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/capture.PhotoOut"
+                        }
+                    },
+                    "processing": {
+                        "description": "Processing counts photos still queued or running.",
+                        "type": "integer"
+                    },
+                    "readyCount": {
+                        "type": "integer"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "open",
+                            "done"
+                        ]
+                    }
+                }
+            },
+            "capture.Status": {
+                "type": "object",
+                "properties": {
+                    "enabled": {
+                        "type": "boolean"
+                    },
+                    "local": {
+                        "type": "boolean"
+                    },
+                    "maxPhotoMb": {
+                        "type": "integer"
+                    },
+                    "maxPhotosPerDay": {
+                        "type": "integer"
+                    },
+                    "model": {
+                        "type": "string"
+                    },
+                    "provider": {
+                        "type": "string"
+                    },
+                    "queueDepth": {
+                        "type": "integer"
+                    }
+                }
+            },
             "currencies.Currency": {
                 "type": "object",
                 "properties": {
@@ -8014,6 +8779,36 @@
                     }
                 }
             },
+            "v1.CaptureMerge": {
+                "type": "object",
+                "required": [
+                    "entityId"
+                ],
+                "properties": {
+                    "entityId": {
+                        "type": "string"
+                    }
+                }
+            },
+            "v1.CaptureSessionCreate": {
+                "type": "object",
+                "required": [
+                    "mode"
+                ],
+                "properties": {
+                    "locationId": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "mode": {
+                        "type": "string",
+                        "enum": [
+                            "item",
+                            "shelf"
+                        ]
+                    }
+                }
+            },
             "v1.ChangePassword": {
                 "type": "object",
                 "properties": {
@@ -8469,6 +9264,23 @@
                     },
                     "fields": {
                         "type": "string"
+                    }
+                }
+            },
+            "vision.BBox": {
+                "type": "object",
+                "properties": {
+                    "h": {
+                        "type": "number"
+                    },
+                    "w": {
+                        "type": "number"
+                    },
+                    "x": {
+                        "type": "number"
+                    },
+                    "y": {
+                        "type": "number"
                     }
                 }
             }

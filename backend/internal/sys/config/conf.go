@@ -67,8 +67,9 @@ type Config struct {
 	// Fork: order import (see FORK_NOTES.md)
 	OrderImport OrderImportConf `yaml:"order_import"`
 	// Fork: shared AI endpoint and idle-item nudges (see FORK_NOTES.md)
-	AI   AIConf   `yaml:"ai"`
-	Idle IdleConf `yaml:"idle"`
+	AI      AIConf      `yaml:"ai"`
+	Idle    IdleConf    `yaml:"idle"`
+	Capture CaptureConf `yaml:"capture"`
 }
 
 // SearchConf selects and configures the free-text search engine. The default
@@ -252,13 +253,23 @@ func (c OrderImportConf) MarshalJSON() ([]byte, error) {
 }
 
 // AIConf is the fork's shared OpenAI-compatible endpoint (HBOX_AI_*), used by
-// "What can I build?" and sale-listing drafts. When BaseURL/Model are empty
+// photo capture, "What can I build?" and sale-listing drafts. It works with
+// cloud APIs (OpenAI and compatibles) and with local servers (Ollama at
+// http://host:11434/v1, LM Studio at http://host:1234/v1). Switching between
+// them is a matter of changing these variables. When BaseURL/Model are empty
 // the order-import LLM settings (HBOX_ORDER_IMPORT_LLM_*) are used instead.
 type AIConf struct {
-	BaseURL    string `yaml:"base_url"`
-	APIKey     string `yaml:"api_key"`
-	Model      string `yaml:"model"`
-	TimeoutSec int    `yaml:"timeout_sec" conf:"default:90"`
+	BaseURL string `yaml:"base_url"`
+	// APIKey is optional: local servers usually need none.
+	APIKey string `yaml:"api_key"`
+	Model  string `yaml:"model"`
+	// VisionModel is used for photos; defaults to Model.
+	VisionModel string `yaml:"vision_model"`
+	// ResponseFormat is how JSON output is requested: "json_object"
+	// (default; retried without it if the server rejects it), "json_schema"
+	// (LM Studio style) or "none".
+	ResponseFormat string `yaml:"response_format" conf:"default:json_object"`
+	TimeoutSec     int    `yaml:"timeout_sec"     conf:"default:120"`
 }
 
 func (c AIConf) MarshalJSON() ([]byte, error) {
@@ -276,11 +287,33 @@ func (c *Config) AIResolved() AIConf {
 	a := c.AI
 	if a.BaseURL == "" || a.Model == "" {
 		a.BaseURL, a.APIKey, a.Model = c.OrderImport.LLMBaseURL, c.OrderImport.LLMApiKey, c.OrderImport.LLMModel
+		a.VisionModel = c.OrderImport.LLMVisionModel
+	}
+	if a.VisionModel == "" {
+		a.VisionModel = a.Model
+	}
+	if a.ResponseFormat == "" {
+		a.ResponseFormat = "json_object"
 	}
 	if a.TimeoutSec <= 0 {
-		a.TimeoutSec = 90
+		a.TimeoutSec = 120
 	}
 	return a
+}
+
+// CaptureConf tunes photo capture (HBOX_CAPTURE_*).
+type CaptureConf struct {
+	// Workers is how many photos are analysed at once. Keep 1 for a local GPU.
+	Workers int `yaml:"workers" conf:"default:1"`
+	// MaxPhotosPerDay caps analysed photos per collection per day (0 = unlimited).
+	MaxPhotosPerDay int `yaml:"max_photos_per_day" conf:"default:300"`
+	// MaxPhotoMB is the largest accepted upload after client resize.
+	MaxPhotoMB int `yaml:"max_photo_mb" conf:"default:8"`
+	// RetentionDays is how long unaccepted photos and crops are kept.
+	RetentionDays int `yaml:"retention_days" conf:"default:7"`
+	// Language is an optional language code ("ja", "en") for generic item
+	// descriptions. Text printed on packaging is always kept as written.
+	Language string `yaml:"language"`
 }
 
 // IdleConf configures the weekly idle-item digest (HBOX_IDLE_*).

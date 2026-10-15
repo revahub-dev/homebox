@@ -31,6 +31,9 @@ import (
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/templatefield"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/user"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/usergroup"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xcaptureitem"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xcapturephoto"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xcapturesession"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xentityactivity"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xidledigest"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/ximportcandidate"
@@ -67,6 +70,9 @@ const (
 	TypeTemplateField        = "TemplateField"
 	TypeUser                 = "User"
 	TypeUserGroup            = "UserGroup"
+	TypeXCaptureItem         = "XCaptureItem"
+	TypeXCapturePhoto        = "XCapturePhoto"
+	TypeXCaptureSession      = "XCaptureSession"
 	TypeXEntityActivity      = "XEntityActivity"
 	TypeXIdleDigest          = "XIdleDigest"
 	TypeXImportCandidate     = "XImportCandidate"
@@ -17527,6 +17533,3701 @@ func (m *UserGroupMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown UserGroup edge %s", name)
+}
+
+// XCaptureItemMutation represents an operation that mutates the XCaptureItem nodes in the graph.
+type XCaptureItemMutation struct {
+	config
+	op                  Op
+	typ                 string
+	id                  *uuid.UUID
+	created_at          *time.Time
+	updated_at          *time.Time
+	group_id            *uuid.UUID
+	session_id          *uuid.UUID
+	photo_id            *uuid.UUID
+	state               *xcaptureitem.State
+	name                *string
+	brand               *string
+	model_number        *string
+	category            *string
+	quantity            *float64
+	addquantity         *float64
+	confidence          *float64
+	addconfidence       *float64
+	low_confidence      *bool
+	bbox                *string
+	crop                *[]byte
+	has_crop            *bool
+	dup_matches         *string
+	target_location_id  *uuid.UUID
+	entity_id           *uuid.UUID
+	attachment_id       *uuid.UUID
+	applied_quantity    *float64
+	addapplied_quantity *float64
+	handled_at          *time.Time
+	clearedFields       map[string]struct{}
+	done                bool
+	oldValue            func(context.Context) (*XCaptureItem, error)
+	predicates          []predicate.XCaptureItem
+}
+
+var _ ent.Mutation = (*XCaptureItemMutation)(nil)
+
+// xcaptureitemOption allows management of the mutation configuration using functional options.
+type xcaptureitemOption func(*XCaptureItemMutation)
+
+// newXCaptureItemMutation creates new mutation for the XCaptureItem entity.
+func newXCaptureItemMutation(c config, op Op, opts ...xcaptureitemOption) *XCaptureItemMutation {
+	m := &XCaptureItemMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeXCaptureItem,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withXCaptureItemID sets the ID field of the mutation.
+func withXCaptureItemID(id uuid.UUID) xcaptureitemOption {
+	return func(m *XCaptureItemMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *XCaptureItem
+		)
+		m.oldValue = func(ctx context.Context) (*XCaptureItem, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().XCaptureItem.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withXCaptureItem sets the old XCaptureItem of the mutation.
+func withXCaptureItem(node *XCaptureItem) xcaptureitemOption {
+	return func(m *XCaptureItemMutation) {
+		m.oldValue = func(context.Context) (*XCaptureItem, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m XCaptureItemMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m XCaptureItemMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of XCaptureItem entities.
+func (m *XCaptureItemMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *XCaptureItemMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *XCaptureItemMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().XCaptureItem.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *XCaptureItemMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *XCaptureItemMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the XCaptureItem entity.
+// If the XCaptureItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureItemMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *XCaptureItemMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *XCaptureItemMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *XCaptureItemMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the XCaptureItem entity.
+// If the XCaptureItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureItemMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *XCaptureItemMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetGroupID sets the "group_id" field.
+func (m *XCaptureItemMutation) SetGroupID(u uuid.UUID) {
+	m.group_id = &u
+}
+
+// GroupID returns the value of the "group_id" field in the mutation.
+func (m *XCaptureItemMutation) GroupID() (r uuid.UUID, exists bool) {
+	v := m.group_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGroupID returns the old "group_id" field's value of the XCaptureItem entity.
+// If the XCaptureItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureItemMutation) OldGroupID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGroupID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGroupID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGroupID: %w", err)
+	}
+	return oldValue.GroupID, nil
+}
+
+// ResetGroupID resets all changes to the "group_id" field.
+func (m *XCaptureItemMutation) ResetGroupID() {
+	m.group_id = nil
+}
+
+// SetSessionID sets the "session_id" field.
+func (m *XCaptureItemMutation) SetSessionID(u uuid.UUID) {
+	m.session_id = &u
+}
+
+// SessionID returns the value of the "session_id" field in the mutation.
+func (m *XCaptureItemMutation) SessionID() (r uuid.UUID, exists bool) {
+	v := m.session_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSessionID returns the old "session_id" field's value of the XCaptureItem entity.
+// If the XCaptureItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureItemMutation) OldSessionID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSessionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSessionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSessionID: %w", err)
+	}
+	return oldValue.SessionID, nil
+}
+
+// ResetSessionID resets all changes to the "session_id" field.
+func (m *XCaptureItemMutation) ResetSessionID() {
+	m.session_id = nil
+}
+
+// SetPhotoID sets the "photo_id" field.
+func (m *XCaptureItemMutation) SetPhotoID(u uuid.UUID) {
+	m.photo_id = &u
+}
+
+// PhotoID returns the value of the "photo_id" field in the mutation.
+func (m *XCaptureItemMutation) PhotoID() (r uuid.UUID, exists bool) {
+	v := m.photo_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPhotoID returns the old "photo_id" field's value of the XCaptureItem entity.
+// If the XCaptureItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureItemMutation) OldPhotoID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPhotoID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPhotoID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPhotoID: %w", err)
+	}
+	return oldValue.PhotoID, nil
+}
+
+// ResetPhotoID resets all changes to the "photo_id" field.
+func (m *XCaptureItemMutation) ResetPhotoID() {
+	m.photo_id = nil
+}
+
+// SetState sets the "state" field.
+func (m *XCaptureItemMutation) SetState(x xcaptureitem.State) {
+	m.state = &x
+}
+
+// State returns the value of the "state" field in the mutation.
+func (m *XCaptureItemMutation) State() (r xcaptureitem.State, exists bool) {
+	v := m.state
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldState returns the old "state" field's value of the XCaptureItem entity.
+// If the XCaptureItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureItemMutation) OldState(ctx context.Context) (v xcaptureitem.State, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldState is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldState requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldState: %w", err)
+	}
+	return oldValue.State, nil
+}
+
+// ResetState resets all changes to the "state" field.
+func (m *XCaptureItemMutation) ResetState() {
+	m.state = nil
+}
+
+// SetName sets the "name" field.
+func (m *XCaptureItemMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *XCaptureItemMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the XCaptureItem entity.
+// If the XCaptureItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureItemMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *XCaptureItemMutation) ResetName() {
+	m.name = nil
+}
+
+// SetBrand sets the "brand" field.
+func (m *XCaptureItemMutation) SetBrand(s string) {
+	m.brand = &s
+}
+
+// Brand returns the value of the "brand" field in the mutation.
+func (m *XCaptureItemMutation) Brand() (r string, exists bool) {
+	v := m.brand
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBrand returns the old "brand" field's value of the XCaptureItem entity.
+// If the XCaptureItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureItemMutation) OldBrand(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBrand is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBrand requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBrand: %w", err)
+	}
+	return oldValue.Brand, nil
+}
+
+// ResetBrand resets all changes to the "brand" field.
+func (m *XCaptureItemMutation) ResetBrand() {
+	m.brand = nil
+}
+
+// SetModelNumber sets the "model_number" field.
+func (m *XCaptureItemMutation) SetModelNumber(s string) {
+	m.model_number = &s
+}
+
+// ModelNumber returns the value of the "model_number" field in the mutation.
+func (m *XCaptureItemMutation) ModelNumber() (r string, exists bool) {
+	v := m.model_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldModelNumber returns the old "model_number" field's value of the XCaptureItem entity.
+// If the XCaptureItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureItemMutation) OldModelNumber(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldModelNumber is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldModelNumber requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldModelNumber: %w", err)
+	}
+	return oldValue.ModelNumber, nil
+}
+
+// ResetModelNumber resets all changes to the "model_number" field.
+func (m *XCaptureItemMutation) ResetModelNumber() {
+	m.model_number = nil
+}
+
+// SetCategory sets the "category" field.
+func (m *XCaptureItemMutation) SetCategory(s string) {
+	m.category = &s
+}
+
+// Category returns the value of the "category" field in the mutation.
+func (m *XCaptureItemMutation) Category() (r string, exists bool) {
+	v := m.category
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCategory returns the old "category" field's value of the XCaptureItem entity.
+// If the XCaptureItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureItemMutation) OldCategory(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCategory is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCategory requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCategory: %w", err)
+	}
+	return oldValue.Category, nil
+}
+
+// ResetCategory resets all changes to the "category" field.
+func (m *XCaptureItemMutation) ResetCategory() {
+	m.category = nil
+}
+
+// SetQuantity sets the "quantity" field.
+func (m *XCaptureItemMutation) SetQuantity(f float64) {
+	m.quantity = &f
+	m.addquantity = nil
+}
+
+// Quantity returns the value of the "quantity" field in the mutation.
+func (m *XCaptureItemMutation) Quantity() (r float64, exists bool) {
+	v := m.quantity
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldQuantity returns the old "quantity" field's value of the XCaptureItem entity.
+// If the XCaptureItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureItemMutation) OldQuantity(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldQuantity is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldQuantity requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldQuantity: %w", err)
+	}
+	return oldValue.Quantity, nil
+}
+
+// AddQuantity adds f to the "quantity" field.
+func (m *XCaptureItemMutation) AddQuantity(f float64) {
+	if m.addquantity != nil {
+		*m.addquantity += f
+	} else {
+		m.addquantity = &f
+	}
+}
+
+// AddedQuantity returns the value that was added to the "quantity" field in this mutation.
+func (m *XCaptureItemMutation) AddedQuantity() (r float64, exists bool) {
+	v := m.addquantity
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetQuantity resets all changes to the "quantity" field.
+func (m *XCaptureItemMutation) ResetQuantity() {
+	m.quantity = nil
+	m.addquantity = nil
+}
+
+// SetConfidence sets the "confidence" field.
+func (m *XCaptureItemMutation) SetConfidence(f float64) {
+	m.confidence = &f
+	m.addconfidence = nil
+}
+
+// Confidence returns the value of the "confidence" field in the mutation.
+func (m *XCaptureItemMutation) Confidence() (r float64, exists bool) {
+	v := m.confidence
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldConfidence returns the old "confidence" field's value of the XCaptureItem entity.
+// If the XCaptureItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureItemMutation) OldConfidence(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldConfidence is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldConfidence requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldConfidence: %w", err)
+	}
+	return oldValue.Confidence, nil
+}
+
+// AddConfidence adds f to the "confidence" field.
+func (m *XCaptureItemMutation) AddConfidence(f float64) {
+	if m.addconfidence != nil {
+		*m.addconfidence += f
+	} else {
+		m.addconfidence = &f
+	}
+}
+
+// AddedConfidence returns the value that was added to the "confidence" field in this mutation.
+func (m *XCaptureItemMutation) AddedConfidence() (r float64, exists bool) {
+	v := m.addconfidence
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetConfidence resets all changes to the "confidence" field.
+func (m *XCaptureItemMutation) ResetConfidence() {
+	m.confidence = nil
+	m.addconfidence = nil
+}
+
+// SetLowConfidence sets the "low_confidence" field.
+func (m *XCaptureItemMutation) SetLowConfidence(b bool) {
+	m.low_confidence = &b
+}
+
+// LowConfidence returns the value of the "low_confidence" field in the mutation.
+func (m *XCaptureItemMutation) LowConfidence() (r bool, exists bool) {
+	v := m.low_confidence
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLowConfidence returns the old "low_confidence" field's value of the XCaptureItem entity.
+// If the XCaptureItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureItemMutation) OldLowConfidence(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLowConfidence is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLowConfidence requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLowConfidence: %w", err)
+	}
+	return oldValue.LowConfidence, nil
+}
+
+// ResetLowConfidence resets all changes to the "low_confidence" field.
+func (m *XCaptureItemMutation) ResetLowConfidence() {
+	m.low_confidence = nil
+}
+
+// SetBbox sets the "bbox" field.
+func (m *XCaptureItemMutation) SetBbox(s string) {
+	m.bbox = &s
+}
+
+// Bbox returns the value of the "bbox" field in the mutation.
+func (m *XCaptureItemMutation) Bbox() (r string, exists bool) {
+	v := m.bbox
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBbox returns the old "bbox" field's value of the XCaptureItem entity.
+// If the XCaptureItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureItemMutation) OldBbox(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBbox is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBbox requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBbox: %w", err)
+	}
+	return oldValue.Bbox, nil
+}
+
+// ResetBbox resets all changes to the "bbox" field.
+func (m *XCaptureItemMutation) ResetBbox() {
+	m.bbox = nil
+}
+
+// SetCrop sets the "crop" field.
+func (m *XCaptureItemMutation) SetCrop(b []byte) {
+	m.crop = &b
+}
+
+// Crop returns the value of the "crop" field in the mutation.
+func (m *XCaptureItemMutation) Crop() (r []byte, exists bool) {
+	v := m.crop
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCrop returns the old "crop" field's value of the XCaptureItem entity.
+// If the XCaptureItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureItemMutation) OldCrop(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCrop is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCrop requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCrop: %w", err)
+	}
+	return oldValue.Crop, nil
+}
+
+// ClearCrop clears the value of the "crop" field.
+func (m *XCaptureItemMutation) ClearCrop() {
+	m.crop = nil
+	m.clearedFields[xcaptureitem.FieldCrop] = struct{}{}
+}
+
+// CropCleared returns if the "crop" field was cleared in this mutation.
+func (m *XCaptureItemMutation) CropCleared() bool {
+	_, ok := m.clearedFields[xcaptureitem.FieldCrop]
+	return ok
+}
+
+// ResetCrop resets all changes to the "crop" field.
+func (m *XCaptureItemMutation) ResetCrop() {
+	m.crop = nil
+	delete(m.clearedFields, xcaptureitem.FieldCrop)
+}
+
+// SetHasCrop sets the "has_crop" field.
+func (m *XCaptureItemMutation) SetHasCrop(b bool) {
+	m.has_crop = &b
+}
+
+// HasCrop returns the value of the "has_crop" field in the mutation.
+func (m *XCaptureItemMutation) HasCrop() (r bool, exists bool) {
+	v := m.has_crop
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHasCrop returns the old "has_crop" field's value of the XCaptureItem entity.
+// If the XCaptureItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureItemMutation) OldHasCrop(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHasCrop is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHasCrop requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHasCrop: %w", err)
+	}
+	return oldValue.HasCrop, nil
+}
+
+// ResetHasCrop resets all changes to the "has_crop" field.
+func (m *XCaptureItemMutation) ResetHasCrop() {
+	m.has_crop = nil
+}
+
+// SetDupMatches sets the "dup_matches" field.
+func (m *XCaptureItemMutation) SetDupMatches(s string) {
+	m.dup_matches = &s
+}
+
+// DupMatches returns the value of the "dup_matches" field in the mutation.
+func (m *XCaptureItemMutation) DupMatches() (r string, exists bool) {
+	v := m.dup_matches
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDupMatches returns the old "dup_matches" field's value of the XCaptureItem entity.
+// If the XCaptureItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureItemMutation) OldDupMatches(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDupMatches is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDupMatches requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDupMatches: %w", err)
+	}
+	return oldValue.DupMatches, nil
+}
+
+// ResetDupMatches resets all changes to the "dup_matches" field.
+func (m *XCaptureItemMutation) ResetDupMatches() {
+	m.dup_matches = nil
+}
+
+// SetTargetLocationID sets the "target_location_id" field.
+func (m *XCaptureItemMutation) SetTargetLocationID(u uuid.UUID) {
+	m.target_location_id = &u
+}
+
+// TargetLocationID returns the value of the "target_location_id" field in the mutation.
+func (m *XCaptureItemMutation) TargetLocationID() (r uuid.UUID, exists bool) {
+	v := m.target_location_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTargetLocationID returns the old "target_location_id" field's value of the XCaptureItem entity.
+// If the XCaptureItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureItemMutation) OldTargetLocationID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTargetLocationID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTargetLocationID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTargetLocationID: %w", err)
+	}
+	return oldValue.TargetLocationID, nil
+}
+
+// ClearTargetLocationID clears the value of the "target_location_id" field.
+func (m *XCaptureItemMutation) ClearTargetLocationID() {
+	m.target_location_id = nil
+	m.clearedFields[xcaptureitem.FieldTargetLocationID] = struct{}{}
+}
+
+// TargetLocationIDCleared returns if the "target_location_id" field was cleared in this mutation.
+func (m *XCaptureItemMutation) TargetLocationIDCleared() bool {
+	_, ok := m.clearedFields[xcaptureitem.FieldTargetLocationID]
+	return ok
+}
+
+// ResetTargetLocationID resets all changes to the "target_location_id" field.
+func (m *XCaptureItemMutation) ResetTargetLocationID() {
+	m.target_location_id = nil
+	delete(m.clearedFields, xcaptureitem.FieldTargetLocationID)
+}
+
+// SetEntityID sets the "entity_id" field.
+func (m *XCaptureItemMutation) SetEntityID(u uuid.UUID) {
+	m.entity_id = &u
+}
+
+// EntityID returns the value of the "entity_id" field in the mutation.
+func (m *XCaptureItemMutation) EntityID() (r uuid.UUID, exists bool) {
+	v := m.entity_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEntityID returns the old "entity_id" field's value of the XCaptureItem entity.
+// If the XCaptureItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureItemMutation) OldEntityID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEntityID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEntityID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEntityID: %w", err)
+	}
+	return oldValue.EntityID, nil
+}
+
+// ClearEntityID clears the value of the "entity_id" field.
+func (m *XCaptureItemMutation) ClearEntityID() {
+	m.entity_id = nil
+	m.clearedFields[xcaptureitem.FieldEntityID] = struct{}{}
+}
+
+// EntityIDCleared returns if the "entity_id" field was cleared in this mutation.
+func (m *XCaptureItemMutation) EntityIDCleared() bool {
+	_, ok := m.clearedFields[xcaptureitem.FieldEntityID]
+	return ok
+}
+
+// ResetEntityID resets all changes to the "entity_id" field.
+func (m *XCaptureItemMutation) ResetEntityID() {
+	m.entity_id = nil
+	delete(m.clearedFields, xcaptureitem.FieldEntityID)
+}
+
+// SetAttachmentID sets the "attachment_id" field.
+func (m *XCaptureItemMutation) SetAttachmentID(u uuid.UUID) {
+	m.attachment_id = &u
+}
+
+// AttachmentID returns the value of the "attachment_id" field in the mutation.
+func (m *XCaptureItemMutation) AttachmentID() (r uuid.UUID, exists bool) {
+	v := m.attachment_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAttachmentID returns the old "attachment_id" field's value of the XCaptureItem entity.
+// If the XCaptureItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureItemMutation) OldAttachmentID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAttachmentID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAttachmentID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAttachmentID: %w", err)
+	}
+	return oldValue.AttachmentID, nil
+}
+
+// ClearAttachmentID clears the value of the "attachment_id" field.
+func (m *XCaptureItemMutation) ClearAttachmentID() {
+	m.attachment_id = nil
+	m.clearedFields[xcaptureitem.FieldAttachmentID] = struct{}{}
+}
+
+// AttachmentIDCleared returns if the "attachment_id" field was cleared in this mutation.
+func (m *XCaptureItemMutation) AttachmentIDCleared() bool {
+	_, ok := m.clearedFields[xcaptureitem.FieldAttachmentID]
+	return ok
+}
+
+// ResetAttachmentID resets all changes to the "attachment_id" field.
+func (m *XCaptureItemMutation) ResetAttachmentID() {
+	m.attachment_id = nil
+	delete(m.clearedFields, xcaptureitem.FieldAttachmentID)
+}
+
+// SetAppliedQuantity sets the "applied_quantity" field.
+func (m *XCaptureItemMutation) SetAppliedQuantity(f float64) {
+	m.applied_quantity = &f
+	m.addapplied_quantity = nil
+}
+
+// AppliedQuantity returns the value of the "applied_quantity" field in the mutation.
+func (m *XCaptureItemMutation) AppliedQuantity() (r float64, exists bool) {
+	v := m.applied_quantity
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAppliedQuantity returns the old "applied_quantity" field's value of the XCaptureItem entity.
+// If the XCaptureItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureItemMutation) OldAppliedQuantity(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAppliedQuantity is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAppliedQuantity requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAppliedQuantity: %w", err)
+	}
+	return oldValue.AppliedQuantity, nil
+}
+
+// AddAppliedQuantity adds f to the "applied_quantity" field.
+func (m *XCaptureItemMutation) AddAppliedQuantity(f float64) {
+	if m.addapplied_quantity != nil {
+		*m.addapplied_quantity += f
+	} else {
+		m.addapplied_quantity = &f
+	}
+}
+
+// AddedAppliedQuantity returns the value that was added to the "applied_quantity" field in this mutation.
+func (m *XCaptureItemMutation) AddedAppliedQuantity() (r float64, exists bool) {
+	v := m.addapplied_quantity
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAppliedQuantity resets all changes to the "applied_quantity" field.
+func (m *XCaptureItemMutation) ResetAppliedQuantity() {
+	m.applied_quantity = nil
+	m.addapplied_quantity = nil
+}
+
+// SetHandledAt sets the "handled_at" field.
+func (m *XCaptureItemMutation) SetHandledAt(t time.Time) {
+	m.handled_at = &t
+}
+
+// HandledAt returns the value of the "handled_at" field in the mutation.
+func (m *XCaptureItemMutation) HandledAt() (r time.Time, exists bool) {
+	v := m.handled_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHandledAt returns the old "handled_at" field's value of the XCaptureItem entity.
+// If the XCaptureItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureItemMutation) OldHandledAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHandledAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHandledAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHandledAt: %w", err)
+	}
+	return oldValue.HandledAt, nil
+}
+
+// ClearHandledAt clears the value of the "handled_at" field.
+func (m *XCaptureItemMutation) ClearHandledAt() {
+	m.handled_at = nil
+	m.clearedFields[xcaptureitem.FieldHandledAt] = struct{}{}
+}
+
+// HandledAtCleared returns if the "handled_at" field was cleared in this mutation.
+func (m *XCaptureItemMutation) HandledAtCleared() bool {
+	_, ok := m.clearedFields[xcaptureitem.FieldHandledAt]
+	return ok
+}
+
+// ResetHandledAt resets all changes to the "handled_at" field.
+func (m *XCaptureItemMutation) ResetHandledAt() {
+	m.handled_at = nil
+	delete(m.clearedFields, xcaptureitem.FieldHandledAt)
+}
+
+// Where appends a list predicates to the XCaptureItemMutation builder.
+func (m *XCaptureItemMutation) Where(ps ...predicate.XCaptureItem) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the XCaptureItemMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *XCaptureItemMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.XCaptureItem, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *XCaptureItemMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *XCaptureItemMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (XCaptureItem).
+func (m *XCaptureItemMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *XCaptureItemMutation) Fields() []string {
+	fields := make([]string, 0, 22)
+	if m.created_at != nil {
+		fields = append(fields, xcaptureitem.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, xcaptureitem.FieldUpdatedAt)
+	}
+	if m.group_id != nil {
+		fields = append(fields, xcaptureitem.FieldGroupID)
+	}
+	if m.session_id != nil {
+		fields = append(fields, xcaptureitem.FieldSessionID)
+	}
+	if m.photo_id != nil {
+		fields = append(fields, xcaptureitem.FieldPhotoID)
+	}
+	if m.state != nil {
+		fields = append(fields, xcaptureitem.FieldState)
+	}
+	if m.name != nil {
+		fields = append(fields, xcaptureitem.FieldName)
+	}
+	if m.brand != nil {
+		fields = append(fields, xcaptureitem.FieldBrand)
+	}
+	if m.model_number != nil {
+		fields = append(fields, xcaptureitem.FieldModelNumber)
+	}
+	if m.category != nil {
+		fields = append(fields, xcaptureitem.FieldCategory)
+	}
+	if m.quantity != nil {
+		fields = append(fields, xcaptureitem.FieldQuantity)
+	}
+	if m.confidence != nil {
+		fields = append(fields, xcaptureitem.FieldConfidence)
+	}
+	if m.low_confidence != nil {
+		fields = append(fields, xcaptureitem.FieldLowConfidence)
+	}
+	if m.bbox != nil {
+		fields = append(fields, xcaptureitem.FieldBbox)
+	}
+	if m.crop != nil {
+		fields = append(fields, xcaptureitem.FieldCrop)
+	}
+	if m.has_crop != nil {
+		fields = append(fields, xcaptureitem.FieldHasCrop)
+	}
+	if m.dup_matches != nil {
+		fields = append(fields, xcaptureitem.FieldDupMatches)
+	}
+	if m.target_location_id != nil {
+		fields = append(fields, xcaptureitem.FieldTargetLocationID)
+	}
+	if m.entity_id != nil {
+		fields = append(fields, xcaptureitem.FieldEntityID)
+	}
+	if m.attachment_id != nil {
+		fields = append(fields, xcaptureitem.FieldAttachmentID)
+	}
+	if m.applied_quantity != nil {
+		fields = append(fields, xcaptureitem.FieldAppliedQuantity)
+	}
+	if m.handled_at != nil {
+		fields = append(fields, xcaptureitem.FieldHandledAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *XCaptureItemMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case xcaptureitem.FieldCreatedAt:
+		return m.CreatedAt()
+	case xcaptureitem.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case xcaptureitem.FieldGroupID:
+		return m.GroupID()
+	case xcaptureitem.FieldSessionID:
+		return m.SessionID()
+	case xcaptureitem.FieldPhotoID:
+		return m.PhotoID()
+	case xcaptureitem.FieldState:
+		return m.State()
+	case xcaptureitem.FieldName:
+		return m.Name()
+	case xcaptureitem.FieldBrand:
+		return m.Brand()
+	case xcaptureitem.FieldModelNumber:
+		return m.ModelNumber()
+	case xcaptureitem.FieldCategory:
+		return m.Category()
+	case xcaptureitem.FieldQuantity:
+		return m.Quantity()
+	case xcaptureitem.FieldConfidence:
+		return m.Confidence()
+	case xcaptureitem.FieldLowConfidence:
+		return m.LowConfidence()
+	case xcaptureitem.FieldBbox:
+		return m.Bbox()
+	case xcaptureitem.FieldCrop:
+		return m.Crop()
+	case xcaptureitem.FieldHasCrop:
+		return m.HasCrop()
+	case xcaptureitem.FieldDupMatches:
+		return m.DupMatches()
+	case xcaptureitem.FieldTargetLocationID:
+		return m.TargetLocationID()
+	case xcaptureitem.FieldEntityID:
+		return m.EntityID()
+	case xcaptureitem.FieldAttachmentID:
+		return m.AttachmentID()
+	case xcaptureitem.FieldAppliedQuantity:
+		return m.AppliedQuantity()
+	case xcaptureitem.FieldHandledAt:
+		return m.HandledAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *XCaptureItemMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case xcaptureitem.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case xcaptureitem.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case xcaptureitem.FieldGroupID:
+		return m.OldGroupID(ctx)
+	case xcaptureitem.FieldSessionID:
+		return m.OldSessionID(ctx)
+	case xcaptureitem.FieldPhotoID:
+		return m.OldPhotoID(ctx)
+	case xcaptureitem.FieldState:
+		return m.OldState(ctx)
+	case xcaptureitem.FieldName:
+		return m.OldName(ctx)
+	case xcaptureitem.FieldBrand:
+		return m.OldBrand(ctx)
+	case xcaptureitem.FieldModelNumber:
+		return m.OldModelNumber(ctx)
+	case xcaptureitem.FieldCategory:
+		return m.OldCategory(ctx)
+	case xcaptureitem.FieldQuantity:
+		return m.OldQuantity(ctx)
+	case xcaptureitem.FieldConfidence:
+		return m.OldConfidence(ctx)
+	case xcaptureitem.FieldLowConfidence:
+		return m.OldLowConfidence(ctx)
+	case xcaptureitem.FieldBbox:
+		return m.OldBbox(ctx)
+	case xcaptureitem.FieldCrop:
+		return m.OldCrop(ctx)
+	case xcaptureitem.FieldHasCrop:
+		return m.OldHasCrop(ctx)
+	case xcaptureitem.FieldDupMatches:
+		return m.OldDupMatches(ctx)
+	case xcaptureitem.FieldTargetLocationID:
+		return m.OldTargetLocationID(ctx)
+	case xcaptureitem.FieldEntityID:
+		return m.OldEntityID(ctx)
+	case xcaptureitem.FieldAttachmentID:
+		return m.OldAttachmentID(ctx)
+	case xcaptureitem.FieldAppliedQuantity:
+		return m.OldAppliedQuantity(ctx)
+	case xcaptureitem.FieldHandledAt:
+		return m.OldHandledAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown XCaptureItem field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *XCaptureItemMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case xcaptureitem.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case xcaptureitem.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case xcaptureitem.FieldGroupID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGroupID(v)
+		return nil
+	case xcaptureitem.FieldSessionID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSessionID(v)
+		return nil
+	case xcaptureitem.FieldPhotoID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPhotoID(v)
+		return nil
+	case xcaptureitem.FieldState:
+		v, ok := value.(xcaptureitem.State)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetState(v)
+		return nil
+	case xcaptureitem.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case xcaptureitem.FieldBrand:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBrand(v)
+		return nil
+	case xcaptureitem.FieldModelNumber:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetModelNumber(v)
+		return nil
+	case xcaptureitem.FieldCategory:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCategory(v)
+		return nil
+	case xcaptureitem.FieldQuantity:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetQuantity(v)
+		return nil
+	case xcaptureitem.FieldConfidence:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetConfidence(v)
+		return nil
+	case xcaptureitem.FieldLowConfidence:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLowConfidence(v)
+		return nil
+	case xcaptureitem.FieldBbox:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBbox(v)
+		return nil
+	case xcaptureitem.FieldCrop:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCrop(v)
+		return nil
+	case xcaptureitem.FieldHasCrop:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHasCrop(v)
+		return nil
+	case xcaptureitem.FieldDupMatches:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDupMatches(v)
+		return nil
+	case xcaptureitem.FieldTargetLocationID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTargetLocationID(v)
+		return nil
+	case xcaptureitem.FieldEntityID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEntityID(v)
+		return nil
+	case xcaptureitem.FieldAttachmentID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAttachmentID(v)
+		return nil
+	case xcaptureitem.FieldAppliedQuantity:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAppliedQuantity(v)
+		return nil
+	case xcaptureitem.FieldHandledAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHandledAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown XCaptureItem field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *XCaptureItemMutation) AddedFields() []string {
+	var fields []string
+	if m.addquantity != nil {
+		fields = append(fields, xcaptureitem.FieldQuantity)
+	}
+	if m.addconfidence != nil {
+		fields = append(fields, xcaptureitem.FieldConfidence)
+	}
+	if m.addapplied_quantity != nil {
+		fields = append(fields, xcaptureitem.FieldAppliedQuantity)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *XCaptureItemMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case xcaptureitem.FieldQuantity:
+		return m.AddedQuantity()
+	case xcaptureitem.FieldConfidence:
+		return m.AddedConfidence()
+	case xcaptureitem.FieldAppliedQuantity:
+		return m.AddedAppliedQuantity()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *XCaptureItemMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case xcaptureitem.FieldQuantity:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddQuantity(v)
+		return nil
+	case xcaptureitem.FieldConfidence:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddConfidence(v)
+		return nil
+	case xcaptureitem.FieldAppliedQuantity:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAppliedQuantity(v)
+		return nil
+	}
+	return fmt.Errorf("unknown XCaptureItem numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *XCaptureItemMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(xcaptureitem.FieldCrop) {
+		fields = append(fields, xcaptureitem.FieldCrop)
+	}
+	if m.FieldCleared(xcaptureitem.FieldTargetLocationID) {
+		fields = append(fields, xcaptureitem.FieldTargetLocationID)
+	}
+	if m.FieldCleared(xcaptureitem.FieldEntityID) {
+		fields = append(fields, xcaptureitem.FieldEntityID)
+	}
+	if m.FieldCleared(xcaptureitem.FieldAttachmentID) {
+		fields = append(fields, xcaptureitem.FieldAttachmentID)
+	}
+	if m.FieldCleared(xcaptureitem.FieldHandledAt) {
+		fields = append(fields, xcaptureitem.FieldHandledAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *XCaptureItemMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *XCaptureItemMutation) ClearField(name string) error {
+	switch name {
+	case xcaptureitem.FieldCrop:
+		m.ClearCrop()
+		return nil
+	case xcaptureitem.FieldTargetLocationID:
+		m.ClearTargetLocationID()
+		return nil
+	case xcaptureitem.FieldEntityID:
+		m.ClearEntityID()
+		return nil
+	case xcaptureitem.FieldAttachmentID:
+		m.ClearAttachmentID()
+		return nil
+	case xcaptureitem.FieldHandledAt:
+		m.ClearHandledAt()
+		return nil
+	}
+	return fmt.Errorf("unknown XCaptureItem nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *XCaptureItemMutation) ResetField(name string) error {
+	switch name {
+	case xcaptureitem.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case xcaptureitem.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case xcaptureitem.FieldGroupID:
+		m.ResetGroupID()
+		return nil
+	case xcaptureitem.FieldSessionID:
+		m.ResetSessionID()
+		return nil
+	case xcaptureitem.FieldPhotoID:
+		m.ResetPhotoID()
+		return nil
+	case xcaptureitem.FieldState:
+		m.ResetState()
+		return nil
+	case xcaptureitem.FieldName:
+		m.ResetName()
+		return nil
+	case xcaptureitem.FieldBrand:
+		m.ResetBrand()
+		return nil
+	case xcaptureitem.FieldModelNumber:
+		m.ResetModelNumber()
+		return nil
+	case xcaptureitem.FieldCategory:
+		m.ResetCategory()
+		return nil
+	case xcaptureitem.FieldQuantity:
+		m.ResetQuantity()
+		return nil
+	case xcaptureitem.FieldConfidence:
+		m.ResetConfidence()
+		return nil
+	case xcaptureitem.FieldLowConfidence:
+		m.ResetLowConfidence()
+		return nil
+	case xcaptureitem.FieldBbox:
+		m.ResetBbox()
+		return nil
+	case xcaptureitem.FieldCrop:
+		m.ResetCrop()
+		return nil
+	case xcaptureitem.FieldHasCrop:
+		m.ResetHasCrop()
+		return nil
+	case xcaptureitem.FieldDupMatches:
+		m.ResetDupMatches()
+		return nil
+	case xcaptureitem.FieldTargetLocationID:
+		m.ResetTargetLocationID()
+		return nil
+	case xcaptureitem.FieldEntityID:
+		m.ResetEntityID()
+		return nil
+	case xcaptureitem.FieldAttachmentID:
+		m.ResetAttachmentID()
+		return nil
+	case xcaptureitem.FieldAppliedQuantity:
+		m.ResetAppliedQuantity()
+		return nil
+	case xcaptureitem.FieldHandledAt:
+		m.ResetHandledAt()
+		return nil
+	}
+	return fmt.Errorf("unknown XCaptureItem field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *XCaptureItemMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *XCaptureItemMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *XCaptureItemMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *XCaptureItemMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *XCaptureItemMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *XCaptureItemMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *XCaptureItemMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown XCaptureItem unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *XCaptureItemMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown XCaptureItem edge %s", name)
+}
+
+// XCapturePhotoMutation represents an operation that mutates the XCapturePhoto nodes in the graph.
+type XCapturePhotoMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *uuid.UUID
+	created_at    *time.Time
+	updated_at    *time.Time
+	group_id      *uuid.UUID
+	session_id    *uuid.UUID
+	status        *xcapturephoto.Status
+	attempts      *int
+	addattempts   *int
+	error         *string
+	mime_type     *string
+	width         *int
+	addwidth      *int
+	height        *int
+	addheight     *int
+	content_hash  *string
+	image         *[]byte
+	provider      *string
+	latency_ms    *int
+	addlatency_ms *int
+	detections    *int
+	adddetections *int
+	locked_at     *time.Time
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*XCapturePhoto, error)
+	predicates    []predicate.XCapturePhoto
+}
+
+var _ ent.Mutation = (*XCapturePhotoMutation)(nil)
+
+// xcapturephotoOption allows management of the mutation configuration using functional options.
+type xcapturephotoOption func(*XCapturePhotoMutation)
+
+// newXCapturePhotoMutation creates new mutation for the XCapturePhoto entity.
+func newXCapturePhotoMutation(c config, op Op, opts ...xcapturephotoOption) *XCapturePhotoMutation {
+	m := &XCapturePhotoMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeXCapturePhoto,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withXCapturePhotoID sets the ID field of the mutation.
+func withXCapturePhotoID(id uuid.UUID) xcapturephotoOption {
+	return func(m *XCapturePhotoMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *XCapturePhoto
+		)
+		m.oldValue = func(ctx context.Context) (*XCapturePhoto, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().XCapturePhoto.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withXCapturePhoto sets the old XCapturePhoto of the mutation.
+func withXCapturePhoto(node *XCapturePhoto) xcapturephotoOption {
+	return func(m *XCapturePhotoMutation) {
+		m.oldValue = func(context.Context) (*XCapturePhoto, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m XCapturePhotoMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m XCapturePhotoMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of XCapturePhoto entities.
+func (m *XCapturePhotoMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *XCapturePhotoMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *XCapturePhotoMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().XCapturePhoto.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *XCapturePhotoMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *XCapturePhotoMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the XCapturePhoto entity.
+// If the XCapturePhoto object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCapturePhotoMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *XCapturePhotoMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *XCapturePhotoMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *XCapturePhotoMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the XCapturePhoto entity.
+// If the XCapturePhoto object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCapturePhotoMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *XCapturePhotoMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetGroupID sets the "group_id" field.
+func (m *XCapturePhotoMutation) SetGroupID(u uuid.UUID) {
+	m.group_id = &u
+}
+
+// GroupID returns the value of the "group_id" field in the mutation.
+func (m *XCapturePhotoMutation) GroupID() (r uuid.UUID, exists bool) {
+	v := m.group_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGroupID returns the old "group_id" field's value of the XCapturePhoto entity.
+// If the XCapturePhoto object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCapturePhotoMutation) OldGroupID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGroupID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGroupID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGroupID: %w", err)
+	}
+	return oldValue.GroupID, nil
+}
+
+// ResetGroupID resets all changes to the "group_id" field.
+func (m *XCapturePhotoMutation) ResetGroupID() {
+	m.group_id = nil
+}
+
+// SetSessionID sets the "session_id" field.
+func (m *XCapturePhotoMutation) SetSessionID(u uuid.UUID) {
+	m.session_id = &u
+}
+
+// SessionID returns the value of the "session_id" field in the mutation.
+func (m *XCapturePhotoMutation) SessionID() (r uuid.UUID, exists bool) {
+	v := m.session_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSessionID returns the old "session_id" field's value of the XCapturePhoto entity.
+// If the XCapturePhoto object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCapturePhotoMutation) OldSessionID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSessionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSessionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSessionID: %w", err)
+	}
+	return oldValue.SessionID, nil
+}
+
+// ResetSessionID resets all changes to the "session_id" field.
+func (m *XCapturePhotoMutation) ResetSessionID() {
+	m.session_id = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *XCapturePhotoMutation) SetStatus(x xcapturephoto.Status) {
+	m.status = &x
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *XCapturePhotoMutation) Status() (r xcapturephoto.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the XCapturePhoto entity.
+// If the XCapturePhoto object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCapturePhotoMutation) OldStatus(ctx context.Context) (v xcapturephoto.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *XCapturePhotoMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetAttempts sets the "attempts" field.
+func (m *XCapturePhotoMutation) SetAttempts(i int) {
+	m.attempts = &i
+	m.addattempts = nil
+}
+
+// Attempts returns the value of the "attempts" field in the mutation.
+func (m *XCapturePhotoMutation) Attempts() (r int, exists bool) {
+	v := m.attempts
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAttempts returns the old "attempts" field's value of the XCapturePhoto entity.
+// If the XCapturePhoto object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCapturePhotoMutation) OldAttempts(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAttempts is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAttempts requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAttempts: %w", err)
+	}
+	return oldValue.Attempts, nil
+}
+
+// AddAttempts adds i to the "attempts" field.
+func (m *XCapturePhotoMutation) AddAttempts(i int) {
+	if m.addattempts != nil {
+		*m.addattempts += i
+	} else {
+		m.addattempts = &i
+	}
+}
+
+// AddedAttempts returns the value that was added to the "attempts" field in this mutation.
+func (m *XCapturePhotoMutation) AddedAttempts() (r int, exists bool) {
+	v := m.addattempts
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAttempts resets all changes to the "attempts" field.
+func (m *XCapturePhotoMutation) ResetAttempts() {
+	m.attempts = nil
+	m.addattempts = nil
+}
+
+// SetError sets the "error" field.
+func (m *XCapturePhotoMutation) SetError(s string) {
+	m.error = &s
+}
+
+// Error returns the value of the "error" field in the mutation.
+func (m *XCapturePhotoMutation) Error() (r string, exists bool) {
+	v := m.error
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldError returns the old "error" field's value of the XCapturePhoto entity.
+// If the XCapturePhoto object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCapturePhotoMutation) OldError(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldError is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldError requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldError: %w", err)
+	}
+	return oldValue.Error, nil
+}
+
+// ResetError resets all changes to the "error" field.
+func (m *XCapturePhotoMutation) ResetError() {
+	m.error = nil
+}
+
+// SetMimeType sets the "mime_type" field.
+func (m *XCapturePhotoMutation) SetMimeType(s string) {
+	m.mime_type = &s
+}
+
+// MimeType returns the value of the "mime_type" field in the mutation.
+func (m *XCapturePhotoMutation) MimeType() (r string, exists bool) {
+	v := m.mime_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMimeType returns the old "mime_type" field's value of the XCapturePhoto entity.
+// If the XCapturePhoto object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCapturePhotoMutation) OldMimeType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMimeType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMimeType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMimeType: %w", err)
+	}
+	return oldValue.MimeType, nil
+}
+
+// ResetMimeType resets all changes to the "mime_type" field.
+func (m *XCapturePhotoMutation) ResetMimeType() {
+	m.mime_type = nil
+}
+
+// SetWidth sets the "width" field.
+func (m *XCapturePhotoMutation) SetWidth(i int) {
+	m.width = &i
+	m.addwidth = nil
+}
+
+// Width returns the value of the "width" field in the mutation.
+func (m *XCapturePhotoMutation) Width() (r int, exists bool) {
+	v := m.width
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWidth returns the old "width" field's value of the XCapturePhoto entity.
+// If the XCapturePhoto object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCapturePhotoMutation) OldWidth(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWidth is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWidth requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWidth: %w", err)
+	}
+	return oldValue.Width, nil
+}
+
+// AddWidth adds i to the "width" field.
+func (m *XCapturePhotoMutation) AddWidth(i int) {
+	if m.addwidth != nil {
+		*m.addwidth += i
+	} else {
+		m.addwidth = &i
+	}
+}
+
+// AddedWidth returns the value that was added to the "width" field in this mutation.
+func (m *XCapturePhotoMutation) AddedWidth() (r int, exists bool) {
+	v := m.addwidth
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetWidth resets all changes to the "width" field.
+func (m *XCapturePhotoMutation) ResetWidth() {
+	m.width = nil
+	m.addwidth = nil
+}
+
+// SetHeight sets the "height" field.
+func (m *XCapturePhotoMutation) SetHeight(i int) {
+	m.height = &i
+	m.addheight = nil
+}
+
+// Height returns the value of the "height" field in the mutation.
+func (m *XCapturePhotoMutation) Height() (r int, exists bool) {
+	v := m.height
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHeight returns the old "height" field's value of the XCapturePhoto entity.
+// If the XCapturePhoto object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCapturePhotoMutation) OldHeight(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHeight is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHeight requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHeight: %w", err)
+	}
+	return oldValue.Height, nil
+}
+
+// AddHeight adds i to the "height" field.
+func (m *XCapturePhotoMutation) AddHeight(i int) {
+	if m.addheight != nil {
+		*m.addheight += i
+	} else {
+		m.addheight = &i
+	}
+}
+
+// AddedHeight returns the value that was added to the "height" field in this mutation.
+func (m *XCapturePhotoMutation) AddedHeight() (r int, exists bool) {
+	v := m.addheight
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetHeight resets all changes to the "height" field.
+func (m *XCapturePhotoMutation) ResetHeight() {
+	m.height = nil
+	m.addheight = nil
+}
+
+// SetContentHash sets the "content_hash" field.
+func (m *XCapturePhotoMutation) SetContentHash(s string) {
+	m.content_hash = &s
+}
+
+// ContentHash returns the value of the "content_hash" field in the mutation.
+func (m *XCapturePhotoMutation) ContentHash() (r string, exists bool) {
+	v := m.content_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContentHash returns the old "content_hash" field's value of the XCapturePhoto entity.
+// If the XCapturePhoto object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCapturePhotoMutation) OldContentHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldContentHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldContentHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContentHash: %w", err)
+	}
+	return oldValue.ContentHash, nil
+}
+
+// ResetContentHash resets all changes to the "content_hash" field.
+func (m *XCapturePhotoMutation) ResetContentHash() {
+	m.content_hash = nil
+}
+
+// SetImage sets the "image" field.
+func (m *XCapturePhotoMutation) SetImage(b []byte) {
+	m.image = &b
+}
+
+// Image returns the value of the "image" field in the mutation.
+func (m *XCapturePhotoMutation) Image() (r []byte, exists bool) {
+	v := m.image
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImage returns the old "image" field's value of the XCapturePhoto entity.
+// If the XCapturePhoto object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCapturePhotoMutation) OldImage(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImage: %w", err)
+	}
+	return oldValue.Image, nil
+}
+
+// ClearImage clears the value of the "image" field.
+func (m *XCapturePhotoMutation) ClearImage() {
+	m.image = nil
+	m.clearedFields[xcapturephoto.FieldImage] = struct{}{}
+}
+
+// ImageCleared returns if the "image" field was cleared in this mutation.
+func (m *XCapturePhotoMutation) ImageCleared() bool {
+	_, ok := m.clearedFields[xcapturephoto.FieldImage]
+	return ok
+}
+
+// ResetImage resets all changes to the "image" field.
+func (m *XCapturePhotoMutation) ResetImage() {
+	m.image = nil
+	delete(m.clearedFields, xcapturephoto.FieldImage)
+}
+
+// SetProvider sets the "provider" field.
+func (m *XCapturePhotoMutation) SetProvider(s string) {
+	m.provider = &s
+}
+
+// Provider returns the value of the "provider" field in the mutation.
+func (m *XCapturePhotoMutation) Provider() (r string, exists bool) {
+	v := m.provider
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProvider returns the old "provider" field's value of the XCapturePhoto entity.
+// If the XCapturePhoto object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCapturePhotoMutation) OldProvider(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProvider is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProvider requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProvider: %w", err)
+	}
+	return oldValue.Provider, nil
+}
+
+// ResetProvider resets all changes to the "provider" field.
+func (m *XCapturePhotoMutation) ResetProvider() {
+	m.provider = nil
+}
+
+// SetLatencyMs sets the "latency_ms" field.
+func (m *XCapturePhotoMutation) SetLatencyMs(i int) {
+	m.latency_ms = &i
+	m.addlatency_ms = nil
+}
+
+// LatencyMs returns the value of the "latency_ms" field in the mutation.
+func (m *XCapturePhotoMutation) LatencyMs() (r int, exists bool) {
+	v := m.latency_ms
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLatencyMs returns the old "latency_ms" field's value of the XCapturePhoto entity.
+// If the XCapturePhoto object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCapturePhotoMutation) OldLatencyMs(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLatencyMs is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLatencyMs requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLatencyMs: %w", err)
+	}
+	return oldValue.LatencyMs, nil
+}
+
+// AddLatencyMs adds i to the "latency_ms" field.
+func (m *XCapturePhotoMutation) AddLatencyMs(i int) {
+	if m.addlatency_ms != nil {
+		*m.addlatency_ms += i
+	} else {
+		m.addlatency_ms = &i
+	}
+}
+
+// AddedLatencyMs returns the value that was added to the "latency_ms" field in this mutation.
+func (m *XCapturePhotoMutation) AddedLatencyMs() (r int, exists bool) {
+	v := m.addlatency_ms
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetLatencyMs resets all changes to the "latency_ms" field.
+func (m *XCapturePhotoMutation) ResetLatencyMs() {
+	m.latency_ms = nil
+	m.addlatency_ms = nil
+}
+
+// SetDetections sets the "detections" field.
+func (m *XCapturePhotoMutation) SetDetections(i int) {
+	m.detections = &i
+	m.adddetections = nil
+}
+
+// Detections returns the value of the "detections" field in the mutation.
+func (m *XCapturePhotoMutation) Detections() (r int, exists bool) {
+	v := m.detections
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDetections returns the old "detections" field's value of the XCapturePhoto entity.
+// If the XCapturePhoto object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCapturePhotoMutation) OldDetections(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDetections is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDetections requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDetections: %w", err)
+	}
+	return oldValue.Detections, nil
+}
+
+// AddDetections adds i to the "detections" field.
+func (m *XCapturePhotoMutation) AddDetections(i int) {
+	if m.adddetections != nil {
+		*m.adddetections += i
+	} else {
+		m.adddetections = &i
+	}
+}
+
+// AddedDetections returns the value that was added to the "detections" field in this mutation.
+func (m *XCapturePhotoMutation) AddedDetections() (r int, exists bool) {
+	v := m.adddetections
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetDetections resets all changes to the "detections" field.
+func (m *XCapturePhotoMutation) ResetDetections() {
+	m.detections = nil
+	m.adddetections = nil
+}
+
+// SetLockedAt sets the "locked_at" field.
+func (m *XCapturePhotoMutation) SetLockedAt(t time.Time) {
+	m.locked_at = &t
+}
+
+// LockedAt returns the value of the "locked_at" field in the mutation.
+func (m *XCapturePhotoMutation) LockedAt() (r time.Time, exists bool) {
+	v := m.locked_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLockedAt returns the old "locked_at" field's value of the XCapturePhoto entity.
+// If the XCapturePhoto object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCapturePhotoMutation) OldLockedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLockedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLockedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLockedAt: %w", err)
+	}
+	return oldValue.LockedAt, nil
+}
+
+// ClearLockedAt clears the value of the "locked_at" field.
+func (m *XCapturePhotoMutation) ClearLockedAt() {
+	m.locked_at = nil
+	m.clearedFields[xcapturephoto.FieldLockedAt] = struct{}{}
+}
+
+// LockedAtCleared returns if the "locked_at" field was cleared in this mutation.
+func (m *XCapturePhotoMutation) LockedAtCleared() bool {
+	_, ok := m.clearedFields[xcapturephoto.FieldLockedAt]
+	return ok
+}
+
+// ResetLockedAt resets all changes to the "locked_at" field.
+func (m *XCapturePhotoMutation) ResetLockedAt() {
+	m.locked_at = nil
+	delete(m.clearedFields, xcapturephoto.FieldLockedAt)
+}
+
+// Where appends a list predicates to the XCapturePhotoMutation builder.
+func (m *XCapturePhotoMutation) Where(ps ...predicate.XCapturePhoto) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the XCapturePhotoMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *XCapturePhotoMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.XCapturePhoto, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *XCapturePhotoMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *XCapturePhotoMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (XCapturePhoto).
+func (m *XCapturePhotoMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *XCapturePhotoMutation) Fields() []string {
+	fields := make([]string, 0, 16)
+	if m.created_at != nil {
+		fields = append(fields, xcapturephoto.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, xcapturephoto.FieldUpdatedAt)
+	}
+	if m.group_id != nil {
+		fields = append(fields, xcapturephoto.FieldGroupID)
+	}
+	if m.session_id != nil {
+		fields = append(fields, xcapturephoto.FieldSessionID)
+	}
+	if m.status != nil {
+		fields = append(fields, xcapturephoto.FieldStatus)
+	}
+	if m.attempts != nil {
+		fields = append(fields, xcapturephoto.FieldAttempts)
+	}
+	if m.error != nil {
+		fields = append(fields, xcapturephoto.FieldError)
+	}
+	if m.mime_type != nil {
+		fields = append(fields, xcapturephoto.FieldMimeType)
+	}
+	if m.width != nil {
+		fields = append(fields, xcapturephoto.FieldWidth)
+	}
+	if m.height != nil {
+		fields = append(fields, xcapturephoto.FieldHeight)
+	}
+	if m.content_hash != nil {
+		fields = append(fields, xcapturephoto.FieldContentHash)
+	}
+	if m.image != nil {
+		fields = append(fields, xcapturephoto.FieldImage)
+	}
+	if m.provider != nil {
+		fields = append(fields, xcapturephoto.FieldProvider)
+	}
+	if m.latency_ms != nil {
+		fields = append(fields, xcapturephoto.FieldLatencyMs)
+	}
+	if m.detections != nil {
+		fields = append(fields, xcapturephoto.FieldDetections)
+	}
+	if m.locked_at != nil {
+		fields = append(fields, xcapturephoto.FieldLockedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *XCapturePhotoMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case xcapturephoto.FieldCreatedAt:
+		return m.CreatedAt()
+	case xcapturephoto.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case xcapturephoto.FieldGroupID:
+		return m.GroupID()
+	case xcapturephoto.FieldSessionID:
+		return m.SessionID()
+	case xcapturephoto.FieldStatus:
+		return m.Status()
+	case xcapturephoto.FieldAttempts:
+		return m.Attempts()
+	case xcapturephoto.FieldError:
+		return m.Error()
+	case xcapturephoto.FieldMimeType:
+		return m.MimeType()
+	case xcapturephoto.FieldWidth:
+		return m.Width()
+	case xcapturephoto.FieldHeight:
+		return m.Height()
+	case xcapturephoto.FieldContentHash:
+		return m.ContentHash()
+	case xcapturephoto.FieldImage:
+		return m.Image()
+	case xcapturephoto.FieldProvider:
+		return m.Provider()
+	case xcapturephoto.FieldLatencyMs:
+		return m.LatencyMs()
+	case xcapturephoto.FieldDetections:
+		return m.Detections()
+	case xcapturephoto.FieldLockedAt:
+		return m.LockedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *XCapturePhotoMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case xcapturephoto.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case xcapturephoto.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case xcapturephoto.FieldGroupID:
+		return m.OldGroupID(ctx)
+	case xcapturephoto.FieldSessionID:
+		return m.OldSessionID(ctx)
+	case xcapturephoto.FieldStatus:
+		return m.OldStatus(ctx)
+	case xcapturephoto.FieldAttempts:
+		return m.OldAttempts(ctx)
+	case xcapturephoto.FieldError:
+		return m.OldError(ctx)
+	case xcapturephoto.FieldMimeType:
+		return m.OldMimeType(ctx)
+	case xcapturephoto.FieldWidth:
+		return m.OldWidth(ctx)
+	case xcapturephoto.FieldHeight:
+		return m.OldHeight(ctx)
+	case xcapturephoto.FieldContentHash:
+		return m.OldContentHash(ctx)
+	case xcapturephoto.FieldImage:
+		return m.OldImage(ctx)
+	case xcapturephoto.FieldProvider:
+		return m.OldProvider(ctx)
+	case xcapturephoto.FieldLatencyMs:
+		return m.OldLatencyMs(ctx)
+	case xcapturephoto.FieldDetections:
+		return m.OldDetections(ctx)
+	case xcapturephoto.FieldLockedAt:
+		return m.OldLockedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown XCapturePhoto field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *XCapturePhotoMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case xcapturephoto.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case xcapturephoto.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case xcapturephoto.FieldGroupID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGroupID(v)
+		return nil
+	case xcapturephoto.FieldSessionID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSessionID(v)
+		return nil
+	case xcapturephoto.FieldStatus:
+		v, ok := value.(xcapturephoto.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case xcapturephoto.FieldAttempts:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAttempts(v)
+		return nil
+	case xcapturephoto.FieldError:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetError(v)
+		return nil
+	case xcapturephoto.FieldMimeType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMimeType(v)
+		return nil
+	case xcapturephoto.FieldWidth:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWidth(v)
+		return nil
+	case xcapturephoto.FieldHeight:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHeight(v)
+		return nil
+	case xcapturephoto.FieldContentHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContentHash(v)
+		return nil
+	case xcapturephoto.FieldImage:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImage(v)
+		return nil
+	case xcapturephoto.FieldProvider:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProvider(v)
+		return nil
+	case xcapturephoto.FieldLatencyMs:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLatencyMs(v)
+		return nil
+	case xcapturephoto.FieldDetections:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDetections(v)
+		return nil
+	case xcapturephoto.FieldLockedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLockedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown XCapturePhoto field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *XCapturePhotoMutation) AddedFields() []string {
+	var fields []string
+	if m.addattempts != nil {
+		fields = append(fields, xcapturephoto.FieldAttempts)
+	}
+	if m.addwidth != nil {
+		fields = append(fields, xcapturephoto.FieldWidth)
+	}
+	if m.addheight != nil {
+		fields = append(fields, xcapturephoto.FieldHeight)
+	}
+	if m.addlatency_ms != nil {
+		fields = append(fields, xcapturephoto.FieldLatencyMs)
+	}
+	if m.adddetections != nil {
+		fields = append(fields, xcapturephoto.FieldDetections)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *XCapturePhotoMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case xcapturephoto.FieldAttempts:
+		return m.AddedAttempts()
+	case xcapturephoto.FieldWidth:
+		return m.AddedWidth()
+	case xcapturephoto.FieldHeight:
+		return m.AddedHeight()
+	case xcapturephoto.FieldLatencyMs:
+		return m.AddedLatencyMs()
+	case xcapturephoto.FieldDetections:
+		return m.AddedDetections()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *XCapturePhotoMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case xcapturephoto.FieldAttempts:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAttempts(v)
+		return nil
+	case xcapturephoto.FieldWidth:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddWidth(v)
+		return nil
+	case xcapturephoto.FieldHeight:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddHeight(v)
+		return nil
+	case xcapturephoto.FieldLatencyMs:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLatencyMs(v)
+		return nil
+	case xcapturephoto.FieldDetections:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDetections(v)
+		return nil
+	}
+	return fmt.Errorf("unknown XCapturePhoto numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *XCapturePhotoMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(xcapturephoto.FieldImage) {
+		fields = append(fields, xcapturephoto.FieldImage)
+	}
+	if m.FieldCleared(xcapturephoto.FieldLockedAt) {
+		fields = append(fields, xcapturephoto.FieldLockedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *XCapturePhotoMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *XCapturePhotoMutation) ClearField(name string) error {
+	switch name {
+	case xcapturephoto.FieldImage:
+		m.ClearImage()
+		return nil
+	case xcapturephoto.FieldLockedAt:
+		m.ClearLockedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown XCapturePhoto nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *XCapturePhotoMutation) ResetField(name string) error {
+	switch name {
+	case xcapturephoto.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case xcapturephoto.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case xcapturephoto.FieldGroupID:
+		m.ResetGroupID()
+		return nil
+	case xcapturephoto.FieldSessionID:
+		m.ResetSessionID()
+		return nil
+	case xcapturephoto.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case xcapturephoto.FieldAttempts:
+		m.ResetAttempts()
+		return nil
+	case xcapturephoto.FieldError:
+		m.ResetError()
+		return nil
+	case xcapturephoto.FieldMimeType:
+		m.ResetMimeType()
+		return nil
+	case xcapturephoto.FieldWidth:
+		m.ResetWidth()
+		return nil
+	case xcapturephoto.FieldHeight:
+		m.ResetHeight()
+		return nil
+	case xcapturephoto.FieldContentHash:
+		m.ResetContentHash()
+		return nil
+	case xcapturephoto.FieldImage:
+		m.ResetImage()
+		return nil
+	case xcapturephoto.FieldProvider:
+		m.ResetProvider()
+		return nil
+	case xcapturephoto.FieldLatencyMs:
+		m.ResetLatencyMs()
+		return nil
+	case xcapturephoto.FieldDetections:
+		m.ResetDetections()
+		return nil
+	case xcapturephoto.FieldLockedAt:
+		m.ResetLockedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown XCapturePhoto field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *XCapturePhotoMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *XCapturePhotoMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *XCapturePhotoMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *XCapturePhotoMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *XCapturePhotoMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *XCapturePhotoMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *XCapturePhotoMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown XCapturePhoto unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *XCapturePhotoMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown XCapturePhoto edge %s", name)
+}
+
+// XCaptureSessionMutation represents an operation that mutates the XCaptureSession nodes in the graph.
+type XCaptureSessionMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *uuid.UUID
+	created_at    *time.Time
+	updated_at    *time.Time
+	group_id      *uuid.UUID
+	user_id       *uuid.UUID
+	mode          *xcapturesession.Mode
+	location_id   *uuid.UUID
+	status        *xcapturesession.Status
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*XCaptureSession, error)
+	predicates    []predicate.XCaptureSession
+}
+
+var _ ent.Mutation = (*XCaptureSessionMutation)(nil)
+
+// xcapturesessionOption allows management of the mutation configuration using functional options.
+type xcapturesessionOption func(*XCaptureSessionMutation)
+
+// newXCaptureSessionMutation creates new mutation for the XCaptureSession entity.
+func newXCaptureSessionMutation(c config, op Op, opts ...xcapturesessionOption) *XCaptureSessionMutation {
+	m := &XCaptureSessionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeXCaptureSession,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withXCaptureSessionID sets the ID field of the mutation.
+func withXCaptureSessionID(id uuid.UUID) xcapturesessionOption {
+	return func(m *XCaptureSessionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *XCaptureSession
+		)
+		m.oldValue = func(ctx context.Context) (*XCaptureSession, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().XCaptureSession.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withXCaptureSession sets the old XCaptureSession of the mutation.
+func withXCaptureSession(node *XCaptureSession) xcapturesessionOption {
+	return func(m *XCaptureSessionMutation) {
+		m.oldValue = func(context.Context) (*XCaptureSession, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m XCaptureSessionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m XCaptureSessionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of XCaptureSession entities.
+func (m *XCaptureSessionMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *XCaptureSessionMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *XCaptureSessionMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().XCaptureSession.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *XCaptureSessionMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *XCaptureSessionMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the XCaptureSession entity.
+// If the XCaptureSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureSessionMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *XCaptureSessionMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *XCaptureSessionMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *XCaptureSessionMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the XCaptureSession entity.
+// If the XCaptureSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureSessionMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *XCaptureSessionMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetGroupID sets the "group_id" field.
+func (m *XCaptureSessionMutation) SetGroupID(u uuid.UUID) {
+	m.group_id = &u
+}
+
+// GroupID returns the value of the "group_id" field in the mutation.
+func (m *XCaptureSessionMutation) GroupID() (r uuid.UUID, exists bool) {
+	v := m.group_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGroupID returns the old "group_id" field's value of the XCaptureSession entity.
+// If the XCaptureSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureSessionMutation) OldGroupID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGroupID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGroupID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGroupID: %w", err)
+	}
+	return oldValue.GroupID, nil
+}
+
+// ResetGroupID resets all changes to the "group_id" field.
+func (m *XCaptureSessionMutation) ResetGroupID() {
+	m.group_id = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *XCaptureSessionMutation) SetUserID(u uuid.UUID) {
+	m.user_id = &u
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *XCaptureSessionMutation) UserID() (r uuid.UUID, exists bool) {
+	v := m.user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the XCaptureSession entity.
+// If the XCaptureSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureSessionMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *XCaptureSessionMutation) ResetUserID() {
+	m.user_id = nil
+}
+
+// SetMode sets the "mode" field.
+func (m *XCaptureSessionMutation) SetMode(x xcapturesession.Mode) {
+	m.mode = &x
+}
+
+// Mode returns the value of the "mode" field in the mutation.
+func (m *XCaptureSessionMutation) Mode() (r xcapturesession.Mode, exists bool) {
+	v := m.mode
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMode returns the old "mode" field's value of the XCaptureSession entity.
+// If the XCaptureSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureSessionMutation) OldMode(ctx context.Context) (v xcapturesession.Mode, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMode: %w", err)
+	}
+	return oldValue.Mode, nil
+}
+
+// ResetMode resets all changes to the "mode" field.
+func (m *XCaptureSessionMutation) ResetMode() {
+	m.mode = nil
+}
+
+// SetLocationID sets the "location_id" field.
+func (m *XCaptureSessionMutation) SetLocationID(u uuid.UUID) {
+	m.location_id = &u
+}
+
+// LocationID returns the value of the "location_id" field in the mutation.
+func (m *XCaptureSessionMutation) LocationID() (r uuid.UUID, exists bool) {
+	v := m.location_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLocationID returns the old "location_id" field's value of the XCaptureSession entity.
+// If the XCaptureSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureSessionMutation) OldLocationID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLocationID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLocationID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLocationID: %w", err)
+	}
+	return oldValue.LocationID, nil
+}
+
+// ClearLocationID clears the value of the "location_id" field.
+func (m *XCaptureSessionMutation) ClearLocationID() {
+	m.location_id = nil
+	m.clearedFields[xcapturesession.FieldLocationID] = struct{}{}
+}
+
+// LocationIDCleared returns if the "location_id" field was cleared in this mutation.
+func (m *XCaptureSessionMutation) LocationIDCleared() bool {
+	_, ok := m.clearedFields[xcapturesession.FieldLocationID]
+	return ok
+}
+
+// ResetLocationID resets all changes to the "location_id" field.
+func (m *XCaptureSessionMutation) ResetLocationID() {
+	m.location_id = nil
+	delete(m.clearedFields, xcapturesession.FieldLocationID)
+}
+
+// SetStatus sets the "status" field.
+func (m *XCaptureSessionMutation) SetStatus(x xcapturesession.Status) {
+	m.status = &x
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *XCaptureSessionMutation) Status() (r xcapturesession.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the XCaptureSession entity.
+// If the XCaptureSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XCaptureSessionMutation) OldStatus(ctx context.Context) (v xcapturesession.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *XCaptureSessionMutation) ResetStatus() {
+	m.status = nil
+}
+
+// Where appends a list predicates to the XCaptureSessionMutation builder.
+func (m *XCaptureSessionMutation) Where(ps ...predicate.XCaptureSession) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the XCaptureSessionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *XCaptureSessionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.XCaptureSession, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *XCaptureSessionMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *XCaptureSessionMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (XCaptureSession).
+func (m *XCaptureSessionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *XCaptureSessionMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m.created_at != nil {
+		fields = append(fields, xcapturesession.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, xcapturesession.FieldUpdatedAt)
+	}
+	if m.group_id != nil {
+		fields = append(fields, xcapturesession.FieldGroupID)
+	}
+	if m.user_id != nil {
+		fields = append(fields, xcapturesession.FieldUserID)
+	}
+	if m.mode != nil {
+		fields = append(fields, xcapturesession.FieldMode)
+	}
+	if m.location_id != nil {
+		fields = append(fields, xcapturesession.FieldLocationID)
+	}
+	if m.status != nil {
+		fields = append(fields, xcapturesession.FieldStatus)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *XCaptureSessionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case xcapturesession.FieldCreatedAt:
+		return m.CreatedAt()
+	case xcapturesession.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case xcapturesession.FieldGroupID:
+		return m.GroupID()
+	case xcapturesession.FieldUserID:
+		return m.UserID()
+	case xcapturesession.FieldMode:
+		return m.Mode()
+	case xcapturesession.FieldLocationID:
+		return m.LocationID()
+	case xcapturesession.FieldStatus:
+		return m.Status()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *XCaptureSessionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case xcapturesession.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case xcapturesession.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case xcapturesession.FieldGroupID:
+		return m.OldGroupID(ctx)
+	case xcapturesession.FieldUserID:
+		return m.OldUserID(ctx)
+	case xcapturesession.FieldMode:
+		return m.OldMode(ctx)
+	case xcapturesession.FieldLocationID:
+		return m.OldLocationID(ctx)
+	case xcapturesession.FieldStatus:
+		return m.OldStatus(ctx)
+	}
+	return nil, fmt.Errorf("unknown XCaptureSession field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *XCaptureSessionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case xcapturesession.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case xcapturesession.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case xcapturesession.FieldGroupID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGroupID(v)
+		return nil
+	case xcapturesession.FieldUserID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case xcapturesession.FieldMode:
+		v, ok := value.(xcapturesession.Mode)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMode(v)
+		return nil
+	case xcapturesession.FieldLocationID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLocationID(v)
+		return nil
+	case xcapturesession.FieldStatus:
+		v, ok := value.(xcapturesession.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	}
+	return fmt.Errorf("unknown XCaptureSession field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *XCaptureSessionMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *XCaptureSessionMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *XCaptureSessionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown XCaptureSession numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *XCaptureSessionMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(xcapturesession.FieldLocationID) {
+		fields = append(fields, xcapturesession.FieldLocationID)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *XCaptureSessionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *XCaptureSessionMutation) ClearField(name string) error {
+	switch name {
+	case xcapturesession.FieldLocationID:
+		m.ClearLocationID()
+		return nil
+	}
+	return fmt.Errorf("unknown XCaptureSession nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *XCaptureSessionMutation) ResetField(name string) error {
+	switch name {
+	case xcapturesession.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case xcapturesession.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case xcapturesession.FieldGroupID:
+		m.ResetGroupID()
+		return nil
+	case xcapturesession.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case xcapturesession.FieldMode:
+		m.ResetMode()
+		return nil
+	case xcapturesession.FieldLocationID:
+		m.ResetLocationID()
+		return nil
+	case xcapturesession.FieldStatus:
+		m.ResetStatus()
+		return nil
+	}
+	return fmt.Errorf("unknown XCaptureSession field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *XCaptureSessionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *XCaptureSessionMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *XCaptureSessionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *XCaptureSessionMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *XCaptureSessionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *XCaptureSessionMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *XCaptureSessionMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown XCaptureSession unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *XCaptureSessionMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown XCaptureSession edge %s", name)
 }
 
 // XEntityActivityMutation represents an operation that mutates the XEntityActivity nodes in the graph.

@@ -48,6 +48,12 @@ type Tx struct {
 	User *UserClient
 	// UserGroup is the client for interacting with the UserGroup builders.
 	UserGroup *UserGroupClient
+	// XCaptureItem is the client for interacting with the XCaptureItem builders.
+	XCaptureItem *XCaptureItemClient
+	// XCapturePhoto is the client for interacting with the XCapturePhoto builders.
+	XCapturePhoto *XCapturePhotoClient
+	// XCaptureSession is the client for interacting with the XCaptureSession builders.
+	XCaptureSession *XCaptureSessionClient
 	// XEntityActivity is the client for interacting with the XEntityActivity builders.
 	XEntityActivity *XEntityActivityClient
 	// XIdleDigest is the client for interacting with the XIdleDigest builders.
@@ -211,6 +217,9 @@ func (tx *Tx) init() {
 	tx.TemplateField = NewTemplateFieldClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.UserGroup = NewUserGroupClient(tx.config)
+	tx.XCaptureItem = NewXCaptureItemClient(tx.config)
+	tx.XCapturePhoto = NewXCapturePhotoClient(tx.config)
+	tx.XCaptureSession = NewXCaptureSessionClient(tx.config)
 	tx.XEntityActivity = NewXEntityActivityClient(tx.config)
 	tx.XIdleDigest = NewXIdleDigestClient(tx.config)
 	tx.XImportCandidate = NewXImportCandidateClient(tx.config)

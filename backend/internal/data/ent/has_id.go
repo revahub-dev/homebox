@@ -72,6 +72,18 @@ func (_m *User) GetID() uuid.UUID {
 	return _m.ID
 }
 
+func (_m *XCaptureItem) GetID() uuid.UUID {
+	return _m.ID
+}
+
+func (_m *XCapturePhoto) GetID() uuid.UUID {
+	return _m.ID
+}
+
+func (_m *XCaptureSession) GetID() uuid.UUID {
+	return _m.ID
+}
+
 func (_m *XEntityActivity) GetID() uuid.UUID {
 	return _m.ID
 }

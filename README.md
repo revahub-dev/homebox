@@ -78,6 +78,79 @@ docker run -d \
 
 <!-- CONTRIBUTING -->
 
+## Fork: photo-first capture (Snap) and AI setup
+
+This fork adds **Snap** (`/x/snap`, the camera button): take photos with the live camera (tap for one, hold for a
+burst) or pick several photos from the phone gallery, choose *One item* or *Shelf or drawer*, and the AI lists what
+it sees. Each detection becomes a card with a crop of the photo: tap **Add**, swipe right to add (or merge, when it
+looks like something you already own), swipe left to ignore, or edit it first. **Accept all ready** adds every
+high-confidence, non-duplicate card at once, and every decision has an **Undo**. Manual forms are still there
+(**Enter manually**). Nothing is added to your inventory until you accept it.
+
+Snap works with **any OpenAI-compatible chat-completions API that accepts images**: cloud (OpenAI and compatible
+providers) or a local server (Ollama, LM Studio, llama.cpp server). Switching is configuration only; no rebuild.
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `HBOX_AI_BASE_URL` | – | API base URL including `/v1` |
+| `HBOX_AI_MODEL` | – | model name (required; Snap is off until base URL and model are set) |
+| `HBOX_AI_VISION_MODEL` | `HBOX_AI_MODEL` | model for photos, if different from the text model |
+| `HBOX_AI_API_KEY` | – | bearer key; leave empty for local servers |
+| `HBOX_AI_RESPONSE_FORMAT` | `json_object` | `json_object`, `json_schema` (LM Studio) or `none`; a server that answers HTTP 400 to `response_format` is retried without it automatically |
+| `HBOX_AI_TIMEOUT_SEC` | `120` | per-request timeout; raise it for slow local CPU models |
+| `HBOX_CAPTURE_WORKERS` | `1` | photos analysed at once (keep `1` for a single local GPU) |
+| `HBOX_CAPTURE_MAX_PHOTOS_PER_DAY` | `300` | per-collection cap (`0` = unlimited), a guard against runaway cloud cost |
+| `HBOX_CAPTURE_MAX_PHOTO_MB` | `8` | largest accepted upload (the app shrinks photos to ~1600 px before uploading) |
+| `HBOX_CAPTURE_RETENTION_DAYS` | `7` | unreviewed photos and crops are deleted after this many days |
+| `HBOX_CAPTURE_LANGUAGE` | – | optional language code (`ja`, `en`) for generic item descriptions; text printed on packaging is always kept as written |
+
+The same `HBOX_AI_*` endpoint also powers "What can I build?" and sale-listing drafts. If only the older
+`HBOX_ORDER_IMPORT_LLM_*` variables are set, they are used as a fallback.
+
+**Examples** (use any vision-capable model; the model names below are examples):
+
+```bash
+# OpenAI (cloud). Photos are sent to the provider.
+HBOX_AI_BASE_URL=https://api.openai.com/v1
+HBOX_AI_API_KEY=sk-...
+HBOX_AI_MODEL=gpt-4o-mini
+
+# Ollama on the host (photos stay on your network). From Docker use host.docker.internal.
+HBOX_AI_BASE_URL=http://host.docker.internal:11434/v1
+HBOX_AI_MODEL=qwen2.5vl:7b          # `ollama pull qwen2.5vl:7b` first
+HBOX_AI_TIMEOUT_SEC=300
+
+# LM Studio on the host (load a vision model and start its local server)
+HBOX_AI_BASE_URL=http://host.docker.internal:1234/v1
+HBOX_AI_MODEL=<model id shown in LM Studio>
+HBOX_AI_RESPONSE_FORMAT=json_schema
+```
+
+With Docker Compose, put these in a `docker-compose.override.yml` next to `docker-compose.yml` (it is merged
+automatically):
+
+```yaml
+services:
+  homebox:
+    environment:
+      - HBOX_AI_BASE_URL=http://host.docker.internal:11434/v1
+      - HBOX_AI_MODEL=qwen2.5vl:7b
+      - HBOX_AI_TIMEOUT_SEC=300
+```
+
+Notes:
+
+- The Snap header shows a **Local AI** or **Cloud AI** badge. It is guessed from the host name (localhost, private
+  IPs, `.local` and single-word Docker service names count as local) and is only a hint.
+- Small local models are slower, name things less precisely and place boxes less accurately than large cloud
+  models. Everything the model returns is validated and clamped, and uncertain results are shown as *Check* or
+  *Low confidence* instead of being added automatically.
+- **Live camera needs HTTPS** (a browser rule). Over plain `http://<lan-ip>:3100` the phone still works through
+  **Take photo** (opens the native camera app) and **From gallery**. For the live camera, serve HomeBox over HTTPS
+  (for example with a reverse proxy such as Caddy, or Tailscale Serve).
+- Ollama on Windows listens on `127.0.0.1` by default. If the container cannot reach it, set the environment
+  variable `OLLAMA_HOST=0.0.0.0` for Ollama and restart it.
+
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.

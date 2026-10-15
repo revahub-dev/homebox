@@ -40,7 +40,7 @@ func AIChatFromConfig(c *config.Config) aichat.Chatter {
 		return nil
 	}
 	a := c.AIResolved()
-	return aichat.New(aichat.Config{BaseURL: a.BaseURL, APIKey: a.APIKey, Model: a.Model, Timeout: time.Duration(a.TimeoutSec) * time.Second})
+	return aichat.New(aichat.Config{BaseURL: a.BaseURL, APIKey: a.APIKey, Model: a.Model, VisionModel: a.VisionModel, ResponseFormat: a.ResponseFormat, Timeout: time.Duration(a.TimeoutSec) * time.Second})
 }
 
 func (ctrl *V1Controller) aiChat() aichat.Chatter {

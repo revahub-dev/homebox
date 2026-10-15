@@ -23,6 +23,9 @@ import (
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/tag"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/templatefield"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/user"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xcaptureitem"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xcapturephoto"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xcapturesession"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xentityactivity"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xidledigest"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/ximportcandidate"
@@ -834,6 +837,171 @@ func init() {
 	user.DefaultID = userDescID.Default.(func() uuid.UUID)
 	usergroupFields := schema.UserGroup{}.Fields()
 	_ = usergroupFields
+	xcaptureitemMixin := schema.XCaptureItem{}.Mixin()
+	xcaptureitemMixinFields0 := xcaptureitemMixin[0].Fields()
+	_ = xcaptureitemMixinFields0
+	xcaptureitemFields := schema.XCaptureItem{}.Fields()
+	_ = xcaptureitemFields
+	// xcaptureitemDescCreatedAt is the schema descriptor for created_at field.
+	xcaptureitemDescCreatedAt := xcaptureitemMixinFields0[1].Descriptor()
+	// xcaptureitem.DefaultCreatedAt holds the default value on creation for the created_at field.
+	xcaptureitem.DefaultCreatedAt = xcaptureitemDescCreatedAt.Default.(func() time.Time)
+	// xcaptureitemDescUpdatedAt is the schema descriptor for updated_at field.
+	xcaptureitemDescUpdatedAt := xcaptureitemMixinFields0[2].Descriptor()
+	// xcaptureitem.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	xcaptureitem.DefaultUpdatedAt = xcaptureitemDescUpdatedAt.Default.(func() time.Time)
+	// xcaptureitem.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	xcaptureitem.UpdateDefaultUpdatedAt = xcaptureitemDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// xcaptureitemDescName is the schema descriptor for name field.
+	xcaptureitemDescName := xcaptureitemFields[4].Descriptor()
+	// xcaptureitem.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	xcaptureitem.NameValidator = func() func(string) error {
+		validators := xcaptureitemDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// xcaptureitemDescBrand is the schema descriptor for brand field.
+	xcaptureitemDescBrand := xcaptureitemFields[5].Descriptor()
+	// xcaptureitem.DefaultBrand holds the default value on creation for the brand field.
+	xcaptureitem.DefaultBrand = xcaptureitemDescBrand.Default.(string)
+	// xcaptureitem.BrandValidator is a validator for the "brand" field. It is called by the builders before save.
+	xcaptureitem.BrandValidator = xcaptureitemDescBrand.Validators[0].(func(string) error)
+	// xcaptureitemDescModelNumber is the schema descriptor for model_number field.
+	xcaptureitemDescModelNumber := xcaptureitemFields[6].Descriptor()
+	// xcaptureitem.DefaultModelNumber holds the default value on creation for the model_number field.
+	xcaptureitem.DefaultModelNumber = xcaptureitemDescModelNumber.Default.(string)
+	// xcaptureitem.ModelNumberValidator is a validator for the "model_number" field. It is called by the builders before save.
+	xcaptureitem.ModelNumberValidator = xcaptureitemDescModelNumber.Validators[0].(func(string) error)
+	// xcaptureitemDescCategory is the schema descriptor for category field.
+	xcaptureitemDescCategory := xcaptureitemFields[7].Descriptor()
+	// xcaptureitem.DefaultCategory holds the default value on creation for the category field.
+	xcaptureitem.DefaultCategory = xcaptureitemDescCategory.Default.(string)
+	// xcaptureitem.CategoryValidator is a validator for the "category" field. It is called by the builders before save.
+	xcaptureitem.CategoryValidator = xcaptureitemDescCategory.Validators[0].(func(string) error)
+	// xcaptureitemDescQuantity is the schema descriptor for quantity field.
+	xcaptureitemDescQuantity := xcaptureitemFields[8].Descriptor()
+	// xcaptureitem.DefaultQuantity holds the default value on creation for the quantity field.
+	xcaptureitem.DefaultQuantity = xcaptureitemDescQuantity.Default.(float64)
+	// xcaptureitemDescConfidence is the schema descriptor for confidence field.
+	xcaptureitemDescConfidence := xcaptureitemFields[9].Descriptor()
+	// xcaptureitem.DefaultConfidence holds the default value on creation for the confidence field.
+	xcaptureitem.DefaultConfidence = xcaptureitemDescConfidence.Default.(float64)
+	// xcaptureitemDescLowConfidence is the schema descriptor for low_confidence field.
+	xcaptureitemDescLowConfidence := xcaptureitemFields[10].Descriptor()
+	// xcaptureitem.DefaultLowConfidence holds the default value on creation for the low_confidence field.
+	xcaptureitem.DefaultLowConfidence = xcaptureitemDescLowConfidence.Default.(bool)
+	// xcaptureitemDescBbox is the schema descriptor for bbox field.
+	xcaptureitemDescBbox := xcaptureitemFields[11].Descriptor()
+	// xcaptureitem.DefaultBbox holds the default value on creation for the bbox field.
+	xcaptureitem.DefaultBbox = xcaptureitemDescBbox.Default.(string)
+	// xcaptureitem.BboxValidator is a validator for the "bbox" field. It is called by the builders before save.
+	xcaptureitem.BboxValidator = xcaptureitemDescBbox.Validators[0].(func(string) error)
+	// xcaptureitemDescHasCrop is the schema descriptor for has_crop field.
+	xcaptureitemDescHasCrop := xcaptureitemFields[13].Descriptor()
+	// xcaptureitem.DefaultHasCrop holds the default value on creation for the has_crop field.
+	xcaptureitem.DefaultHasCrop = xcaptureitemDescHasCrop.Default.(bool)
+	// xcaptureitemDescDupMatches is the schema descriptor for dup_matches field.
+	xcaptureitemDescDupMatches := xcaptureitemFields[14].Descriptor()
+	// xcaptureitem.DefaultDupMatches holds the default value on creation for the dup_matches field.
+	xcaptureitem.DefaultDupMatches = xcaptureitemDescDupMatches.Default.(string)
+	// xcaptureitemDescAppliedQuantity is the schema descriptor for applied_quantity field.
+	xcaptureitemDescAppliedQuantity := xcaptureitemFields[18].Descriptor()
+	// xcaptureitem.DefaultAppliedQuantity holds the default value on creation for the applied_quantity field.
+	xcaptureitem.DefaultAppliedQuantity = xcaptureitemDescAppliedQuantity.Default.(float64)
+	// xcaptureitemDescID is the schema descriptor for id field.
+	xcaptureitemDescID := xcaptureitemMixinFields0[0].Descriptor()
+	// xcaptureitem.DefaultID holds the default value on creation for the id field.
+	xcaptureitem.DefaultID = xcaptureitemDescID.Default.(func() uuid.UUID)
+	xcapturephotoMixin := schema.XCapturePhoto{}.Mixin()
+	xcapturephotoMixinFields0 := xcapturephotoMixin[0].Fields()
+	_ = xcapturephotoMixinFields0
+	xcapturephotoFields := schema.XCapturePhoto{}.Fields()
+	_ = xcapturephotoFields
+	// xcapturephotoDescCreatedAt is the schema descriptor for created_at field.
+	xcapturephotoDescCreatedAt := xcapturephotoMixinFields0[1].Descriptor()
+	// xcapturephoto.DefaultCreatedAt holds the default value on creation for the created_at field.
+	xcapturephoto.DefaultCreatedAt = xcapturephotoDescCreatedAt.Default.(func() time.Time)
+	// xcapturephotoDescUpdatedAt is the schema descriptor for updated_at field.
+	xcapturephotoDescUpdatedAt := xcapturephotoMixinFields0[2].Descriptor()
+	// xcapturephoto.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	xcapturephoto.DefaultUpdatedAt = xcapturephotoDescUpdatedAt.Default.(func() time.Time)
+	// xcapturephoto.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	xcapturephoto.UpdateDefaultUpdatedAt = xcapturephotoDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// xcapturephotoDescAttempts is the schema descriptor for attempts field.
+	xcapturephotoDescAttempts := xcapturephotoFields[3].Descriptor()
+	// xcapturephoto.DefaultAttempts holds the default value on creation for the attempts field.
+	xcapturephoto.DefaultAttempts = xcapturephotoDescAttempts.Default.(int)
+	// xcapturephotoDescError is the schema descriptor for error field.
+	xcapturephotoDescError := xcapturephotoFields[4].Descriptor()
+	// xcapturephoto.DefaultError holds the default value on creation for the error field.
+	xcapturephoto.DefaultError = xcapturephotoDescError.Default.(string)
+	// xcapturephoto.ErrorValidator is a validator for the "error" field. It is called by the builders before save.
+	xcapturephoto.ErrorValidator = xcapturephotoDescError.Validators[0].(func(string) error)
+	// xcapturephotoDescMimeType is the schema descriptor for mime_type field.
+	xcapturephotoDescMimeType := xcapturephotoFields[5].Descriptor()
+	// xcapturephoto.DefaultMimeType holds the default value on creation for the mime_type field.
+	xcapturephoto.DefaultMimeType = xcapturephotoDescMimeType.Default.(string)
+	// xcapturephoto.MimeTypeValidator is a validator for the "mime_type" field. It is called by the builders before save.
+	xcapturephoto.MimeTypeValidator = xcapturephotoDescMimeType.Validators[0].(func(string) error)
+	// xcapturephotoDescWidth is the schema descriptor for width field.
+	xcapturephotoDescWidth := xcapturephotoFields[6].Descriptor()
+	// xcapturephoto.DefaultWidth holds the default value on creation for the width field.
+	xcapturephoto.DefaultWidth = xcapturephotoDescWidth.Default.(int)
+	// xcapturephotoDescHeight is the schema descriptor for height field.
+	xcapturephotoDescHeight := xcapturephotoFields[7].Descriptor()
+	// xcapturephoto.DefaultHeight holds the default value on creation for the height field.
+	xcapturephoto.DefaultHeight = xcapturephotoDescHeight.Default.(int)
+	// xcapturephotoDescContentHash is the schema descriptor for content_hash field.
+	xcapturephotoDescContentHash := xcapturephotoFields[8].Descriptor()
+	// xcapturephoto.ContentHashValidator is a validator for the "content_hash" field. It is called by the builders before save.
+	xcapturephoto.ContentHashValidator = xcapturephotoDescContentHash.Validators[0].(func(string) error)
+	// xcapturephotoDescProvider is the schema descriptor for provider field.
+	xcapturephotoDescProvider := xcapturephotoFields[10].Descriptor()
+	// xcapturephoto.DefaultProvider holds the default value on creation for the provider field.
+	xcapturephoto.DefaultProvider = xcapturephotoDescProvider.Default.(string)
+	// xcapturephoto.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	xcapturephoto.ProviderValidator = xcapturephotoDescProvider.Validators[0].(func(string) error)
+	// xcapturephotoDescLatencyMs is the schema descriptor for latency_ms field.
+	xcapturephotoDescLatencyMs := xcapturephotoFields[11].Descriptor()
+	// xcapturephoto.DefaultLatencyMs holds the default value on creation for the latency_ms field.
+	xcapturephoto.DefaultLatencyMs = xcapturephotoDescLatencyMs.Default.(int)
+	// xcapturephotoDescDetections is the schema descriptor for detections field.
+	xcapturephotoDescDetections := xcapturephotoFields[12].Descriptor()
+	// xcapturephoto.DefaultDetections holds the default value on creation for the detections field.
+	xcapturephoto.DefaultDetections = xcapturephotoDescDetections.Default.(int)
+	// xcapturephotoDescID is the schema descriptor for id field.
+	xcapturephotoDescID := xcapturephotoMixinFields0[0].Descriptor()
+	// xcapturephoto.DefaultID holds the default value on creation for the id field.
+	xcapturephoto.DefaultID = xcapturephotoDescID.Default.(func() uuid.UUID)
+	xcapturesessionMixin := schema.XCaptureSession{}.Mixin()
+	xcapturesessionMixinFields0 := xcapturesessionMixin[0].Fields()
+	_ = xcapturesessionMixinFields0
+	xcapturesessionFields := schema.XCaptureSession{}.Fields()
+	_ = xcapturesessionFields
+	// xcapturesessionDescCreatedAt is the schema descriptor for created_at field.
+	xcapturesessionDescCreatedAt := xcapturesessionMixinFields0[1].Descriptor()
+	// xcapturesession.DefaultCreatedAt holds the default value on creation for the created_at field.
+	xcapturesession.DefaultCreatedAt = xcapturesessionDescCreatedAt.Default.(func() time.Time)
+	// xcapturesessionDescUpdatedAt is the schema descriptor for updated_at field.
+	xcapturesessionDescUpdatedAt := xcapturesessionMixinFields0[2].Descriptor()
+	// xcapturesession.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	xcapturesession.DefaultUpdatedAt = xcapturesessionDescUpdatedAt.Default.(func() time.Time)
+	// xcapturesession.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	xcapturesession.UpdateDefaultUpdatedAt = xcapturesessionDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// xcapturesessionDescID is the schema descriptor for id field.
+	xcapturesessionDescID := xcapturesessionMixinFields0[0].Descriptor()
+	// xcapturesession.DefaultID holds the default value on creation for the id field.
+	xcapturesession.DefaultID = xcapturesessionDescID.Default.(func() uuid.UUID)
 	xentityactivityMixin := schema.XEntityActivity{}.Mixin()
 	xentityactivityMixinFields0 := xentityactivityMixin[0].Fields()
 	_ = xentityactivityMixinFields0

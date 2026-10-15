@@ -88,6 +88,7 @@ func (a *app) mountRoutes(r *chi.Mux, chain *errchain.ErrChain, repos *repo.AllR
 		v1.WithMaxParseMemory(a.conf.Web.MaxParseMemory),
 		v1.WithRegistration(a.conf.Options.AllowRegistration),
 		v1.WithDemoStatus(a.conf.Demo), // Disable Password Change in Demo Mode
+		v1.WithCapture(a.captureService()),
 		v1.WithURL(fmt.Sprintf("%s:%s", a.conf.Web.Host, a.conf.Web.Port)),
 	)
 
@@ -276,12 +277,27 @@ func (a *app) mountRoutes(r *chi.Mux, chain *errchain.ErrChain, repos *repo.AllR
 		r.Get("/build/projects", chain.ToHandlerFunc(v1Ctrl.HandleProjectsList(), userMW...))
 		r.Post("/build/projects", chain.ToHandlerFunc(v1Ctrl.HandleProjectCreate(), userMW...))
 		r.Delete("/build/projects/{id}", chain.ToHandlerFunc(v1Ctrl.HandleProjectDelete(), userMW...))
+		// Fork: photo-first capture (see internal/core/services/x/capture)
+		r.Get("/capture/status", chain.ToHandlerFunc(v1Ctrl.HandleCaptureStatus(), userMW...))
+		r.Post("/capture/sessions", chain.ToHandlerFunc(v1Ctrl.HandleCaptureSessionCreate(), userMW...))
+		r.Get("/capture/sessions/{id}", chain.ToHandlerFunc(v1Ctrl.HandleCaptureSessionGet(), userMW...))
+		r.Post("/capture/sessions/{id}/photos", chain.ToHandlerFunc(v1Ctrl.HandleCapturePhotoUpload(), userMW...))
+		r.Post("/capture/sessions/{id}/accept", chain.ToHandlerFunc(v1Ctrl.HandleCaptureSessionAccept(), userMW...))
+		r.Post("/capture/sessions/{id}/finish", chain.ToHandlerFunc(v1Ctrl.HandleCaptureSessionFinish(), userMW...))
+		r.Post("/capture/photos/{id}/retry", chain.ToHandlerFunc(v1Ctrl.HandleCapturePhotoRetry(), userMW...))
+		r.Patch("/capture/items/{id}", chain.ToHandlerFunc(v1Ctrl.HandleCaptureItemEdit(), userMW...))
+		r.Post("/capture/items/{id}/accept", chain.ToHandlerFunc(v1Ctrl.HandleCaptureItemAccept(), userMW...))
+		r.Post("/capture/items/{id}/merge", chain.ToHandlerFunc(v1Ctrl.HandleCaptureItemMerge(), userMW...))
+		r.Post("/capture/items/{id}/ignore", chain.ToHandlerFunc(v1Ctrl.HandleCaptureItemIgnore(), userMW...))
+		r.Post("/capture/items/{id}/undo", chain.ToHandlerFunc(v1Ctrl.HandleCaptureItemUndo(), userMW...))
 		// Fork: duplicate check before purchase (see internal/core/dupcheck)
 		r.Get("/duplicates/check", chain.ToHandlerFunc(v1Ctrl.HandleDuplicateCheckGet(), userMW...))
 		r.Post("/duplicates/check", chain.ToHandlerFunc(v1Ctrl.HandleDuplicateCheckPost(), userMW...))
 		r.Get("/products/search-from-barcode", chain.ToHandlerFunc(v1Ctrl.HandleProductSearchFromBarcode(a.conf.Barcode), userMW...))
 
 		r.Get("/qrcode", chain.ToHandlerFunc(v1Ctrl.HandleGenerateQRCode(), assetMW...))
+		// Fork: crops are loaded by <img>, so they use the attachment token like photos do.
+		r.Get("/capture/items/{id}/crop", chain.ToHandlerFunc(v1Ctrl.HandleCaptureItemCrop(), assetMW...))
 		r.Get(
 			"/entities/{id}/attachments/{attachment_id}",
 			chain.ToHandlerFunc(v1Ctrl.HandleEntityAttachmentGet(), assetMW...),

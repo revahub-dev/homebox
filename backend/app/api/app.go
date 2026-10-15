@@ -1,10 +1,14 @@
 package main
 
 import (
+	"sync"
 	"time"
+
+	v1 "github.com/sysadminsmedia/homebox/backend/app/api/handlers/v1"
 
 	"github.com/sysadminsmedia/homebox/backend/internal/core/services"
 	"github.com/sysadminsmedia/homebox/backend/internal/core/services/reporting/eventbus"
+	"github.com/sysadminsmedia/homebox/backend/internal/core/services/x/capture"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/repo"
 	"github.com/sysadminsmedia/homebox/backend/internal/sys/config"
@@ -23,6 +27,16 @@ type app struct {
 	notifierTestLimiter *simpleRateLimiter
 	registerLimiter     *simpleRateLimiter
 	otel                *otel.Provider
+
+	// Fork: photo capture service, shared by the HTTP handlers and the worker.
+	captureOnce sync.Once
+	capture     *capture.Service
+}
+
+// captureService returns the single photo-capture service (fork).
+func (a *app) captureService() *capture.Service {
+	a.captureOnce.Do(func() { a.capture = v1.NewCaptureService(a.repos, a.conf, nil) })
+	return a.capture
 }
 
 func new(conf *config.Config) *app {

@@ -27,6 +27,8 @@ type AllRepos struct {
 	XOrderImport *XOrderImportRepository
 	// Fork: use & build
 	XUseBuild *XUseBuildRepository
+	// Fork: photo capture
+	XCapture *XCaptureRepository
 }
 
 // New constructs the repository container. searchEngine selects the free-text
@@ -52,5 +54,6 @@ func New(db *ent.Client, bus *eventbus.EventBus, storage config.Storage, pubSubC
 		Exports:             &ExportRepository{db},
 		XOrderImport:        NewXOrderImportRepository(db),
 		XUseBuild:           NewXUseBuildRepository(db),
+		XCapture:            NewXCaptureRepository(db),
 	}
 }

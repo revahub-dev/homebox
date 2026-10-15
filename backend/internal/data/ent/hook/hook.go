@@ -225,6 +225,42 @@ func (f UserGroupFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, e
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserGroupMutation", m)
 }
 
+// The XCaptureItemFunc type is an adapter to allow the use of ordinary
+// function as XCaptureItem mutator.
+type XCaptureItemFunc func(context.Context, *ent.XCaptureItemMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f XCaptureItemFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.XCaptureItemMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.XCaptureItemMutation", m)
+}
+
+// The XCapturePhotoFunc type is an adapter to allow the use of ordinary
+// function as XCapturePhoto mutator.
+type XCapturePhotoFunc func(context.Context, *ent.XCapturePhotoMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f XCapturePhotoFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.XCapturePhotoMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.XCapturePhotoMutation", m)
+}
+
+// The XCaptureSessionFunc type is an adapter to allow the use of ordinary
+// function as XCaptureSession mutator.
+type XCaptureSessionFunc func(context.Context, *ent.XCaptureSessionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f XCaptureSessionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.XCaptureSessionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.XCaptureSessionMutation", m)
+}
+
 // The XEntityActivityFunc type is an adapter to allow the use of ordinary
 // function as XEntityActivity mutator.
 type XEntityActivityFunc func(context.Context, *ent.XEntityActivityMutation) (ent.Value, error)

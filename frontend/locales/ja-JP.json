@@ -512,6 +512,7 @@
         "total_entries": "合計項目数"
     },
     "menu": {
+        "add_manually": "手動で入力",
         "build": "作る",
         "collection": "プロファイル",
         "create_item": "アイテム",
@@ -523,7 +524,9 @@
         "order_inbox": "注文インボックス",
         "profile": "ユーザー設定",
         "scanner": "スキャナー",
-        "search": "検索"
+        "search": "検索",
+        "snap": "撮影",
+        "snap_to_add": "撮って追加"
     },
     "pages": {
         "templates": {
@@ -831,5 +834,120 @@
             "buildable_now": "今すぐ作れる",
             "missing_parts": "パーツ不足"
         }
+    },
+    "x_snap": {
+        "title": "撮影",
+        "intro": "アイテムや棚全体を撮影するか、ギャラリーから写真を選びます。AIが写っているものを一覧にするので、確認するだけです。",
+        "enter_manually": "手動で入力する",
+        "gallery": "ギャラリーから",
+        "native_camera": "写真を撮る",
+        "photos_summary": "写真 {total} 枚 · 処理中 {working} 枚",
+        "undo": "元に戻す",
+        "done": "完了",
+        "done_confirm": "未確認のアイテムが {count} 件あります。破棄されますが、終了しますか？",
+        "accept_all": "準備完了をすべて追加 ({count})",
+        "nothing_found": "これらの写真からアイテムを検出できませんでした。もっと近くで明るく撮影するか、手動で入力してください。",
+        "camera": {
+            "open": "カメラを開く",
+            "starting": "カメラを起動中…",
+            "close": "カメラを閉じる",
+            "flip": "カメラを切り替え",
+            "shutter": "撮影（長押しで連写）",
+            "hint": "タップで1枚、長押しで連写",
+            "error_insecure": "ライブカメラにはHTTPSが必要です。「写真を撮る」または「ギャラリーから」を使うか、HTTPSでHomeBoxを開いてください。",
+            "error_denied": "カメラの許可が拒否されました。ブラウザでカメラを許可するか、「写真を撮る」/「ギャラリーから」を使ってください。",
+            "error_unsupported": "このブラウザはライブカメラに対応していません。「写真を撮る」または「ギャラリーから」を使ってください。"
+        },
+        "mode": {
+            "label": "何を撮影しますか？",
+            "item": "1つのアイテム",
+            "item_hint": "1つの物、その箱やラベル",
+            "shelf": "棚・引き出し",
+            "shelf_hint": "1枚に複数のアイテム"
+        },
+        "location": {
+            "label": "今いる場所",
+            "into": "新しいアイテムは「{name}」に追加されます。",
+            "none": "場所が未選択です。新しいアイテムは「Unsorted」に追加されます。"
+        },
+        "provider": {
+            "local": "ローカルAI",
+            "cloud": "クラウドAI",
+            "local_hint": "写真は自宅ネットワーク内のAIサーバーで解析されます。",
+            "cloud_hint": "写真は設定したクラウドAIプロバイダーに送信されます。"
+        },
+        "disabled": {
+            "title": "AIが設定されていません",
+            "body": "撮影機能には画像対応のAIエンドポイントが必要です。次の環境変数を設定してHomeBoxを再起動してください（クラウドのOpenAI互換API、Ollama、LM Studioが使えます）。または手動で入力してください。"
+        },
+        "status": {
+            "queued": "待機中",
+            "analysing": "解析中"
+        },
+        "bucket": {
+            "ready": "確実",
+            "review": "要確認",
+            "maybe": "かも"
+        },
+        "section": {
+            "ready": "追加できます ({count})",
+            "ready_hint": "信頼度が高く、まだ登録されていません。右スワイプまたは「追加」で登録、左スワイプで無視します。",
+            "review": "確認してください ({count})",
+            "review_hint": "信頼度が低いか、すでに持っているものに似ています。",
+            "maybe": "信頼度が低い ({count})",
+            "maybe_hint": "AIに自信がありません。無視するか、名前を直してください。",
+            "done": "処理済み ({count})"
+        },
+        "state": {
+            "accepted": "追加済み",
+            "merged": "統合済み",
+            "ignored": "無視",
+            "pending": "保留中"
+        },
+        "card": {
+            "add": "追加",
+            "add_new": "新規に追加",
+            "ignore": "無視",
+            "edit": "編集",
+            "merge": "統合",
+            "quantity": "数量",
+            "fewer": "減らす",
+            "more": "増やす"
+        },
+        "dup": {
+            "likely": "すでに持っているものかもしれません",
+            "similar": "持っているものに似ています",
+            "merge": "統合"
+        },
+        "edit": {
+            "title": "検出したアイテムを編集",
+            "name": "名前",
+            "brand": "ブランド",
+            "model": "型番",
+            "category": "カテゴリ",
+            "quantity": "数量",
+            "location": "場所"
+        },
+        "toast": {
+            "added": "「{name}」を追加しました",
+            "merged": "「{name}」を既存のアイテムに統合しました",
+            "ignored": "「{name}」を無視しました",
+            "bulk": "{count} 件追加しました",
+            "undone": "元に戻しました"
+        },
+        "error": {
+            "disabled": "AIが設定されていません（HBOX_AI_BASE_URL / HBOX_AI_MODEL）。",
+            "not_image": "対応していない画像ファイルです。",
+            "too_large": "写真が大きすぎます。",
+            "daily_cap": "1日の写真数の上限に達しました。",
+            "upload": "アップロードに失敗しました。写真をタップして再試行してください。",
+            "network": "ネットワークエラーです。写真をタップして再試行してください。",
+            "session": "撮影セッションを開始できませんでした。",
+            "already_handled": "このアイテムはすでに処理済みです。",
+            "not_found": "このアイテムは存在しません。",
+            "action": "失敗しました。もう一度お試しください。",
+            "undo": "元に戻せなかったアイテムがあります。"
+        },
+        "create_hint": "もっと簡単：写真を撮ってAIに入力させる →"
     }
 }
