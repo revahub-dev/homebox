@@ -1,0 +1,48 @@
+From: Jack <jack@example.com>
+To: orders-token@inbox.example.com
+Subject: FW: order
+Date: Mon, 12 Oct 2026 08:00:00 +0900
+Message-ID: <outlook-fw-1@example.com>
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="mx"
+
+--mx
+Content-Type: text/plain; charset=utf-8
+
+See attached.
+--mx
+Content-Type: message/rfc822
+Content-Disposition: attachment; filename="order.eml"
+
+From: =?ISO-2022-JP?B?GyRCM1pFNztUPmwbKEI=?= <order@rakuten.co.jp>
+To: jack@example.com
+Subject: =?iso-2022-jp?b?GyRCIVozWkU3O1Q+bCFbQ21KOEZiTUYkNDNORychSjwrRjBHWz8uJWEbKEI=?=
+ =?iso-2022-jp?b?GyRCITwlayFLGyhC?=
+Date: Sun, 11 Oct 2026 21:15:10 +0900
+Message-ID: <rakuten-0012345678@mail.rakuten.co.jp>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=ISO-2022-JP
+Content-Transfer-Encoding: 7bit
+
+このたびは楽天市場をご利用いただきありがとうございます。
+
+[受注番号] 123456-20261011-0012345678
+[日時] 2026-10-11 21:15:03
+[注文者] 山田 太郎 様
+
+[商品]
+【公式】象印 マイコン沸とう電動ポット
+2.2L CD-WU22-WG
+https://item.rakuten.co.jp/zojirushi/cd-wu22/
+価格  12,800(円) x  1(個) = 12,800(円)
+JANコード：4974305213761
+
+パナソニック 乾電池エボルタネオ 単3形 4本パック
+価格  498(円) x  3(個) = 1,494(円)
+
+**************************************************************
+小計    14,294(円)
+送料    0(円)
+合計金額(税込)  14,294(円)
+
+--mx--

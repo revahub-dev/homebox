@@ -34,6 +34,9 @@ import (
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/templatefield"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/user"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/usergroup"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/ximportcandidate"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xinboundaddress"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xinboundmessage"
 )
 
 // Client is the client that holds all ent builders.
@@ -77,6 +80,12 @@ type Client struct {
 	User *UserClient
 	// UserGroup is the client for interacting with the UserGroup builders.
 	UserGroup *UserGroupClient
+	// XImportCandidate is the client for interacting with the XImportCandidate builders.
+	XImportCandidate *XImportCandidateClient
+	// XInboundAddress is the client for interacting with the XInboundAddress builders.
+	XInboundAddress *XInboundAddressClient
+	// XInboundMessage is the client for interacting with the XInboundMessage builders.
+	XInboundMessage *XInboundMessageClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -106,6 +115,9 @@ func (c *Client) init() {
 	c.TemplateField = NewTemplateFieldClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.UserGroup = NewUserGroupClient(c.config)
+	c.XImportCandidate = NewXImportCandidateClient(c.config)
+	c.XInboundAddress = NewXInboundAddressClient(c.config)
+	c.XInboundMessage = NewXInboundMessageClient(c.config)
 }
 
 type (
@@ -216,6 +228,9 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		TemplateField:        NewTemplateFieldClient(cfg),
 		User:                 NewUserClient(cfg),
 		UserGroup:            NewUserGroupClient(cfg),
+		XImportCandidate:     NewXImportCandidateClient(cfg),
+		XInboundAddress:      NewXInboundAddressClient(cfg),
+		XInboundMessage:      NewXInboundMessageClient(cfg),
 	}, nil
 }
 
@@ -253,6 +268,9 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		TemplateField:        NewTemplateFieldClient(cfg),
 		User:                 NewUserClient(cfg),
 		UserGroup:            NewUserGroupClient(cfg),
+		XImportCandidate:     NewXImportCandidateClient(cfg),
+		XInboundAddress:      NewXInboundAddressClient(cfg),
+		XInboundMessage:      NewXInboundMessageClient(cfg),
 	}, nil
 }
 
@@ -285,7 +303,7 @@ func (c *Client) Use(hooks ...Hook) {
 		c.APIKey, c.Attachment, c.AuthRoles, c.AuthTokens, c.Entity, c.EntityField,
 		c.EntityTemplate, c.EntityType, c.Export, c.Group, c.GroupInvitationToken,
 		c.MaintenanceEntry, c.Notifier, c.PasswordResetTokens, c.Tag, c.TemplateField,
-		c.User, c.UserGroup,
+		c.User, c.UserGroup, c.XImportCandidate, c.XInboundAddress, c.XInboundMessage,
 	} {
 		n.Use(hooks...)
 	}
@@ -298,7 +316,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.APIKey, c.Attachment, c.AuthRoles, c.AuthTokens, c.Entity, c.EntityField,
 		c.EntityTemplate, c.EntityType, c.Export, c.Group, c.GroupInvitationToken,
 		c.MaintenanceEntry, c.Notifier, c.PasswordResetTokens, c.Tag, c.TemplateField,
-		c.User, c.UserGroup,
+		c.User, c.UserGroup, c.XImportCandidate, c.XInboundAddress, c.XInboundMessage,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -343,6 +361,12 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.User.mutate(ctx, m)
 	case *UserGroupMutation:
 		return c.UserGroup.mutate(ctx, m)
+	case *XImportCandidateMutation:
+		return c.XImportCandidate.mutate(ctx, m)
+	case *XInboundAddressMutation:
+		return c.XInboundAddress.mutate(ctx, m)
+	case *XInboundMessageMutation:
+		return c.XInboundMessage.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -3509,16 +3533,449 @@ func (c *UserGroupClient) mutate(ctx context.Context, m *UserGroupMutation) (Val
 	}
 }
 
+// XImportCandidateClient is a client for the XImportCandidate schema.
+type XImportCandidateClient struct {
+	config
+}
+
+// NewXImportCandidateClient returns a client for the XImportCandidate from the given config.
+func NewXImportCandidateClient(c config) *XImportCandidateClient {
+	return &XImportCandidateClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `ximportcandidate.Hooks(f(g(h())))`.
+func (c *XImportCandidateClient) Use(hooks ...Hook) {
+	c.hooks.XImportCandidate = append(c.hooks.XImportCandidate, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `ximportcandidate.Intercept(f(g(h())))`.
+func (c *XImportCandidateClient) Intercept(interceptors ...Interceptor) {
+	c.inters.XImportCandidate = append(c.inters.XImportCandidate, interceptors...)
+}
+
+// Create returns a builder for creating a XImportCandidate entity.
+func (c *XImportCandidateClient) Create() *XImportCandidateCreate {
+	mutation := newXImportCandidateMutation(c.config, OpCreate)
+	return &XImportCandidateCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of XImportCandidate entities.
+func (c *XImportCandidateClient) CreateBulk(builders ...*XImportCandidateCreate) *XImportCandidateCreateBulk {
+	return &XImportCandidateCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *XImportCandidateClient) MapCreateBulk(slice any, setFunc func(*XImportCandidateCreate, int)) *XImportCandidateCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &XImportCandidateCreateBulk{err: fmt.Errorf("calling to XImportCandidateClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*XImportCandidateCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &XImportCandidateCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for XImportCandidate.
+func (c *XImportCandidateClient) Update() *XImportCandidateUpdate {
+	mutation := newXImportCandidateMutation(c.config, OpUpdate)
+	return &XImportCandidateUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *XImportCandidateClient) UpdateOne(_m *XImportCandidate) *XImportCandidateUpdateOne {
+	mutation := newXImportCandidateMutation(c.config, OpUpdateOne, withXImportCandidate(_m))
+	return &XImportCandidateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *XImportCandidateClient) UpdateOneID(id uuid.UUID) *XImportCandidateUpdateOne {
+	mutation := newXImportCandidateMutation(c.config, OpUpdateOne, withXImportCandidateID(id))
+	return &XImportCandidateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for XImportCandidate.
+func (c *XImportCandidateClient) Delete() *XImportCandidateDelete {
+	mutation := newXImportCandidateMutation(c.config, OpDelete)
+	return &XImportCandidateDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *XImportCandidateClient) DeleteOne(_m *XImportCandidate) *XImportCandidateDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *XImportCandidateClient) DeleteOneID(id uuid.UUID) *XImportCandidateDeleteOne {
+	builder := c.Delete().Where(ximportcandidate.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &XImportCandidateDeleteOne{builder}
+}
+
+// Query returns a query builder for XImportCandidate.
+func (c *XImportCandidateClient) Query() *XImportCandidateQuery {
+	return &XImportCandidateQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeXImportCandidate},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a XImportCandidate entity by its id.
+func (c *XImportCandidateClient) Get(ctx context.Context, id uuid.UUID) (*XImportCandidate, error) {
+	return c.Query().Where(ximportcandidate.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *XImportCandidateClient) GetX(ctx context.Context, id uuid.UUID) *XImportCandidate {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryMessage queries the message edge of a XImportCandidate.
+func (c *XImportCandidateClient) QueryMessage(_m *XImportCandidate) *XInboundMessageQuery {
+	query := (&XInboundMessageClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(ximportcandidate.Table, ximportcandidate.FieldID, id),
+			sqlgraph.To(xinboundmessage.Table, xinboundmessage.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ximportcandidate.MessageTable, ximportcandidate.MessageColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *XImportCandidateClient) Hooks() []Hook {
+	return c.hooks.XImportCandidate
+}
+
+// Interceptors returns the client interceptors.
+func (c *XImportCandidateClient) Interceptors() []Interceptor {
+	return c.inters.XImportCandidate
+}
+
+func (c *XImportCandidateClient) mutate(ctx context.Context, m *XImportCandidateMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&XImportCandidateCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&XImportCandidateUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&XImportCandidateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&XImportCandidateDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown XImportCandidate mutation op: %q", m.Op())
+	}
+}
+
+// XInboundAddressClient is a client for the XInboundAddress schema.
+type XInboundAddressClient struct {
+	config
+}
+
+// NewXInboundAddressClient returns a client for the XInboundAddress from the given config.
+func NewXInboundAddressClient(c config) *XInboundAddressClient {
+	return &XInboundAddressClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `xinboundaddress.Hooks(f(g(h())))`.
+func (c *XInboundAddressClient) Use(hooks ...Hook) {
+	c.hooks.XInboundAddress = append(c.hooks.XInboundAddress, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `xinboundaddress.Intercept(f(g(h())))`.
+func (c *XInboundAddressClient) Intercept(interceptors ...Interceptor) {
+	c.inters.XInboundAddress = append(c.inters.XInboundAddress, interceptors...)
+}
+
+// Create returns a builder for creating a XInboundAddress entity.
+func (c *XInboundAddressClient) Create() *XInboundAddressCreate {
+	mutation := newXInboundAddressMutation(c.config, OpCreate)
+	return &XInboundAddressCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of XInboundAddress entities.
+func (c *XInboundAddressClient) CreateBulk(builders ...*XInboundAddressCreate) *XInboundAddressCreateBulk {
+	return &XInboundAddressCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *XInboundAddressClient) MapCreateBulk(slice any, setFunc func(*XInboundAddressCreate, int)) *XInboundAddressCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &XInboundAddressCreateBulk{err: fmt.Errorf("calling to XInboundAddressClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*XInboundAddressCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &XInboundAddressCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for XInboundAddress.
+func (c *XInboundAddressClient) Update() *XInboundAddressUpdate {
+	mutation := newXInboundAddressMutation(c.config, OpUpdate)
+	return &XInboundAddressUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *XInboundAddressClient) UpdateOne(_m *XInboundAddress) *XInboundAddressUpdateOne {
+	mutation := newXInboundAddressMutation(c.config, OpUpdateOne, withXInboundAddress(_m))
+	return &XInboundAddressUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *XInboundAddressClient) UpdateOneID(id uuid.UUID) *XInboundAddressUpdateOne {
+	mutation := newXInboundAddressMutation(c.config, OpUpdateOne, withXInboundAddressID(id))
+	return &XInboundAddressUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for XInboundAddress.
+func (c *XInboundAddressClient) Delete() *XInboundAddressDelete {
+	mutation := newXInboundAddressMutation(c.config, OpDelete)
+	return &XInboundAddressDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *XInboundAddressClient) DeleteOne(_m *XInboundAddress) *XInboundAddressDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *XInboundAddressClient) DeleteOneID(id uuid.UUID) *XInboundAddressDeleteOne {
+	builder := c.Delete().Where(xinboundaddress.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &XInboundAddressDeleteOne{builder}
+}
+
+// Query returns a query builder for XInboundAddress.
+func (c *XInboundAddressClient) Query() *XInboundAddressQuery {
+	return &XInboundAddressQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeXInboundAddress},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a XInboundAddress entity by its id.
+func (c *XInboundAddressClient) Get(ctx context.Context, id uuid.UUID) (*XInboundAddress, error) {
+	return c.Query().Where(xinboundaddress.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *XInboundAddressClient) GetX(ctx context.Context, id uuid.UUID) *XInboundAddress {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *XInboundAddressClient) Hooks() []Hook {
+	return c.hooks.XInboundAddress
+}
+
+// Interceptors returns the client interceptors.
+func (c *XInboundAddressClient) Interceptors() []Interceptor {
+	return c.inters.XInboundAddress
+}
+
+func (c *XInboundAddressClient) mutate(ctx context.Context, m *XInboundAddressMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&XInboundAddressCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&XInboundAddressUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&XInboundAddressUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&XInboundAddressDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown XInboundAddress mutation op: %q", m.Op())
+	}
+}
+
+// XInboundMessageClient is a client for the XInboundMessage schema.
+type XInboundMessageClient struct {
+	config
+}
+
+// NewXInboundMessageClient returns a client for the XInboundMessage from the given config.
+func NewXInboundMessageClient(c config) *XInboundMessageClient {
+	return &XInboundMessageClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `xinboundmessage.Hooks(f(g(h())))`.
+func (c *XInboundMessageClient) Use(hooks ...Hook) {
+	c.hooks.XInboundMessage = append(c.hooks.XInboundMessage, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `xinboundmessage.Intercept(f(g(h())))`.
+func (c *XInboundMessageClient) Intercept(interceptors ...Interceptor) {
+	c.inters.XInboundMessage = append(c.inters.XInboundMessage, interceptors...)
+}
+
+// Create returns a builder for creating a XInboundMessage entity.
+func (c *XInboundMessageClient) Create() *XInboundMessageCreate {
+	mutation := newXInboundMessageMutation(c.config, OpCreate)
+	return &XInboundMessageCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of XInboundMessage entities.
+func (c *XInboundMessageClient) CreateBulk(builders ...*XInboundMessageCreate) *XInboundMessageCreateBulk {
+	return &XInboundMessageCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *XInboundMessageClient) MapCreateBulk(slice any, setFunc func(*XInboundMessageCreate, int)) *XInboundMessageCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &XInboundMessageCreateBulk{err: fmt.Errorf("calling to XInboundMessageClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*XInboundMessageCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &XInboundMessageCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for XInboundMessage.
+func (c *XInboundMessageClient) Update() *XInboundMessageUpdate {
+	mutation := newXInboundMessageMutation(c.config, OpUpdate)
+	return &XInboundMessageUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *XInboundMessageClient) UpdateOne(_m *XInboundMessage) *XInboundMessageUpdateOne {
+	mutation := newXInboundMessageMutation(c.config, OpUpdateOne, withXInboundMessage(_m))
+	return &XInboundMessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *XInboundMessageClient) UpdateOneID(id uuid.UUID) *XInboundMessageUpdateOne {
+	mutation := newXInboundMessageMutation(c.config, OpUpdateOne, withXInboundMessageID(id))
+	return &XInboundMessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for XInboundMessage.
+func (c *XInboundMessageClient) Delete() *XInboundMessageDelete {
+	mutation := newXInboundMessageMutation(c.config, OpDelete)
+	return &XInboundMessageDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *XInboundMessageClient) DeleteOne(_m *XInboundMessage) *XInboundMessageDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *XInboundMessageClient) DeleteOneID(id uuid.UUID) *XInboundMessageDeleteOne {
+	builder := c.Delete().Where(xinboundmessage.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &XInboundMessageDeleteOne{builder}
+}
+
+// Query returns a query builder for XInboundMessage.
+func (c *XInboundMessageClient) Query() *XInboundMessageQuery {
+	return &XInboundMessageQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeXInboundMessage},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a XInboundMessage entity by its id.
+func (c *XInboundMessageClient) Get(ctx context.Context, id uuid.UUID) (*XInboundMessage, error) {
+	return c.Query().Where(xinboundmessage.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *XInboundMessageClient) GetX(ctx context.Context, id uuid.UUID) *XInboundMessage {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCandidates queries the candidates edge of a XInboundMessage.
+func (c *XInboundMessageClient) QueryCandidates(_m *XInboundMessage) *XImportCandidateQuery {
+	query := (&XImportCandidateClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(xinboundmessage.Table, xinboundmessage.FieldID, id),
+			sqlgraph.To(ximportcandidate.Table, ximportcandidate.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, xinboundmessage.CandidatesTable, xinboundmessage.CandidatesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *XInboundMessageClient) Hooks() []Hook {
+	return c.hooks.XInboundMessage
+}
+
+// Interceptors returns the client interceptors.
+func (c *XInboundMessageClient) Interceptors() []Interceptor {
+	return c.inters.XInboundMessage
+}
+
+func (c *XInboundMessageClient) mutate(ctx context.Context, m *XInboundMessageMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&XInboundMessageCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&XInboundMessageUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&XInboundMessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&XInboundMessageDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown XInboundMessage mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
 		APIKey, Attachment, AuthRoles, AuthTokens, Entity, EntityField, EntityTemplate,
 		EntityType, Export, Group, GroupInvitationToken, MaintenanceEntry, Notifier,
-		PasswordResetTokens, Tag, TemplateField, User, UserGroup []ent.Hook
+		PasswordResetTokens, Tag, TemplateField, User, UserGroup, XImportCandidate,
+		XInboundAddress, XInboundMessage []ent.Hook
 	}
 	inters struct {
 		APIKey, Attachment, AuthRoles, AuthTokens, Entity, EntityField, EntityTemplate,
 		EntityType, Export, Group, GroupInvitationToken, MaintenanceEntry, Notifier,
-		PasswordResetTokens, Tag, TemplateField, User, UserGroup []ent.Interceptor
+		PasswordResetTokens, Tag, TemplateField, User, UserGroup, XImportCandidate,
+		XInboundAddress, XInboundMessage []ent.Interceptor
 	}
 )

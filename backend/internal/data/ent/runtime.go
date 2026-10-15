@@ -23,6 +23,9 @@ import (
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/tag"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/templatefield"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/user"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/ximportcandidate"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xinboundaddress"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/xinboundmessage"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -827,4 +830,229 @@ func init() {
 	user.DefaultID = userDescID.Default.(func() uuid.UUID)
 	usergroupFields := schema.UserGroup{}.Fields()
 	_ = usergroupFields
+	ximportcandidateMixin := schema.XImportCandidate{}.Mixin()
+	ximportcandidateMixinFields0 := ximportcandidateMixin[0].Fields()
+	_ = ximportcandidateMixinFields0
+	ximportcandidateFields := schema.XImportCandidate{}.Fields()
+	_ = ximportcandidateFields
+	// ximportcandidateDescCreatedAt is the schema descriptor for created_at field.
+	ximportcandidateDescCreatedAt := ximportcandidateMixinFields0[1].Descriptor()
+	// ximportcandidate.DefaultCreatedAt holds the default value on creation for the created_at field.
+	ximportcandidate.DefaultCreatedAt = ximportcandidateDescCreatedAt.Default.(func() time.Time)
+	// ximportcandidateDescUpdatedAt is the schema descriptor for updated_at field.
+	ximportcandidateDescUpdatedAt := ximportcandidateMixinFields0[2].Descriptor()
+	// ximportcandidate.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	ximportcandidate.DefaultUpdatedAt = ximportcandidateDescUpdatedAt.Default.(func() time.Time)
+	// ximportcandidate.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	ximportcandidate.UpdateDefaultUpdatedAt = ximportcandidateDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// ximportcandidateDescName is the schema descriptor for name field.
+	ximportcandidateDescName := ximportcandidateFields[4].Descriptor()
+	// ximportcandidate.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	ximportcandidate.NameValidator = ximportcandidateDescName.Validators[0].(func(string) error)
+	// ximportcandidateDescQuantity is the schema descriptor for quantity field.
+	ximportcandidateDescQuantity := ximportcandidateFields[5].Descriptor()
+	// ximportcandidate.DefaultQuantity holds the default value on creation for the quantity field.
+	ximportcandidate.DefaultQuantity = ximportcandidateDescQuantity.Default.(float64)
+	// ximportcandidateDescUnitPrice is the schema descriptor for unit_price field.
+	ximportcandidateDescUnitPrice := ximportcandidateFields[6].Descriptor()
+	// ximportcandidate.DefaultUnitPrice holds the default value on creation for the unit_price field.
+	ximportcandidate.DefaultUnitPrice = ximportcandidateDescUnitPrice.Default.(float64)
+	// ximportcandidateDescCurrency is the schema descriptor for currency field.
+	ximportcandidateDescCurrency := ximportcandidateFields[7].Descriptor()
+	// ximportcandidate.DefaultCurrency holds the default value on creation for the currency field.
+	ximportcandidate.DefaultCurrency = ximportcandidateDescCurrency.Default.(string)
+	// ximportcandidate.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	ximportcandidate.CurrencyValidator = ximportcandidateDescCurrency.Validators[0].(func(string) error)
+	// ximportcandidateDescStore is the schema descriptor for store field.
+	ximportcandidateDescStore := ximportcandidateFields[8].Descriptor()
+	// ximportcandidate.DefaultStore holds the default value on creation for the store field.
+	ximportcandidate.DefaultStore = ximportcandidateDescStore.Default.(string)
+	// ximportcandidate.StoreValidator is a validator for the "store" field. It is called by the builders before save.
+	ximportcandidate.StoreValidator = ximportcandidateDescStore.Validators[0].(func(string) error)
+	// ximportcandidateDescOrderNumber is the schema descriptor for order_number field.
+	ximportcandidateDescOrderNumber := ximportcandidateFields[9].Descriptor()
+	// ximportcandidate.DefaultOrderNumber holds the default value on creation for the order_number field.
+	ximportcandidate.DefaultOrderNumber = ximportcandidateDescOrderNumber.Default.(string)
+	// ximportcandidate.OrderNumberValidator is a validator for the "order_number" field. It is called by the builders before save.
+	ximportcandidate.OrderNumberValidator = ximportcandidateDescOrderNumber.Validators[0].(func(string) error)
+	// ximportcandidateDescAsin is the schema descriptor for asin field.
+	ximportcandidateDescAsin := ximportcandidateFields[11].Descriptor()
+	// ximportcandidate.DefaultAsin holds the default value on creation for the asin field.
+	ximportcandidate.DefaultAsin = ximportcandidateDescAsin.Default.(string)
+	// ximportcandidate.AsinValidator is a validator for the "asin" field. It is called by the builders before save.
+	ximportcandidate.AsinValidator = ximportcandidateDescAsin.Validators[0].(func(string) error)
+	// ximportcandidateDescJan is the schema descriptor for jan field.
+	ximportcandidateDescJan := ximportcandidateFields[12].Descriptor()
+	// ximportcandidate.DefaultJan holds the default value on creation for the jan field.
+	ximportcandidate.DefaultJan = ximportcandidateDescJan.Default.(string)
+	// ximportcandidate.JanValidator is a validator for the "jan" field. It is called by the builders before save.
+	ximportcandidate.JanValidator = ximportcandidateDescJan.Validators[0].(func(string) error)
+	// ximportcandidateDescModelNumber is the schema descriptor for model_number field.
+	ximportcandidateDescModelNumber := ximportcandidateFields[13].Descriptor()
+	// ximportcandidate.DefaultModelNumber holds the default value on creation for the model_number field.
+	ximportcandidate.DefaultModelNumber = ximportcandidateDescModelNumber.Default.(string)
+	// ximportcandidate.ModelNumberValidator is a validator for the "model_number" field. It is called by the builders before save.
+	ximportcandidate.ModelNumberValidator = ximportcandidateDescModelNumber.Validators[0].(func(string) error)
+	// ximportcandidateDescURL is the schema descriptor for url field.
+	ximportcandidateDescURL := ximportcandidateFields[14].Descriptor()
+	// ximportcandidate.DefaultURL holds the default value on creation for the url field.
+	ximportcandidate.DefaultURL = ximportcandidateDescURL.Default.(string)
+	// ximportcandidate.URLValidator is a validator for the "url" field. It is called by the builders before save.
+	ximportcandidate.URLValidator = ximportcandidateDescURL.Validators[0].(func(string) error)
+	// ximportcandidateDescNote is the schema descriptor for note field.
+	ximportcandidateDescNote := ximportcandidateFields[15].Descriptor()
+	// ximportcandidate.DefaultNote holds the default value on creation for the note field.
+	ximportcandidate.DefaultNote = ximportcandidateDescNote.Default.(string)
+	// ximportcandidateDescConfidence is the schema descriptor for confidence field.
+	ximportcandidateDescConfidence := ximportcandidateFields[16].Descriptor()
+	// ximportcandidate.DefaultConfidence holds the default value on creation for the confidence field.
+	ximportcandidate.DefaultConfidence = ximportcandidateDescConfidence.Default.(float64)
+	// ximportcandidateDescLowConfidence is the schema descriptor for low_confidence field.
+	ximportcandidateDescLowConfidence := ximportcandidateFields[17].Descriptor()
+	// ximportcandidate.DefaultLowConfidence holds the default value on creation for the low_confidence field.
+	ximportcandidate.DefaultLowConfidence = ximportcandidateDescLowConfidence.Default.(bool)
+	// ximportcandidateDescExtractor is the schema descriptor for extractor field.
+	ximportcandidateDescExtractor := ximportcandidateFields[18].Descriptor()
+	// ximportcandidate.DefaultExtractor holds the default value on creation for the extractor field.
+	ximportcandidate.DefaultExtractor = ximportcandidateDescExtractor.Default.(string)
+	// ximportcandidate.ExtractorValidator is a validator for the "extractor" field. It is called by the builders before save.
+	ximportcandidate.ExtractorValidator = ximportcandidateDescExtractor.Validators[0].(func(string) error)
+	// ximportcandidateDescDupMatches is the schema descriptor for dup_matches field.
+	ximportcandidateDescDupMatches := ximportcandidateFields[19].Descriptor()
+	// ximportcandidate.DefaultDupMatches holds the default value on creation for the dup_matches field.
+	ximportcandidate.DefaultDupMatches = ximportcandidateDescDupMatches.Default.(string)
+	// ximportcandidateDescID is the schema descriptor for id field.
+	ximportcandidateDescID := ximportcandidateMixinFields0[0].Descriptor()
+	// ximportcandidate.DefaultID holds the default value on creation for the id field.
+	ximportcandidate.DefaultID = ximportcandidateDescID.Default.(func() uuid.UUID)
+	xinboundaddressMixin := schema.XInboundAddress{}.Mixin()
+	xinboundaddressMixinFields0 := xinboundaddressMixin[0].Fields()
+	_ = xinboundaddressMixinFields0
+	xinboundaddressFields := schema.XInboundAddress{}.Fields()
+	_ = xinboundaddressFields
+	// xinboundaddressDescCreatedAt is the schema descriptor for created_at field.
+	xinboundaddressDescCreatedAt := xinboundaddressMixinFields0[1].Descriptor()
+	// xinboundaddress.DefaultCreatedAt holds the default value on creation for the created_at field.
+	xinboundaddress.DefaultCreatedAt = xinboundaddressDescCreatedAt.Default.(func() time.Time)
+	// xinboundaddressDescUpdatedAt is the schema descriptor for updated_at field.
+	xinboundaddressDescUpdatedAt := xinboundaddressMixinFields0[2].Descriptor()
+	// xinboundaddress.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	xinboundaddress.DefaultUpdatedAt = xinboundaddressDescUpdatedAt.Default.(func() time.Time)
+	// xinboundaddress.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	xinboundaddress.UpdateDefaultUpdatedAt = xinboundaddressDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// xinboundaddressDescToken is the schema descriptor for token field.
+	xinboundaddressDescToken := xinboundaddressFields[1].Descriptor()
+	// xinboundaddress.TokenValidator is a validator for the "token" field. It is called by the builders before save.
+	xinboundaddress.TokenValidator = func() func(string) error {
+		validators := xinboundaddressDescToken.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(token string) error {
+			for _, fn := range fns {
+				if err := fn(token); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// xinboundaddressDescAllowedSenders is the schema descriptor for allowed_senders field.
+	xinboundaddressDescAllowedSenders := xinboundaddressFields[2].Descriptor()
+	// xinboundaddress.DefaultAllowedSenders holds the default value on creation for the allowed_senders field.
+	xinboundaddress.DefaultAllowedSenders = xinboundaddressDescAllowedSenders.Default.(string)
+	// xinboundaddressDescID is the schema descriptor for id field.
+	xinboundaddressDescID := xinboundaddressMixinFields0[0].Descriptor()
+	// xinboundaddress.DefaultID holds the default value on creation for the id field.
+	xinboundaddress.DefaultID = xinboundaddressDescID.Default.(func() uuid.UUID)
+	xinboundmessageMixin := schema.XInboundMessage{}.Mixin()
+	xinboundmessageMixinFields0 := xinboundmessageMixin[0].Fields()
+	_ = xinboundmessageMixinFields0
+	xinboundmessageFields := schema.XInboundMessage{}.Fields()
+	_ = xinboundmessageFields
+	// xinboundmessageDescCreatedAt is the schema descriptor for created_at field.
+	xinboundmessageDescCreatedAt := xinboundmessageMixinFields0[1].Descriptor()
+	// xinboundmessage.DefaultCreatedAt holds the default value on creation for the created_at field.
+	xinboundmessage.DefaultCreatedAt = xinboundmessageDescCreatedAt.Default.(func() time.Time)
+	// xinboundmessageDescUpdatedAt is the schema descriptor for updated_at field.
+	xinboundmessageDescUpdatedAt := xinboundmessageMixinFields0[2].Descriptor()
+	// xinboundmessage.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	xinboundmessage.DefaultUpdatedAt = xinboundmessageDescUpdatedAt.Default.(func() time.Time)
+	// xinboundmessage.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	xinboundmessage.UpdateDefaultUpdatedAt = xinboundmessageDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// xinboundmessageDescMessageID is the schema descriptor for message_id field.
+	xinboundmessageDescMessageID := xinboundmessageFields[3].Descriptor()
+	// xinboundmessage.DefaultMessageID holds the default value on creation for the message_id field.
+	xinboundmessage.DefaultMessageID = xinboundmessageDescMessageID.Default.(string)
+	// xinboundmessage.MessageIDValidator is a validator for the "message_id" field. It is called by the builders before save.
+	xinboundmessage.MessageIDValidator = xinboundmessageDescMessageID.Validators[0].(func(string) error)
+	// xinboundmessageDescContentHash is the schema descriptor for content_hash field.
+	xinboundmessageDescContentHash := xinboundmessageFields[4].Descriptor()
+	// xinboundmessage.ContentHashValidator is a validator for the "content_hash" field. It is called by the builders before save.
+	xinboundmessage.ContentHashValidator = func() func(string) error {
+		validators := xinboundmessageDescContentHash.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(content_hash string) error {
+			for _, fn := range fns {
+				if err := fn(content_hash); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// xinboundmessageDescStore is the schema descriptor for store field.
+	xinboundmessageDescStore := xinboundmessageFields[5].Descriptor()
+	// xinboundmessage.DefaultStore holds the default value on creation for the store field.
+	xinboundmessage.DefaultStore = xinboundmessageDescStore.Default.(string)
+	// xinboundmessage.StoreValidator is a validator for the "store" field. It is called by the builders before save.
+	xinboundmessage.StoreValidator = xinboundmessageDescStore.Validators[0].(func(string) error)
+	// xinboundmessageDescOrderNumber is the schema descriptor for order_number field.
+	xinboundmessageDescOrderNumber := xinboundmessageFields[6].Descriptor()
+	// xinboundmessage.DefaultOrderNumber holds the default value on creation for the order_number field.
+	xinboundmessage.DefaultOrderNumber = xinboundmessageDescOrderNumber.Default.(string)
+	// xinboundmessage.OrderNumberValidator is a validator for the "order_number" field. It is called by the builders before save.
+	xinboundmessage.OrderNumberValidator = xinboundmessageDescOrderNumber.Validators[0].(func(string) error)
+	// xinboundmessageDescOrderTotal is the schema descriptor for order_total field.
+	xinboundmessageDescOrderTotal := xinboundmessageFields[8].Descriptor()
+	// xinboundmessage.DefaultOrderTotal holds the default value on creation for the order_total field.
+	xinboundmessage.DefaultOrderTotal = xinboundmessageDescOrderTotal.Default.(float64)
+	// xinboundmessageDescSender is the schema descriptor for sender field.
+	xinboundmessageDescSender := xinboundmessageFields[9].Descriptor()
+	// xinboundmessage.DefaultSender holds the default value on creation for the sender field.
+	xinboundmessage.DefaultSender = xinboundmessageDescSender.Default.(string)
+	// xinboundmessage.SenderValidator is a validator for the "sender" field. It is called by the builders before save.
+	xinboundmessage.SenderValidator = xinboundmessageDescSender.Validators[0].(func(string) error)
+	// xinboundmessageDescSubject is the schema descriptor for subject field.
+	xinboundmessageDescSubject := xinboundmessageFields[10].Descriptor()
+	// xinboundmessage.DefaultSubject holds the default value on creation for the subject field.
+	xinboundmessage.DefaultSubject = xinboundmessageDescSubject.Default.(string)
+	// xinboundmessage.SubjectValidator is a validator for the "subject" field. It is called by the builders before save.
+	xinboundmessage.SubjectValidator = xinboundmessageDescSubject.Validators[0].(func(string) error)
+	// xinboundmessageDescMimeType is the schema descriptor for mime_type field.
+	xinboundmessageDescMimeType := xinboundmessageFields[11].Descriptor()
+	// xinboundmessage.DefaultMimeType holds the default value on creation for the mime_type field.
+	xinboundmessage.DefaultMimeType = xinboundmessageDescMimeType.Default.(string)
+	// xinboundmessage.MimeTypeValidator is a validator for the "mime_type" field. It is called by the builders before save.
+	xinboundmessage.MimeTypeValidator = xinboundmessageDescMimeType.Validators[0].(func(string) error)
+	// xinboundmessageDescExtractor is the schema descriptor for extractor field.
+	xinboundmessageDescExtractor := xinboundmessageFields[12].Descriptor()
+	// xinboundmessage.DefaultExtractor holds the default value on creation for the extractor field.
+	xinboundmessage.DefaultExtractor = xinboundmessageDescExtractor.Default.(string)
+	// xinboundmessage.ExtractorValidator is a validator for the "extractor" field. It is called by the builders before save.
+	xinboundmessage.ExtractorValidator = xinboundmessageDescExtractor.Validators[0].(func(string) error)
+	// xinboundmessageDescError is the schema descriptor for error field.
+	xinboundmessageDescError := xinboundmessageFields[13].Descriptor()
+	// xinboundmessage.DefaultError holds the default value on creation for the error field.
+	xinboundmessage.DefaultError = xinboundmessageDescError.Default.(string)
+	// xinboundmessage.ErrorValidator is a validator for the "error" field. It is called by the builders before save.
+	xinboundmessage.ErrorValidator = xinboundmessageDescError.Validators[0].(func(string) error)
+	// xinboundmessageDescID is the schema descriptor for id field.
+	xinboundmessageDescID := xinboundmessageMixinFields0[0].Descriptor()
+	// xinboundmessage.DefaultID holds the default value on creation for the id field.
+	xinboundmessage.DefaultID = xinboundmessageDescID.Default.(func() uuid.UUID)
 }

@@ -48,6 +48,12 @@ type Tx struct {
 	User *UserClient
 	// UserGroup is the client for interacting with the UserGroup builders.
 	UserGroup *UserGroupClient
+	// XImportCandidate is the client for interacting with the XImportCandidate builders.
+	XImportCandidate *XImportCandidateClient
+	// XInboundAddress is the client for interacting with the XInboundAddress builders.
+	XInboundAddress *XInboundAddressClient
+	// XInboundMessage is the client for interacting with the XInboundMessage builders.
+	XInboundMessage *XInboundMessageClient
 
 	// lazily loaded.
 	client     *Client
@@ -197,6 +203,9 @@ func (tx *Tx) init() {
 	tx.TemplateField = NewTemplateFieldClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.UserGroup = NewUserGroupClient(tx.config)
+	tx.XImportCandidate = NewXImportCandidateClient(tx.config)
+	tx.XInboundAddress = NewXInboundAddressClient(tx.config)
+	tx.XInboundMessage = NewXInboundMessageClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

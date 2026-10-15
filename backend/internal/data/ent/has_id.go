@@ -71,3 +71,15 @@ func (_m *TemplateField) GetID() uuid.UUID {
 func (_m *User) GetID() uuid.UUID {
 	return _m.ID
 }
+
+func (_m *XImportCandidate) GetID() uuid.UUID {
+	return _m.ID
+}
+
+func (_m *XInboundAddress) GetID() uuid.UUID {
+	return _m.ID
+}
+
+func (_m *XInboundMessage) GetID() uuid.UUID {
+	return _m.ID
+}

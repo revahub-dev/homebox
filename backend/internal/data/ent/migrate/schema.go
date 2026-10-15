@@ -637,6 +637,126 @@ var (
 			},
 		},
 	}
+	// XImportCandidatesColumns holds the columns for the "x_import_candidates" table.
+	XImportCandidatesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "group_id", Type: field.TypeUUID},
+		{Name: "kind", Type: field.TypeEnum, Enums: []string{"item", "notice"}, Default: "item"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "accepted", "merged", "ignored"}, Default: "pending"},
+		{Name: "name", Type: field.TypeString, Size: 500},
+		{Name: "quantity", Type: field.TypeFloat64, Default: 1},
+		{Name: "unit_price", Type: field.TypeFloat64, Default: 0},
+		{Name: "currency", Type: field.TypeString, Size: 8, Default: "JPY"},
+		{Name: "store", Type: field.TypeString, Size: 32, Default: ""},
+		{Name: "order_number", Type: field.TypeString, Size: 128, Default: ""},
+		{Name: "order_date", Type: field.TypeTime, Nullable: true},
+		{Name: "asin", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "jan", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "model_number", Type: field.TypeString, Size: 255, Default: ""},
+		{Name: "url", Type: field.TypeString, Size: 2048, Default: ""},
+		{Name: "note", Type: field.TypeString, Size: 2147483647, Default: ""},
+		{Name: "confidence", Type: field.TypeFloat64, Default: 0},
+		{Name: "low_confidence", Type: field.TypeBool, Default: false},
+		{Name: "extractor", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "dup_matches", Type: field.TypeString, Size: 2147483647, Default: "[]"},
+		{Name: "entity_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "inbound_message_id", Type: field.TypeUUID},
+	}
+	// XImportCandidatesTable holds the schema information for the "x_import_candidates" table.
+	XImportCandidatesTable = &schema.Table{
+		Name:       "x_import_candidates",
+		Columns:    XImportCandidatesColumns,
+		PrimaryKey: []*schema.Column{XImportCandidatesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "x_import_candidates_x_inbound_messages_candidates",
+				Columns:    []*schema.Column{XImportCandidatesColumns[23]},
+				RefColumns: []*schema.Column{XInboundMessagesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "ximportcandidate_group_id_status",
+				Unique:  false,
+				Columns: []*schema.Column{XImportCandidatesColumns[3], XImportCandidatesColumns[5]},
+			},
+		},
+	}
+	// XInboundAddressesColumns holds the columns for the "x_inbound_addresses" table.
+	XInboundAddressesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "group_id", Type: field.TypeUUID},
+		{Name: "token", Type: field.TypeString, Size: 128},
+		{Name: "allowed_senders", Type: field.TypeString, Size: 2147483647, Default: ""},
+		{Name: "last_received_at", Type: field.TypeTime, Nullable: true},
+	}
+	// XInboundAddressesTable holds the schema information for the "x_inbound_addresses" table.
+	XInboundAddressesTable = &schema.Table{
+		Name:       "x_inbound_addresses",
+		Columns:    XInboundAddressesColumns,
+		PrimaryKey: []*schema.Column{XInboundAddressesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "xinboundaddress_group_id",
+				Unique:  true,
+				Columns: []*schema.Column{XInboundAddressesColumns[3]},
+			},
+			{
+				Name:    "xinboundaddress_token",
+				Unique:  true,
+				Columns: []*schema.Column{XInboundAddressesColumns[4]},
+			},
+		},
+	}
+	// XInboundMessagesColumns holds the columns for the "x_inbound_messages" table.
+	XInboundMessagesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "group_id", Type: field.TypeUUID},
+		{Name: "channel", Type: field.TypeEnum, Enums: []string{"forward", "eml", "photo"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"parsed", "unparsed", "duplicate", "failed"}, Default: "unparsed"},
+		{Name: "message_id", Type: field.TypeString, Size: 998, Default: ""},
+		{Name: "content_hash", Type: field.TypeString, Size: 64},
+		{Name: "store", Type: field.TypeString, Size: 32, Default: ""},
+		{Name: "order_number", Type: field.TypeString, Size: 128, Default: ""},
+		{Name: "order_date", Type: field.TypeTime, Nullable: true},
+		{Name: "order_total", Type: field.TypeFloat64, Default: 0},
+		{Name: "sender", Type: field.TypeString, Size: 320, Default: ""},
+		{Name: "subject", Type: field.TypeString, Size: 998, Default: ""},
+		{Name: "mime_type", Type: field.TypeString, Size: 128, Default: ""},
+		{Name: "extractor", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "error", Type: field.TypeString, Size: 1000, Default: ""},
+		{Name: "raw", Type: field.TypeBytes, Nullable: true},
+	}
+	// XInboundMessagesTable holds the schema information for the "x_inbound_messages" table.
+	XInboundMessagesTable = &schema.Table{
+		Name:       "x_inbound_messages",
+		Columns:    XInboundMessagesColumns,
+		PrimaryKey: []*schema.Column{XInboundMessagesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "xinboundmessage_group_id_content_hash",
+				Unique:  true,
+				Columns: []*schema.Column{XInboundMessagesColumns[3], XInboundMessagesColumns[7]},
+			},
+			{
+				Name:    "xinboundmessage_group_id_message_id",
+				Unique:  false,
+				Columns: []*schema.Column{XInboundMessagesColumns[3], XInboundMessagesColumns[6]},
+			},
+			{
+				Name:    "xinboundmessage_group_id_store_order_number",
+				Unique:  false,
+				Columns: []*schema.Column{XInboundMessagesColumns[3], XInboundMessagesColumns[8], XInboundMessagesColumns[9]},
+			},
+		},
+	}
 	// TagEntitiesColumns holds the columns for the "tag_entities" table.
 	TagEntitiesColumns = []*schema.Column{
 		{Name: "tag_id", Type: field.TypeUUID},
@@ -682,6 +802,9 @@ var (
 		TemplateFieldsTable,
 		UsersTable,
 		UserGroupsTable,
+		XImportCandidatesTable,
+		XInboundAddressesTable,
+		XInboundMessagesTable,
 		TagEntitiesTable,
 	}
 )
@@ -714,6 +837,16 @@ func init() {
 	UserGroupsTable.ForeignKeys[1].RefTable = GroupsTable
 	UserGroupsTable.Annotation = &entsql.Annotation{
 		Table: "user_groups",
+	}
+	XImportCandidatesTable.ForeignKeys[0].RefTable = XInboundMessagesTable
+	XImportCandidatesTable.Annotation = &entsql.Annotation{
+		Table: "x_import_candidates",
+	}
+	XInboundAddressesTable.Annotation = &entsql.Annotation{
+		Table: "x_inbound_addresses",
+	}
+	XInboundMessagesTable.Annotation = &entsql.Annotation{
+		Table: "x_inbound_messages",
 	}
 	TagEntitiesTable.ForeignKeys[0].RefTable = TagsTable
 	TagEntitiesTable.ForeignKeys[1].RefTable = EntitiesTable

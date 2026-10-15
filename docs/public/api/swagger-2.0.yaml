@@ -1056,6 +1056,45 @@ definitions:
     - StatusRunning
     - StatusCompleted
     - StatusFailed
+  orderimport.AcceptInput:
+    properties:
+      entityTypeId:
+        type: string
+        x-nullable: true
+      name:
+        maxLength: 255
+        type: string
+      parentId:
+        type: string
+        x-nullable: true
+      quantity:
+        minimum: 0
+        type: number
+      unitPrice:
+        minimum: 0
+        type: number
+    type: object
+  orderimport.Result:
+    properties:
+      candidates:
+        type: integer
+      extractor:
+        type: string
+      messageId:
+        type: string
+      note:
+        type: string
+      orderNumber:
+        type: string
+      status:
+        enum:
+        - imported
+        - unparsed
+        - duplicate
+        type: string
+      store:
+        type: string
+    type: object
   repo.APIKeyCreate:
     properties:
       expiresAt:
@@ -2188,6 +2227,73 @@ definitions:
       value:
         type: number
     type: object
+  repo.XImportCandidate:
+    properties:
+      asin:
+        type: string
+      channel:
+        enum:
+        - forward
+        - eml
+        - photo
+        type: string
+      confidence:
+        type: number
+      createdAt:
+        type: string
+      currency:
+        type: string
+      dupMatches:
+        description: JSON array of duplicate-check matches captured at import time.
+        type: string
+      entityId:
+        type: string
+        x-nullable: true
+      extractor:
+        type: string
+      id:
+        type: string
+      jan:
+        type: string
+      kind:
+        enum:
+        - item
+        - notice
+        type: string
+      lowConfidence:
+        type: boolean
+      messageId:
+        description: Source message
+        type: string
+      modelNumber:
+        type: string
+      name:
+        type: string
+      note:
+        type: string
+      orderDate:
+        type: string
+        x-nullable: true
+      orderNumber:
+        type: string
+      quantity:
+        type: number
+      status:
+        enum:
+        - pending
+        - accepted
+        - merged
+        - ignored
+        type: string
+      store:
+        type: string
+      subject:
+        type: string
+      unitPrice:
+        type: number
+      url:
+        type: string
+    type: object
   services.Latest:
     properties:
       date:
@@ -2414,6 +2520,57 @@ definitions:
         type: integer
     required:
     - uses
+    type: object
+  v1.ImportFileResult:
+    properties:
+      error:
+        type: string
+      fileName:
+        type: string
+      result:
+        allOf:
+        - $ref: '#/definitions/orderimport.Result'
+        x-nullable: true
+    type: object
+  v1.ImportMergeInput:
+    properties:
+      entityId:
+        type: string
+    required:
+    - entityId
+    type: object
+  v1.ImportSettings:
+    properties:
+      address:
+        description: orders-<token>@<domain>; empty when HBOX_ORDER_IMPORT_INBOUND_DOMAIN
+          is unset.
+        type: string
+      allowedSenders:
+        items:
+          type: string
+        type: array
+      lastReceivedAt:
+        type: string
+        x-nullable: true
+      llmEnabled:
+        type: boolean
+      maxBytes:
+        type: integer
+      maxFiles:
+        type: integer
+      token:
+        type: string
+      webhookPath:
+        description: Path of the inbound webhook, relative to the server origin.
+        type: string
+    type: object
+  v1.ImportSettingsUpdate:
+    properties:
+      allowedSenders:
+        items:
+          type: string
+        maxItems: 100
+        type: array
     type: object
   v1.LoginForm:
     properties:
@@ -3667,6 +3824,230 @@ paths:
       summary: Get Tags Statistics
       tags:
       - Statistics
+  /v1/import/candidates:
+    get:
+      parameters:
+      - description: 'pending | accepted | merged | ignored (default: all)'
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/repo.XImportCandidate'
+            type: array
+      security:
+      - Bearer: []
+      summary: List the review inbox
+      tags:
+      - Order Import
+  /v1/import/candidates/{id}/accept:
+    post:
+      consumes:
+      - application/json
+      description: Creates an entity with purchase date, store and price, and ASIN/JAN
+        custom fields. Optional overrides edit the item before it is created.
+      parameters:
+      - description: Candidate ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Overrides
+        in: body
+        name: payload
+        schema:
+          $ref: '#/definitions/orderimport.AcceptInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/repo.EntityOut'
+      security:
+      - Bearer: []
+      summary: Accept a review-inbox item
+      tags:
+      - Order Import
+  /v1/import/candidates/{id}/ignore:
+    post:
+      parameters:
+      - description: Candidate ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      security:
+      - Bearer: []
+      summary: Ignore a review-inbox entry
+      tags:
+      - Order Import
+  /v1/import/candidates/{id}/merge:
+    post:
+      consumes:
+      - application/json
+      description: Adds the quantity, fills in empty purchase fields, and adds ASIN/JAN
+        custom fields.
+      parameters:
+      - description: Candidate ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Target entity
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/v1.ImportMergeInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/repo.EntityOut'
+      security:
+      - Bearer: []
+      summary: Merge a review-inbox item into an existing entity
+      tags:
+      - Order Import
+  /v1/import/eml:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Up to 50 files per request in the "files" field, each at most 10
+        MB. Every file gets its own result; invalid files report an error without
+        failing the batch.
+      parameters:
+      - description: .eml files
+        in: formData
+        name: files
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v1.ImportFileResult'
+            type: array
+      security:
+      - Bearer: []
+      summary: Upload order emails (.eml)
+      tags:
+      - Order Import
+  /v1/import/inbound/{token}:
+    post:
+      consumes:
+      - text/plain
+      description: Public endpoint for an inbound-email service. The body is the raw
+        MIME message (or a multipart form with an "email"/"body-mime" field). The
+        token in the path authenticates the request. Unknown or rotated tokens get
+        404, bodies over 10 MB get 413, and senders outside the allow-list get 403.
+        Nothing is imported without review.
+      parameters:
+      - description: Forwarding token
+        in: path
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/orderimport.Result'
+      summary: Inbound email webhook
+      tags:
+      - Order Import
+  /v1/import/photo:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Reads the image with the configured vision LLM. Results are marked
+        low-confidence. Returns 503 when no LLM is configured.
+      parameters:
+      - description: JPEG, PNG, WebP or GIF image
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/orderimport.Result'
+      security:
+      - Bearer: []
+      summary: Upload a receipt or order screenshot
+      tags:
+      - Order Import
+  /v1/import/settings:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.ImportSettings'
+      security:
+      - Bearer: []
+      summary: Get order-import forwarding settings
+      tags:
+      - Order Import
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Allow-list
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/v1.ImportSettingsUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.ImportSettings'
+      security:
+      - Bearer: []
+      summary: Update the forwarding sender allow-list
+      tags:
+      - Order Import
+  /v1/import/settings/rotate:
+    post:
+      description: Issues a new token; mail sent to the old address or webhook URL
+        is rejected from now on.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.ImportSettings'
+      security:
+      - Bearer: []
+      summary: Rotate the forwarding token
+      tags:
+      - Order Import
   /v1/labelmaker/asset/{id}:
     get:
       parameters:

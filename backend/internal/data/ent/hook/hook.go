@@ -225,6 +225,42 @@ func (f UserGroupFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, e
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserGroupMutation", m)
 }
 
+// The XImportCandidateFunc type is an adapter to allow the use of ordinary
+// function as XImportCandidate mutator.
+type XImportCandidateFunc func(context.Context, *ent.XImportCandidateMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f XImportCandidateFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.XImportCandidateMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.XImportCandidateMutation", m)
+}
+
+// The XInboundAddressFunc type is an adapter to allow the use of ordinary
+// function as XInboundAddress mutator.
+type XInboundAddressFunc func(context.Context, *ent.XInboundAddressMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f XInboundAddressFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.XInboundAddressMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.XInboundAddressMutation", m)
+}
+
+// The XInboundMessageFunc type is an adapter to allow the use of ordinary
+// function as XInboundMessage mutator.
+type XInboundMessageFunc func(context.Context, *ent.XInboundMessageMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f XInboundMessageFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.XInboundMessageMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.XInboundMessageMutation", m)
+}
+
 // Condition is a hook condition function.
 type Condition func(context.Context, ent.Mutation) bool
 

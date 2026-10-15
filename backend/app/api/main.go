@@ -232,6 +232,8 @@ func run(cfg *config.Config) error {
 		// default.
 		mid.MaxBodySizeByPath(cfg.Web.MaxUploadSize+1, map[string]int64{
 			"/api/v1/group/import": cfg.Web.MaxImportSize + 1,
+			// Fork: up to 50 x 10 MB order emails per upload.
+			"/api/v1/import/eml": 50*10 + 1,
 		}),
 		middleware.Recoverer,
 		middleware.StripSlashes,

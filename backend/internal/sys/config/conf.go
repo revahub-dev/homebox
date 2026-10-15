@@ -64,6 +64,8 @@ type Config struct {
 	Auth       AuthConfig     `yaml:"auth"`
 	Notifier   NotifierConf   `yaml:"notifier"`
 	Search     SearchConf     `yaml:"search"`
+	// Fork: order import (see FORK_NOTES.md)
+	OrderImport OrderImportConf `yaml:"order_import"`
 }
 
 // SearchConf selects and configures the free-text search engine. The default
@@ -218,6 +220,30 @@ func (c BarcodeAPIConf) MarshalJSON() ([]byte, error) {
 	a := alias(c)
 	if a.TokenBarcodespider != "" {
 		a.TokenBarcodespider = redactedValue
+	}
+	return json.Marshal(a)
+}
+
+// OrderImportConf configures the fork's order import. Env vars use the
+// HBOX_ORDER_IMPORT_ prefix, e.g. HBOX_ORDER_IMPORT_LLM_BASE_URL.
+type OrderImportConf struct {
+	// InboundDomain is the domain of the forwarding address shown in the UI
+	// (orders-<token>@InboundDomain). Mail for it must be delivered to the
+	// webhook by an inbound-email service. Empty hides the address.
+	InboundDomain string `yaml:"inbound_domain"`
+	// LLM fallback / vision extractor. Disabled unless base URL and model are set.
+	LLMBaseURL     string `yaml:"llm_base_url"`
+	LLMApiKey      string `yaml:"llm_api_key"`
+	LLMModel       string `yaml:"llm_model"`
+	LLMVisionModel string `yaml:"llm_vision_model"`
+	LLMTimeoutSec  int    `yaml:"llm_timeout_sec"  conf:"default:60"`
+}
+
+func (c OrderImportConf) MarshalJSON() ([]byte, error) {
+	type alias OrderImportConf
+	a := alias(c)
+	if a.LLMApiKey != "" {
+		a.LLMApiKey = redactedValue
 	}
 	return json.Marshal(a)
 }
